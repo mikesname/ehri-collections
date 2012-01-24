@@ -1,5 +1,5 @@
 from modeltranslation.translator import translator, TranslationOptions
-from ehriportal.repositories.models import Repository
+from ehriportal.repositories.models import Repository, Contact
 
 class RepositoryTranslationOptions(TranslationOptions):
     fields = (
@@ -15,4 +15,14 @@ class RepositoryTranslationOptions(TranslationOptions):
         "maintenance_notes",
     )
 
+class ContactTranslationOptions(TranslationOptions):
+    fields = (
+            "city",
+            "region",
+            "note",
+            "contact_type",
+    )
+
 translator.register(Repository, RepositoryTranslationOptions)
+translator.register(Contact, ContactTranslationOptions)
+
