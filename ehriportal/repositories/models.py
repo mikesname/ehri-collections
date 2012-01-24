@@ -1,6 +1,7 @@
 """
 Repository model.
 """
+import datetime
 
 from django.db import models
 
@@ -13,19 +14,30 @@ class Repository(models.Model):
     authorized_form_of_name = models.CharField(max_length=255)
     lod = models.CharField(max_length=255, choices=LOD)
     type_of_entity = models.CharField(max_length=255, choices=ENTITY_TYPES)
-    dates_of_existence = models.TextField(null=True, blank=True)
-    history = models.TextField(null=True, blank=True)
-    places = models.TextField(null=True, blank=True)
-    legal_status = models.TextField(null=True, blank=True)
-    functions = models.TextField(null=True, blank=True)
-    mandates = models.TextField(null=True, blank=True)
-    internal_structures = models.TextField(null=True, blank=True)
-    general_context = models.TextField(null=True, blank=True)
-    rules_conventions = models.TextField(null=True, blank=True)
-    sources = models.TextField(null=True, blank=True)
-    maintenance_notes = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(editable=False)
     updated_at = models.DateTimeField(editable=False, null=True, blank=True)
+    # optional translatable text fields
+    access_conditions = models.TextField(null=True, blank=True)
+    buildings = models.TextField(null=True, blank=True)
+    collecting_policies = models.TextField(null=True, blank=True)
+    dates_of_existence = models.TextField(null=True, blank=True)
+    disabled_access = models.TextField(null=True, blank=True)
+    finding_aids = models.TextField(null=True, blank=True)
+    functions = models.TextField(null=True, blank=True)
+    general_context = models.TextField(null=True, blank=True)
+    geocultural_context = models.TextField(null=True, blank=True)
+    history = models.TextField(null=True, blank=True)
+    holdings = models.TextField(null=True, blank=True)
+    internal_structures = models.TextField(null=True, blank=True)
+    legal_status = models.TextField(null=True, blank=True)
+    maintenance_notes = models.TextField(null=True, blank=True)
+    mandates = models.TextField(null=True, blank=True)
+    opening_times = models.TextField(null=True, blank=True)
+    places = models.TextField(null=True, blank=True)
+    reproduction_services = models.TextField(null=True, blank=True)
+    research_services = models.TextField(null=True, blank=True)
+    rules = models.TextField(null=True, blank=True)
+    sources = models.TextField(null=True, blank=True)
 
     def save(self):
         if not self.id:
