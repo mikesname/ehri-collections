@@ -3,16 +3,27 @@ from ehriportal.repositories.models import Repository, Contact
 
 class RepositoryTranslationOptions(TranslationOptions):
     fields = (
-        "history",
-        "places",
-        "legal_status",
+        "access_conditions",
+        "buildings",
+        "collecting_policies",
+        "dates_of_existence",
+        "disabled_access",
+        "finding_aids",
         "functions",
-        "mandates",
-        "internal_structures",
         "general_context",
-        "rules_conventions",
-        "sources",
+        "geocultural_context",
+        "history",
+        "holdings",
+        "internal_structures",
+        "legal_status",
         "maintenance_notes",
+        "mandates",
+        "opening_times",
+        "places",
+        "reproduction_services",
+        "research_services",
+        "rules",
+        "sources",
     )
 
 class ContactTranslationOptions(TranslationOptions):

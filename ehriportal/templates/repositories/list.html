@@ -6,15 +6,19 @@
 {% block head_title %}{% trans "Repositories" %}{% endblock %}
 
 {% block subnav %}
-<h1>{% trans "Stuff" %}</h1>
+<h1>{% trans "Filter" %}</h1>
 <ul>
     <li><a href="#">One</a></li>
     <li><a href="#">Two</a></li>
 </ul>
 {% endblock %}
 {% block body %}
-<h2>{% trans "More stuff" %}</h2>
+<h2>{% trans "Repositories" %}</h2>
 <table class="zebra-striped">
-
+    {% for object in object_list %}
+    <tr>
+        <td><a href="#">{{object.authorized_form_of_name}}</a></td>
+    </tr>
+    {% endfor %}
 </table>
 {% endblock %}
