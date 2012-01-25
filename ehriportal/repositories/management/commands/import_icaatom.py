@@ -10,6 +10,7 @@ import json
 
 from django.core.management.base import BaseCommand, CommandError
 from ehriportal.repositories.models import Repository as DjRepository
+from ehriportal.repositories.models import Contact as DjContact
 
 from incf.countryutils import data as countrydata
 from sqlaqubit import models, keys, create_engine, init_models
@@ -113,5 +114,29 @@ class Command(BaseCommand):
             sources=i18n["sources"],
         )
         djrepo.save()
+        for contact in repo.contacts:
+            self.import_icaatom_contact(djrepo, contact)            
 
+    def import_icaatom_contact(self, djrepo, contact):
+        """Import a contact detail object."""
 
+        i18n = contact.get_i18n()
+
+        djcontact = DjContact(
+            repository=djrepo,
+            primary=contact.primary_contact,
+            contact_person=contact.contact_person,
+            country_code=contact.country_code,
+            postal_code=contact.postal_code,
+            street_address=contact.street_address,
+            telephone=contact.telephone,
+            fax=contact.fax,
+            email=contact.email,
+            website=contact.website,
+            longitude=contact.longitude,
+            latitude=contact.latitude,
+            city=i18n["city"],
+            region=i18n["region"],
+            note=i18n["note"]
+        )
+        djcontact.save()

@@ -14,8 +14,8 @@ class Repository(models.Model):
     authorized_form_of_name = models.CharField(max_length=255)
     lod = models.CharField(max_length=255, choices=LOD)
     type_of_entity = models.CharField(max_length=255, choices=ENTITY_TYPES)
-    created_at = models.DateTimeField(editable=False)
-    updated_at = models.DateTimeField(editable=False, null=True, blank=True)
+    created_on = models.DateTimeField(editable=False)
+    updated_on = models.DateTimeField(editable=False, null=True, blank=True)
     # optional translatable text fields
     access_conditions = models.TextField(null=True, blank=True)
     buildings = models.TextField(null=True, blank=True)
@@ -66,6 +66,8 @@ class Contact(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     contact_type = models.CharField(
             max_length=100, blank=True, null=True, choices=CONTACT_TYPES)
+    postal_code = models.CharField(max_length=100, null=True, blank=True)
+    country_code = models.CharField(max_length=100, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
     region = models.CharField(max_length=100, null=True, blank=True)
     note = models.TextField(null=True, blank=True)
