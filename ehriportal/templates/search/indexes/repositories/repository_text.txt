@@ -1,0 +1,32 @@
+{{ object.identifier|default_if_none:"" }}
+{{ object.authorized_form_of_name|default_if_none:"" }}
+{{ object.lod|default_if_none:"" }}
+{{ object.type_of_entity|default_if_none:"" }}
+{{ object.access_conditions|default_if_none:"" }}
+{{ object.buildings|default_if_none:"" }}
+{{ object.collecting_policies|default_if_none:"" }}
+{{ object.dates_of_existence|default_if_none:"" }}
+{{ object.disabled_access|default_if_none:"" }}
+{{ object.finding_aids|default_if_none:"" }}
+{{ object.functions|default_if_none:"" }}
+{{ object.general_context|default_if_none:"" }}
+{{ object.geocultural_context|default_if_none:"" }}
+{{ object.history|default_if_none:"" }}
+{{ object.holdings|default_if_none:"" }}
+{{ object.internal_structures|default_if_none:"" }}
+{{ object.legal_status|default_if_none:"" }}
+{{ object.maintenance_notes|default_if_none:"" }}
+{{ object.mandates|default_if_none:"" }}
+{{ object.opening_times|default_if_none:"" }}
+{{ object.places|default_if_none:"" }}
+{{ object.reproduction_services|default_if_none:"" }}
+{{ object.research_services|default_if_none:"" }}
+{{ object.rules|default_if_none:"" }}
+{{ object.sources|default_if_none:"" }}
+
+{% for contact in object.contacts.all %}
+    {{ contact.street_address|default_if_none:"" }}
+    {{ contact.city|default_if_none:"" }}
+    {{ contact.region|default_if_none:"" }}
+{% endfor %}
+
