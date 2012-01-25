@@ -2,4 +2,4 @@
 *.swa
 *.swp
 *.pyc
-
+*/dev.db
