@@ -185,6 +185,7 @@ INSTALLED_APPS = [
 
     # our apps
     "repositories",
+    "descriptions",
 ]
 
 FIXTURE_DIRS = [
