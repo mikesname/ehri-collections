@@ -1,15 +1,16 @@
 from django.conf.urls.defaults import *
 from django.contrib.auth.decorators import login_required
-from ehriportal.repositories import views, models
+from ehriportal.descriptions import views, models
 
 from haystack.views import FacetedSearchView
 from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
 
-sqs = SearchQuerySet().models(models.Repository).facet('country')
+sqs = SearchQuerySet().models(models.Description).facet('language')\
+        .facet('language_of_description')
 
 urlpatterns = patterns('',
-    url(r'^/?$', views.FacetedSearchView(
+    url(r'^/?$', FacetedSearchView(
         form_class=FacetedSearchForm, searchqueryset=sqs,
-        template="repositories/search.html"), name='repos'),
+        template="descriptions/search.html"), name='descriptions'),
 )

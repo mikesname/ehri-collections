@@ -14,6 +14,7 @@ from ehriportal.repositories.models import Repository as DjRepository, \
 from ehriportal.descriptions.models import Description
 
 from incf.countryutils import data as countrydata
+import phpserialize
 from sqlaqubit import models, keys, create_engine, init_models
 from sqlalchemy.engine.url import URL
 from sqlalchemy import and_
@@ -73,9 +74,11 @@ class Command(BaseCommand):
         ))
         init_models(engine)
         self.session = models.Session()
-        
-        #repos = self.session.query(models.Repository).filter(models.Repository.identifier=='ehri1691None').all()
-        repos = self.session.query(models.Repository).all()
+
+        # random selection for now
+        repos = self.session.query(models.Repository).all()[50:150]
+        repos.extend(self.session.query(models.Repository)\
+                .filter(models.Repository.identifier=='ehri1691None').all())
         self.stdout.write("Adding %s repos\n" % len(repos))
         for repo in repos:
             if not repo.identifier:
@@ -93,7 +96,7 @@ class Command(BaseCommand):
         djrepo = DjRepository(
             identifier=repo.identifier,
             # TODO contacts, maintanence notes
-            authorized_form_of_name=i18n["authorized_form_of_name"],
+            name=i18n["authorized_form_of_name"],
             access_conditions=i18n["access_conditions"],
             buildings=i18n["buildings"],
             collecting_policies=i18n["collecting_policies"],
@@ -155,7 +158,7 @@ class Command(BaseCommand):
         djdesc = Description(
                 repository=djrepo,
                 identifier=desc.identifier,
-                title=i18n["title"],
+                name=i18n["title"],
                 access_conditions=i18n["access_conditions"],
                 accruals=i18n["accruals"],
                 acquisition=i18n["acquisition"],
@@ -177,6 +180,13 @@ class Command(BaseCommand):
                 scope_and_content=i18n["scope_and_content"],
                 sources=i18n["sources"]
         )
+        # FIXME: Description could have many languages
+        for prop in desc.properties:
+            if prop.name == "language":
+                djdesc.language = phpserialize.loads(prop.get_i18n()["value"])[0]
+            elif prop.name == "languageOfDescription":
+                djdesc.language_of_description = \
+                        phpserialize.loads(prop.get_i18n()["value"])[0]
         djdesc.save()
 
 

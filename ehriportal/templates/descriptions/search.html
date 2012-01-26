@@ -1,0 +1,88 @@
+{% extends 'subnav_base.html' %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+{% load highlight %}
+{% block head_title %}{% trans "Descriptions" %}{% endblock %}
+
+{% block subnav %}
+<h2>{% trans "Limit search" %}</h2>
+
+    <!-- Begin faceting. -->
+    <div class="facet-list">
+        {% if facets.fields.language %}
+        <h4>{% trans "By Language" %}</h4>
+            <dl>
+                {# Only list languages with results #}
+                {% for lang in facets.fields.language %}
+                {% if lang.1 > 0 %}
+                    {% with lang.0|urlencode as langcoded %}
+                        {% with "&selected_facets=language_exact:"|add:langcoded as lfacet %}
+                            {% if lfacet in request.get_full_path %}
+                            <dd>{{ lang.0 }}({{ lang.1 }}) <a href="{{request.get_full_path|cut:lfacet}}">[Remove]</a></dd>
+                            {% else %} 
+                            <dd><a href="{{ request.get_full_path }}&amp;selected_facets=language_exact:{{ lang.0|urlencode }}">
+                                {{ lang.0 }}</a> ({{ lang.1 }})</dd>
+                            {% endif %}
+                        {% endwith %}
+                    {% endwith %}
+                {% endif %}
+                {% endfor %}
+            </dl>
+        {% else %}
+        {% endif %}
+        {% if facets.fields.language_of_description %}
+        <h4>{% trans "By Language of description" %}</h4>
+            <dl>
+                {# Only list languages with results #}
+                {% for lang in facets.fields.language_of_description %}
+                {% if lang.1 > 0 %}
+                    {% with lang.0|urlencode as langcoded %}
+                        {% with "&selected_facets=language_of_description_exact:"|add:langcoded as lfacet %}
+                            {% if lfacet in request.get_full_path %}
+                            <dd>{{ lang.0 }}({{ lang.1 }}) <a href="{{request.get_full_path|cut:lfacet}}">[Remove]</a></dd>
+                            {% else %} 
+                            <dd><a href="{{ request.get_full_path }}&amp;selected_facets=language_of_description_exact:{{ lang.0|urlencode }}">
+                                {{ lang.0 }}</a> ({{ lang.1 }})</dd>
+                            {% endif %}
+                        {% endwith %}
+                    {% endwith %}
+                {% endif %}
+                {% endfor %}
+            </dl>
+        {% else %}
+        {% endif %}
+    </div>
+    <!-- End faceting -->
+
+{% endblock %}
+
+{% block body %}
+    <h2>Search</h2>
+    <form method="get" action=".">
+            {{ form.q }}
+            <input type="submit" value="Search">
+
+        {% if query %}
+        <h3>{{paginator.count}} Result{{paginator.count|pluralize}}</h3>
+
+            {% for result in page.object_list %}
+                <p>
+                    <a href="{{ result.object.get_absolute_url }}">{{ result.object.name }}</a>
+                </p>
+            {% empty %}
+                <p>No results found.</p>
+            {% endfor %}
+
+            {% if page.has_previous or page.has_next %}
+                <div>
+                    {% if page.has_previous %}<a href="?q={{ query }}&amp;page={{ page.previous_page_number }}">{% endif %}&laquo; Previous{% if page.has_previous %}</a>{% endif %}
+                    |
+                    {% if page.has_next %}<a href="?q={{ query }}&amp;page={{ page.next_page_number }}">{% endif %}Next &raquo;{% if page.has_next %}</a>{% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            {# Show some example queries to run, maybe query syntax, something else? #}
+        {% endif %}
+    </form>
+{% endblock %}

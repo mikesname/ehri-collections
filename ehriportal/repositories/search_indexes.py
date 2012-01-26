@@ -7,7 +7,7 @@ from incf.countryutils import data as countrydata
 
 
 class RepositoryIndex(SearchIndex):
-    name = CharField(model_attr='authorized_form_of_name', default=True)
+    name = CharField(model_attr='name', default=True)
     other_names = MultiValueField(model_attr='other_names')
     country = CharField(model_attr='country', faceted=True, null=True)
     text = CharField(document=True, use_template=True, stored=False)

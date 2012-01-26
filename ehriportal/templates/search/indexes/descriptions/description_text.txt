@@ -1,0 +1,22 @@
+{{ object.repository|default_if_none:"" }}
+{{ object.access_conditions|default_if_none:"" }}
+{{ object.accruals|default_if_none:"" }}
+{{ object.acquisition|default_if_none:"" }}
+{{ object.alternate_title|default_if_none:"" }}
+{{ object.appraisal|default_if_none:"" }}
+{{ object.archival_history|default_if_none:"" }}
+{{ object.arrangement|default_if_none:"" }}
+{{ object.edition|default_if_none:"" }}
+{{ object.extent_and_medium|default_if_none:"" }}
+{{ object.finding_aids|default_if_none:"" }}
+{{ object.institution_responsible_identifier|default_if_none:"" }}
+{{ object.location_of_copies|default_if_none:"" }}
+{{ object.location_of_originals|default_if_none:"" }}
+{{ object.physical_characteristics|default_if_none:"" }}
+{{ object.related_units_of_description|default_if_none:"" }}
+{{ object.reproduction_conditions|default_if_none:"" }}
+{{ object.revision_history|default_if_none:"" }}
+{{ object.rules|default_if_none:"" }}
+{{ object.scope_and_content|default_if_none:"" }}
+{{ object.sources|default_if_none:"" }}
+

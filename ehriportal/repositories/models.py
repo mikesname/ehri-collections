@@ -15,7 +15,7 @@ class Repository(models.Model):
     LOD = ()
 
     identifier = models.CharField(max_length=255)
-    authorized_form_of_name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
     lod = models.CharField(max_length=255, choices=LOD)
     type_of_entity = models.CharField(max_length=255, choices=ENTITY_TYPES)
     created_on = models.DateTimeField(editable=False)
