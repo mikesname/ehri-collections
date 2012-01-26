@@ -234,7 +234,7 @@ except ImportError:
 # Haystack config
 HAYSTACK_SITECONF = 'ehriportal.search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
-HAYSTACK_SOLR_URL = 'http://127.0.0.1:8983/solr/repositories'
+HAYSTACK_SOLR_URL = 'http://127.0.0.1:8983/solr'
 #HAYSTACK_ITEM_URL = 'http://127.0.0.1:8983/solr/collections'
 
 # translation
