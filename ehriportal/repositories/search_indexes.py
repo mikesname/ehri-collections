@@ -3,9 +3,14 @@ from haystack.indexes import *
 from haystack import site
 from ehriportal.repositories.models import Repository
 
+from incf.countryutils import data as countrydata
+
 
 class RepositoryIndex(SearchIndex):
-    text = CharField(document=True, use_template=True)
+    name = CharField(model_attr='authorized_form_of_name', default=True)
+    other_names = MultiValueField(model_attr='other_names')
+    country = CharField(model_attr='country', faceted=True, null=True)
+    text = CharField(document=True, use_template=True, stored=False)
     pub_date = DateTimeField(model_attr='created_on')
 
     def index_queryset(self):

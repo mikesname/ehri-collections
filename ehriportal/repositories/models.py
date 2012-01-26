@@ -5,6 +5,10 @@ import datetime
 
 from django.db import models
 
+from ehriportal.repositories import utils
+
+from incf.countryutils import data as countrydata
+
 class Repository(models.Model):
     """Repository."""
     ENTITY_TYPES=()
@@ -37,7 +41,7 @@ class Repository(models.Model):
     reproduction_services = models.TextField(null=True, blank=True)
     research_services = models.TextField(null=True, blank=True)
     rules = models.TextField(null=True, blank=True)
-    sources = models.TextField(null=True, blank=True)
+    sources = models.TextField(null=True, blank=True)    
 
     def save(self):
         if not self.id:
@@ -45,6 +49,26 @@ class Repository(models.Model):
         else:
             self.updated_on = datetime.datetime.now()
         super(Repository, self).save()
+
+    @property
+    def other_names(self):
+        """Get a list of other names."""
+        return [on.name for on in self.othername_set.all()]
+
+    @property
+    def primary_contact(self):
+        """Get the main contact property."""
+        try:
+            return self.contacts.all().order_by("primary")[0]
+        except IndexError:
+            return None
+
+    @property
+    def country(self):
+        contact = self.primary_contact
+        if contact is None:
+            return
+        return utils.get_country_from_code(contact.country_code)
 
     def __unicode__(self):
         return self.identifier
@@ -84,7 +108,7 @@ class Contact(models.Model):
 
 class OtherName(models.Model):
     name = models.CharField(max_length=255)
-    repository = models.ForeignKey(Repository, related_name="other_names")
+    repository = models.ForeignKey(Repository)
 
 
 
