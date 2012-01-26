@@ -11,6 +11,7 @@ import json
 from django.core.management.base import BaseCommand, CommandError
 from ehriportal.repositories.models import Repository as DjRepository, \
         Contact as DjContact, OtherName
+from ehriportal.descriptions.models import Description
 
 from incf.countryutils import data as countrydata
 from sqlaqubit import models, keys, create_engine, init_models
@@ -73,6 +74,7 @@ class Command(BaseCommand):
         init_models(engine)
         self.session = models.Session()
         
+        #repos = self.session.query(models.Repository).filter(models.Repository.identifier=='ehri1691None').all()
         repos = self.session.query(models.Repository).all()
         self.stdout.write("Adding %s repos\n" % len(repos))
         for repo in repos:
@@ -119,6 +121,8 @@ class Command(BaseCommand):
         for on in repo.other_names:            
             djrepo.othername_set.add(OtherName(name=on.get_i18n()["name"],
                     repository=djrepo))
+        for io in repo.information_objects:
+            self.import_icaatom_description(djrepo, io)
 
 
     def import_icaatom_contact(self, djrepo, contact):
@@ -144,3 +148,35 @@ class Command(BaseCommand):
             note=i18n["note"]
         )
         djcontact.save()
+
+    def import_icaatom_description(self, djrepo, desc):
+        """Import an archival description/information object."""
+        i18n = desc.get_i18n()
+        djdesc = Description(
+                repository=djrepo,
+                identifier=desc.identifier,
+                title=i18n["title"],
+                access_conditions=i18n["access_conditions"],
+                accruals=i18n["accruals"],
+                acquisition=i18n["acquisition"],
+                alternate_title=i18n["alternate_title"],
+                appraisal=i18n["appraisal"],
+                archival_history=i18n["archival_history"],
+                arrangement=i18n["arrangement"],
+                edition=i18n["edition"],
+                extent_and_medium=i18n["extent_and_medium"],
+                finding_aids=i18n["finding_aids"],
+                institution_responsible_identifier=i18n["institution_responsible_identifier"],
+                location_of_copies=i18n["location_of_copies"],
+                location_of_originals=i18n["location_of_originals"],
+                physical_characteristics=i18n["physical_characteristics"],
+                related_units_of_description=i18n["related_units_of_description"],
+                reproduction_conditions=i18n["reproduction_conditions"],
+                revision_history=i18n["revision_history"],
+                rules=i18n["rules"],
+                scope_and_content=i18n["scope_and_content"],
+                sources=i18n["sources"]
+        )
+        djdesc.save()
+
+
