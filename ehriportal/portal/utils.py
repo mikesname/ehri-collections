@@ -1,6 +1,13 @@
 """Utility functions for dealing with repository and geo data."""
 
 from incf.countryutils import data as countrydata
+import babel
+
+def language_name_from_code(code):
+    """Get lang display name."""
+    # TODO: Find the correct way to do this
+    return babel.Locale("en").languages.get(code, "")
+
 
 def get_country_from_code(code):
     """Get the country code from a coutry name."""

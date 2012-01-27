@@ -1,11 +1,25 @@
 import datetime
 from haystack.indexes import *
 from haystack import site
-from ehriportal.descriptions.models import Description
-from ehriportal.descriptions import utils
+from ehriportal.portal.models import Repository, Collection
+from ehriportal.portal import utils
+
+from incf.countryutils import data as countrydata
 
 
-class DescriptionIndex(SearchIndex):
+class RepositoryIndex(SearchIndex):
+    name = CharField(model_attr='name', default=True)
+    other_names = MultiValueField(model_attr='other_names')
+    country = CharField(model_attr='country', faceted=True, null=True)
+    text = CharField(document=True, use_template=True, stored=False)
+    pub_date = DateTimeField(model_attr='created_on')
+
+    def index_queryset(self):
+        """Used when the entire index for model is updated."""
+        return Repository.objects.filter(created_on__lte=datetime.datetime.now())
+
+
+class CollectionIndex(SearchIndex):
     name = CharField(model_attr='name', default=True)
     other_names = MultiValueField(model_attr='other_names')
     repository = CharField(model_attr='repository__name')
@@ -25,7 +39,8 @@ class DescriptionIndex(SearchIndex):
 
     def index_queryset(self):
         """Used when the entire index for model is updated."""
-        return Description.objects.filter(created_on__lte=datetime.datetime.now())
+        return Collection.objects.filter(created_on__lte=datetime.datetime.now())
 
 
-site.register(Description, DescriptionIndex)
+site.register(Collection, CollectionIndex)
+site.register(Repository, RepositoryIndex)

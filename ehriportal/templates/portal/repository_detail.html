@@ -1,0 +1,36 @@
+{% extends "subnav_base.html" %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+
+{% block head_title %}{% trans "Repositories" %}{% endblock %}
+
+
+{% block subnav %}
+<div style="height:200px;border:1px solid grey;">
+    Image goes here.
+</div>
+{% for contact in object.contacts.all %}
+    {{contact.street_address}}
+    <br />
+    {{contact.city}}
+    <br />
+    {{contact.region}}
+    <br />
+    {{contact.country}}
+    <br />
+    Tel: {{contact.telephone}}
+    <br />
+    Fax: {{contact.fax}}
+{% endfor %}
+{% endblock %}
+{% block body %}
+<h2>{{object.name}}</h2>
+<table class="zebra-striped">
+    {% for object in object_list %}
+    <tr>
+        <td><a href="#">{{object.authorized_form_of_name}}</a></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

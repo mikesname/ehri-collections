@@ -8,9 +8,40 @@ class Migration(SchemaMigration):
 
     def forwards(self, orm):
         
+        # Adding model 'Resource'
+        db.create_table('portal_resource', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('identifier', self.gf('django.db.models.fields.CharField')(unique=True, max_length=255)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('slug', self.gf('autoslug.fields.AutoSlugField')(unique=True, max_length=50, populate_from=None, unique_with=(), db_index=True)),
+            ('type', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('lod', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('type_of_entity', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('created_on', self.gf('django.db.models.fields.DateTimeField')()),
+            ('updated_on', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+        ))
+        db.send_create_signal('portal', ['Resource'])
+
+        # Adding model 'OtherName'
+        db.create_table('portal_othername', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('resource', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['portal.Resource'])),
+        ))
+        db.send_create_signal('portal', ['OtherName'])
+
+        # Adding model 'Property'
+        db.create_table('portal_property', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('resource', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['portal.Resource'])),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
+            ('value', self.gf('django.db.models.fields.CharField')(max_length=255)),
+        ))
+        db.send_create_signal('portal', ['Property'])
+
         # Adding model 'Repository'
-        db.create_table('repositories_repository', (
-            ('archivalresource_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['archival_resource.ArchivalResource'], unique=True, primary_key=True)),
+        db.create_table('portal_repository', (
+            ('resource_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['portal.Resource'], unique=True, primary_key=True)),
             ('access_conditions', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('access_conditions_en', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('access_conditions_de', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
@@ -96,13 +127,13 @@ class Migration(SchemaMigration):
             ('sources_de', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('sources_fr', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
         ))
-        db.send_create_signal('repositories', ['Repository'])
+        db.send_create_signal('portal', ['Repository'])
 
         # Adding model 'Contact'
-        db.create_table('repositories_contact', (
+        db.create_table('portal_contact', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('primary', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('repository', self.gf('django.db.models.fields.related.ForeignKey')(related_name='contacts', to=orm['repositories.Repository'])),
+            ('repository', self.gf('django.db.models.fields.related.ForeignKey')(related_name='contacts', to=orm['portal.Repository'])),
             ('contact_person', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
             ('street_address', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('website', self.gf('django.db.models.fields.URLField')(max_length=200, null=True, blank=True)),
@@ -132,32 +163,84 @@ class Migration(SchemaMigration):
             ('created_on', self.gf('django.db.models.fields.DateTimeField')()),
             ('updated_on', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
         ))
-        db.send_create_signal('repositories', ['Contact'])
+        db.send_create_signal('portal', ['Contact'])
+
+        # Adding model 'Collection'
+        db.create_table('portal_collection', (
+            ('resource_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['portal.Resource'], unique=True, primary_key=True)),
+            ('repository', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['portal.Repository'])),
+            ('access_conditions', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('accruals', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('acquisition', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('alternate_title', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('appraisal', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('archival_history', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('arrangement', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('edition', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('extent_and_medium', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('finding_aids', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('institution_responsible_identifier', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('location_of_copies', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('location_of_originals', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('physical_characteristics', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('related_units_of_description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('reproduction_conditions', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('revision_history', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('rules', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('scope_and_content', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+            ('sources', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
+        ))
+        db.send_create_signal('portal', ['Collection'])
 
 
     def backwards(self, orm):
         
+        # Deleting model 'Resource'
+        db.delete_table('portal_resource')
+
+        # Deleting model 'OtherName'
+        db.delete_table('portal_othername')
+
+        # Deleting model 'Property'
+        db.delete_table('portal_property')
+
         # Deleting model 'Repository'
-        db.delete_table('repositories_repository')
+        db.delete_table('portal_repository')
 
         # Deleting model 'Contact'
-        db.delete_table('repositories_contact')
+        db.delete_table('portal_contact')
+
+        # Deleting model 'Collection'
+        db.delete_table('portal_collection')
 
 
     models = {
-        'archival_resource.archivalresource': {
-            'Meta': {'object_name': 'ArchivalResource'},
-            'created_on': ('django.db.models.fields.DateTimeField', [], {}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'identifier': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
-            'lod': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'slug': ('autoslug.fields.AutoSlugField', [], {'unique': 'True', 'max_length': '50', 'populate_from': 'None', 'unique_with': '()', 'db_index': 'True'}),
-            'type': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'type_of_entity': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'updated_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
+        'portal.collection': {
+            'Meta': {'object_name': 'Collection', '_ormbases': ['portal.Resource']},
+            'access_conditions': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'accruals': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'acquisition': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'alternate_title': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'appraisal': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'archival_history': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'arrangement': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'edition': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'extent_and_medium': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'finding_aids': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'institution_responsible_identifier': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'location_of_copies': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'location_of_originals': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'physical_characteristics': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'related_units_of_description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'repository': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['portal.Repository']"}),
+            'reproduction_conditions': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'resource_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['portal.Resource']", 'unique': 'True', 'primary_key': 'True'}),
+            'revision_history': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'rules': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'scope_and_content': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'sources': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
         },
-        'repositories.contact': {
+        'portal.contact': {
             'Meta': {'object_name': 'Contact'},
             'city': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'city_de': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
@@ -185,19 +268,31 @@ class Migration(SchemaMigration):
             'region_de': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'region_en': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'region_fr': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'repository': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'contacts'", 'to': "orm['repositories.Repository']"}),
+            'repository': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'contacts'", 'to': "orm['portal.Repository']"}),
             'street_address': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'telephone': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'updated_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'website': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'})
         },
-        'repositories.repository': {
-            'Meta': {'object_name': 'Repository', '_ormbases': ['archival_resource.ArchivalResource']},
+        'portal.othername': {
+            'Meta': {'object_name': 'OtherName'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'resource': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['portal.Resource']"})
+        },
+        'portal.property': {
+            'Meta': {'object_name': 'Property'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'resource': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['portal.Resource']"}),
+            'value': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+        },
+        'portal.repository': {
+            'Meta': {'object_name': 'Repository', '_ormbases': ['portal.Resource']},
             'access_conditions': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'access_conditions_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'access_conditions_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'access_conditions_fr': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'archivalresource_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['archival_resource.ArchivalResource']", 'unique': 'True', 'primary_key': 'True'}),
             'buildings': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'buildings_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'buildings_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
@@ -270,6 +365,7 @@ class Migration(SchemaMigration):
             'research_services_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'research_services_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'research_services_fr': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'resource_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['portal.Resource']", 'unique': 'True', 'primary_key': 'True'}),
             'rules': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'rules_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'rules_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
@@ -278,7 +374,19 @@ class Migration(SchemaMigration):
             'sources_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'sources_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'sources_fr': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
+        },
+        'portal.resource': {
+            'Meta': {'object_name': 'Resource'},
+            'created_on': ('django.db.models.fields.DateTimeField', [], {}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'identifier': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
+            'lod': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'slug': ('autoslug.fields.AutoSlugField', [], {'unique': 'True', 'max_length': '50', 'populate_from': 'None', 'unique_with': '()', 'db_index': 'True'}),
+            'type': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'type_of_entity': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'updated_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
         }
     }
 
-    complete_apps = ['repositories']
+    complete_apps = ['portal']

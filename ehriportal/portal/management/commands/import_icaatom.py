@@ -9,10 +9,8 @@ import httplib2
 import json
 
 from django.core.management.base import BaseCommand, CommandError
-from ehriportal.repositories.models import Repository as DjRepository, \
-        Contact as DjContact
-from ehriportal.archival_resource.models import OtherName
-from ehriportal.descriptions.models import Description
+from ehriportal.portal.models import Repository as DjRepository, \
+        Contact as DjContact, Collection, OtherName
 
 from incf.countryutils import data as countrydata
 import phpserialize
@@ -157,7 +155,7 @@ class Command(BaseCommand):
     def import_icaatom_description(self, djrepo, desc):
         """Import an archival description/information object."""
         i18n = desc.get_i18n()
-        djdesc = Description(
+        djdesc = Collection(
                 repository=djrepo,
                 identifier=desc.identifier,
                 name=i18n["title"],
@@ -182,10 +180,10 @@ class Command(BaseCommand):
                 scope_and_content=i18n["scope_and_content"],
                 sources=i18n["sources"]
         )
-        # FIXME: Description could have many languages
+        # FIXME: Collection could have many languages
         djdesc.save()
         for prop in desc.properties:
-            if prop.name == "language" or prop.name == "languageOfDescription":
+            if prop.name == "language" or prop.name == "languageOfCollection":
                 vals = phpserialize.loads(prop.get_i18n()["value"])
                 for index, val in vals.iteritems():
                     djdesc.set_property(prop.name, val)
