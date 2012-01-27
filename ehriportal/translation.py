@@ -1,5 +1,5 @@
 from modeltranslation.translator import translator, TranslationOptions
-from ehriportal.repositories.models import Repository, Contact
+from ehriportal.portal.models import Repository, Contact
 
 class RepositoryTranslationOptions(TranslationOptions):
     fields = [f[0] for f in Repository.translatable_fields]
