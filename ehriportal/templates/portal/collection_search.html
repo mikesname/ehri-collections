@@ -3,7 +3,9 @@
 {% load i18n %}
 {% load ifsetting_tag %}
 {% load highlight %}
-{% block head_title %}{% trans "Descriptions" %}{% endblock %}
+{% block head_title %}{% trans "Search Collections" %}{% endblock %}
+
+{% block body_class %}collections{% endblock %}
 
 {% block subnav %}
 <h2>{% trans "Limit search" %}</h2>
@@ -58,7 +60,7 @@
 {% endblock %}
 
 {% block body %}
-    <h2>Search</h2>
+    <h2>Search Collections</h2>
     <form method="get" action=".">
             {{ form.q }}
             <input type="submit" value="Search">

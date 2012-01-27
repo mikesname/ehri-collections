@@ -2,6 +2,7 @@
 
 {% load i18n %}
 {% load ifsetting_tag %}
+{% load getattribute %}
 
 {% block head_title %}{% trans "Repositories" %}{% endblock %}
 
@@ -26,11 +27,15 @@
 {% endblock %}
 {% block body %}
 <h2>{{object.name}}</h2>
-<table class="zebra-striped">
-    {% for object in object_list %}
-    <tr>
-        <td><a href="#">{{object.authorized_form_of_name}}</a></td>
-    </tr>
-    {% endfor %}
-</table>
+
+{% for field in object.translatable_fields %}
+    {% with object|getattribute:field.0 as value %}
+        {% if value %}
+            <h2>{{field|title}}</h2>
+            <div class="description-field">
+                {{value|linebreaks}}
+            </div>
+        {% endif %}
+    {% endwith %}
+{% endfor %}
 {% endblock %}

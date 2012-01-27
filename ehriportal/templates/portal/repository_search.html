@@ -5,6 +5,8 @@
 {% load highlight %}
 {% block head_title %}{% trans "Repositories" %}{% endblock %}
 
+{% block body_class %}repositories{% endblock %}
+
 {% block subnav %}
 <h2>{% trans "Limit search" %}</h2>
 
@@ -37,7 +39,7 @@
 {% endblock %}
 
 {% block body %}
-    <h2>Search</h2>
+    <h2>Search Repositories</h2>
 
     <form method="get" action=".">
             {{ form.q }}

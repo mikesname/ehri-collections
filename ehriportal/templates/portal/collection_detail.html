@@ -1,36 +1,81 @@
-{% extends "subnav_base.html" %}
+{% extends "site_base.html" %}
 
 {% load i18n %}
 {% load ifsetting_tag %}
+{% load getattribute %}
+{% load formatattr %}
 
-{% block head_title %}{% trans "Repositories" %}{% endblock %}
+{% block head_title %}{{object.name}}{% endblock %}
 
+{% block body_class %}collections{% endblock %}
 
-{% block subnav %}
-<div style="height:200px;border:1px solid grey;">
-    Image goes here.
-</div>
-{% for contact in object.contacts.all %}
-    {{contact.street_address}}
-    <br />
-    {{contact.city}}
-    <br />
-    {{contact.region}}
-    <br />
-    {{contact.country}}
-    <br />
-    Tel: {{contact.telephone}}
-    <br />
-    Fax: {{contact.fax}}
-{% endfor %}
-{% endblock %}
 {% block body %}
-<h2>{{object.name}}</h2>
-<table class="zebra-striped">
-    {% for object in object_list %}
-    <tr>
-        <td><a href="#">{{object.authorized_form_of_name}}</a></td>
-    </tr>
-    {% endfor %}
-</table>
+    <h2>{{object.name}}</h2>
+    <div class="row">
+        <div class="span12 columns">
+            <div class="description-field">
+                {{object.scope_and_content|linebreaks}}
+            </div>
+            <h3>{% trans "Revision history" %}</h3>
+            <div class="revision-field">
+                {{object.revision_history|linebreaks}}
+            </div>
+            <h3>{% trans "Rules" %}</h3>
+            <div class="rules-field">
+                {{object.rules|linebreaks}}
+            </div>
+        </div>
+        <div class="span4 columns">
+            <table class="zebra-striped">
+                {% if object.location_of_copies %}
+                    <tr>
+                        <td><strong>{% trans "Location:" %}</strong></td><td>{{object.location_of_copies}}</td>
+                    </tr>
+                {% endif %}
+                {% if object.extent_and_medium %}
+                    <tr>
+                        <td><strong>{% trans "Extent:" %}</strong></td><td>{{object.extent_and_medium}}</td>
+                    </tr>
+                {% endif %}
+                {% if object.access_conditions %}
+                    <tr>
+                        <td><strong>{% trans "Access:" %}</strong></td><td>{{object.access_conditions}}</td>
+                    </tr>
+                {% endif %}
+                {% if object.acquisition %}
+                    <tr>
+                        <td><strong>{% trans "Acquisition:" %}</strong></td><td>{{object.acquisition}}</td>
+                    </tr>
+                {% endif %}
+                {% if object.reproduction_conditions %}
+                    <tr>
+                        <td colspan="2">
+                            <strong>{% trans "Reproduction:" %}</strong>
+                            <br />
+                            {{object.reproduction_conditions}}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if object.finding_aids %}    
+                    <tr>
+                        <td colspan="2">
+                            <strong>{% trans "Finding aids:" %}</strong>
+                            <br />
+                            {{object.finding_aids}}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if object.arrangement %}    
+                    <tr>
+                        <td colspan="2">
+                            <strong>{% trans "Arrangement:" %}</strong>
+                            <br />
+                            {{object.arrangement}}
+                        </td>
+                    </tr>
+                {% endif %}
+
+            </table>
+        </div>
+    </div>
 {% endblock %}
