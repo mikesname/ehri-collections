@@ -10,7 +10,8 @@ import json
 
 from django.core.management.base import BaseCommand, CommandError
 from ehriportal.repositories.models import Repository as DjRepository, \
-        Contact as DjContact, OtherName
+        Contact as DjContact
+from ehriportal.archival_resource.models import OtherName
 from ehriportal.descriptions.models import Description
 
 from incf.countryutils import data as countrydata
@@ -76,9 +77,10 @@ class Command(BaseCommand):
         self.session = models.Session()
 
         # random selection for now
-        repos = self.session.query(models.Repository).all()[50:150]
+        repos = []
         repos.extend(self.session.query(models.Repository)\
                 .filter(models.Repository.identifier=='ehri1691None').all())
+        repos.extend(self.session.query(models.Repository).all()[50:150])
         self.stdout.write("Adding %s repos\n" % len(repos))
         for repo in repos:
             if not repo.identifier:
@@ -123,7 +125,7 @@ class Command(BaseCommand):
             self.import_icaatom_contact(djrepo, contact)
         for on in repo.other_names:            
             djrepo.othername_set.add(OtherName(name=on.get_i18n()["name"],
-                    repository=djrepo))
+                    resource=djrepo))
         for io in repo.information_objects:
             self.import_icaatom_description(djrepo, io)
 
@@ -181,12 +183,11 @@ class Command(BaseCommand):
                 sources=i18n["sources"]
         )
         # FIXME: Description could have many languages
-        for prop in desc.properties:
-            if prop.name == "language":
-                djdesc.language = phpserialize.loads(prop.get_i18n()["value"])[0]
-            elif prop.name == "languageOfDescription":
-                djdesc.language_of_description = \
-                        phpserialize.loads(prop.get_i18n()["value"])[0]
         djdesc.save()
+        for prop in desc.properties:
+            if prop.name == "language" or prop.name == "languageOfDescription":
+                vals = phpserialize.loads(prop.get_i18n()["value"])
+                for index, val in vals.iteritems():
+                    djdesc.set_property(prop.name, val)
 
 

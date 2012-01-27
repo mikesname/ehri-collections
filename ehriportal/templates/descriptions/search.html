@@ -10,18 +10,18 @@
 
     <!-- Begin faceting. -->
     <div class="facet-list">
-        {% if facets.fields.language %}
+        {% if facets.fields.languages %}
         <h4>{% trans "By Language" %}</h4>
             <dl>
                 {# Only list languages with results #}
-                {% for lang in facets.fields.language %}
+                {% for lang in facets.fields.languages %}
                 {% if lang.1 > 0 %}
                     {% with lang.0|urlencode as langcoded %}
-                        {% with "&selected_facets=language_exact:"|add:langcoded as lfacet %}
+                        {% with "&selected_facets=languages_exact:"|add:langcoded as lfacet %}
                             {% if lfacet in request.get_full_path %}
                             <dd>{{ lang.0 }}({{ lang.1 }}) <a href="{{request.get_full_path|cut:lfacet}}">[Remove]</a></dd>
                             {% else %} 
-                            <dd><a href="{{ request.get_full_path }}&amp;selected_facets=language_exact:{{ lang.0|urlencode }}">
+                            <dd><a href="{{ request.get_full_path }}&amp;selected_facets=languages_exact:{{ lang.0|urlencode }}">
                                 {{ lang.0 }}</a> ({{ lang.1 }})</dd>
                             {% endif %}
                         {% endwith %}
@@ -31,18 +31,18 @@
             </dl>
         {% else %}
         {% endif %}
-        {% if facets.fields.language_of_description %}
-        <h4>{% trans "By Language of description" %}</h4>
+        {% if facets.fields.languages_of_description %}
+        <h4>% trans "By Language of description" %}</h4>
             <dl>
                 {# Only list languages with results #}
-                {% for lang in facets.fields.language_of_description %}
+                {% for lang in facets.fields.languages_of_description %}
                 {% if lang.1 > 0 %}
                     {% with lang.0|urlencode as langcoded %}
-                        {% with "&selected_facets=language_of_description_exact:"|add:langcoded as lfacet %}
+                        {% with "&selected_facets=languages_of_description_exact:"|add:langcoded as lfacet %}
                             {% if lfacet in request.get_full_path %}
                             <dd>{{ lang.0 }}({{ lang.1 }}) <a href="{{request.get_full_path|cut:lfacet}}">[Remove]</a></dd>
                             {% else %} 
-                            <dd><a href="{{ request.get_full_path }}&amp;selected_facets=language_of_description_exact:{{ lang.0|urlencode }}">
+                            <dd><a href="{{ request.get_full_path }}&amp;selected_facets=languages_of_description_exact:{{ lang.0|urlencode }}">
                                 {{ lang.0 }}</a> ({{ lang.1 }})</dd>
                             {% endif %}
                         {% endwith %}

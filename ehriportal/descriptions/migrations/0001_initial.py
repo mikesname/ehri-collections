@@ -10,13 +10,7 @@ class Migration(SchemaMigration):
         
         # Adding model 'Description'
         db.create_table('descriptions_description', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('identifier', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('lod', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('type_of_entity', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')()),
-            ('updated_on', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
+            ('archivalresource_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['archival_resource.ArchivalResource'], unique=True, primary_key=True)),
             ('repository', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['repositories.Repository'])),
             ('access_conditions', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('accruals', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
@@ -41,44 +35,42 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal('descriptions', ['Description'])
 
-        # Adding model 'OtherName'
-        db.create_table('descriptions_othername', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=255)),
-            ('description', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['descriptions.Description'])),
-        ))
-        db.send_create_signal('descriptions', ['OtherName'])
-
 
     def backwards(self, orm):
         
         # Deleting model 'Description'
         db.delete_table('descriptions_description')
 
-        # Deleting model 'OtherName'
-        db.delete_table('descriptions_othername')
-
 
     models = {
+        'archival_resource.archivalresource': {
+            'Meta': {'object_name': 'ArchivalResource'},
+            'created_on': ('django.db.models.fields.DateTimeField', [], {}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'identifier': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '255'}),
+            'lod': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'slug': ('autoslug.fields.AutoSlugField', [], {'unique': 'True', 'max_length': '50', 'populate_from': 'None', 'unique_with': '()', 'db_index': 'True'}),
+            'type': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'type_of_entity': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'updated_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
+        },
         'descriptions.description': {
-            'Meta': {'object_name': 'Description'},
+            'Meta': {'object_name': 'Description', '_ormbases': ['archival_resource.ArchivalResource']},
             'access_conditions': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'accruals': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'acquisition': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'alternate_title': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'appraisal': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'archival_history': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
+            'archivalresource_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['archival_resource.ArchivalResource']", 'unique': 'True', 'primary_key': 'True'}),
             'arrangement': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {}),
             'edition': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'extent_and_medium': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'finding_aids': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'identifier': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'institution_responsible_identifier': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'location_of_copies': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'location_of_originals': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'lod': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'physical_characteristics': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'related_units_of_description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'repository': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['repositories.Repository']"}),
@@ -86,24 +78,15 @@ class Migration(SchemaMigration):
             'revision_history': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'rules': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'scope_and_content': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'sources': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'type_of_entity': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'updated_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
-        },
-        'descriptions.othername': {
-            'Meta': {'object_name': 'OtherName'},
-            'description': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['descriptions.Description']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '255'})
+            'sources': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
         },
         'repositories.repository': {
-            'Meta': {'object_name': 'Repository'},
+            'Meta': {'object_name': 'Repository', '_ormbases': ['archival_resource.ArchivalResource']},
             'access_conditions': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'access_conditions_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'access_conditions_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'access_conditions_fr': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'authorized_form_of_name': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
+            'archivalresource_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['archival_resource.ArchivalResource']", 'unique': 'True', 'primary_key': 'True'}),
             'buildings': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'buildings_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'buildings_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
@@ -112,7 +95,6 @@ class Migration(SchemaMigration):
             'collecting_policies_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'collecting_policies_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'collecting_policies_fr': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'created_on': ('django.db.models.fields.DateTimeField', [], {}),
             'dates_of_existence': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'dates_of_existence_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'dates_of_existence_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
@@ -145,8 +127,6 @@ class Migration(SchemaMigration):
             'holdings_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'holdings_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'holdings_fr': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'identifier': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'internal_structures': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'internal_structures_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'internal_structures_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
@@ -155,7 +135,6 @@ class Migration(SchemaMigration):
             'legal_status_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'legal_status_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'legal_status_fr': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'lod': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
             'maintenance_notes': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'maintenance_notes_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'maintenance_notes_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
@@ -187,9 +166,7 @@ class Migration(SchemaMigration):
             'sources': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'sources_de': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
             'sources_en': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'sources_fr': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'type_of_entity': ('django.db.models.fields.CharField', [], {'max_length': '255'}),
-            'updated_on': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
+            'sources_fr': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
         }
     }
 

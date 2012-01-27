@@ -6,54 +6,39 @@ import datetime
 from django.db import models
 
 from ehriportal.repositories import utils
+from ehriportal.archival_resource.models import ArchivalResource
 
 from incf.countryutils import data as countrydata
 
-class Repository(models.Model):
+
+class Repository(ArchivalResource):
     """Repository."""
     ENTITY_TYPES=()
     LOD = ()
 
-    identifier = models.CharField(max_length=255)
-    name = models.CharField(max_length=255)
-    lod = models.CharField(max_length=255, choices=LOD)
-    type_of_entity = models.CharField(max_length=255, choices=ENTITY_TYPES)
-    created_on = models.DateTimeField(editable=False)
-    updated_on = models.DateTimeField(editable=False, null=True, blank=True)
-    # optional translatable text fields
-    access_conditions = models.TextField(null=True, blank=True)
-    buildings = models.TextField(null=True, blank=True)
-    collecting_policies = models.TextField(null=True, blank=True)
-    dates_of_existence = models.TextField(null=True, blank=True)
-    disabled_access = models.TextField(null=True, blank=True)
-    finding_aids = models.TextField(null=True, blank=True)
-    functions = models.TextField(null=True, blank=True)
-    general_context = models.TextField(null=True, blank=True)
-    geocultural_context = models.TextField(null=True, blank=True)
-    history = models.TextField(null=True, blank=True)
-    holdings = models.TextField(null=True, blank=True)
-    internal_structures = models.TextField(null=True, blank=True)
-    legal_status = models.TextField(null=True, blank=True)
-    maintenance_notes = models.TextField(null=True, blank=True)
-    mandates = models.TextField(null=True, blank=True)
-    opening_times = models.TextField(null=True, blank=True)
-    places = models.TextField(null=True, blank=True)
-    reproduction_services = models.TextField(null=True, blank=True)
-    research_services = models.TextField(null=True, blank=True)
-    rules = models.TextField(null=True, blank=True)
-    sources = models.TextField(null=True, blank=True)    
-
-    def save(self):
-        if not self.id:
-            self.created_on = datetime.datetime.now()
-        else:
-            self.updated_on = datetime.datetime.now()
-        super(Repository, self).save()
-
-    @property
-    def other_names(self):
-        """Get a list of other names."""
-        return [on.name for on in self.othername_set.all()]
+    translatable_fields = (
+        ("access_conditions", "TODO: Help text"),
+        ("buildings", "TODO: Help text"),
+        ("collecting_policies", "TODO: Help text"),
+        ("dates_of_existence", "TODO: Help text"),
+        ("disabled_access", "TODO: Help text"),
+        ("finding_aids", "TODO: Help text"),
+        ("functions", "TODO: Help text"),
+        ("general_context", "TODO: Help text"),
+        ("geocultural_context", "TODO: Help text"),
+        ("history", "TODO: Help text"),
+        ("holdings", "TODO: Help text"),
+        ("internal_structures", "TODO: Help text"),
+        ("legal_status", "TODO: Help text"),
+        ("maintenance_notes", "TODO: Help text"),
+        ("mandates", "TODO: Help text"),
+        ("opening_times", "TODO: Help text"),
+        ("places", "TODO: Help text"),
+        ("reproduction_services", "TODO: Help text"),
+        ("research_services", "TODO: Help text"),
+        ("rules", "TODO: Help text"),
+        ("sources", "TODO: Help text"),
+    )
 
     @property
     def primary_contact(self):
@@ -95,8 +80,8 @@ class Contact(models.Model):
     city = models.CharField(max_length=100, null=True, blank=True)
     region = models.CharField(max_length=100, null=True, blank=True)
     note = models.TextField(null=True, blank=True)
-    created_at = models.DateTimeField(editable=False)
-    updated_at = models.DateTimeField(editable=False, null=True, blank=True)
+    created_on = models.DateTimeField(editable=False)
+    updated_on = models.DateTimeField(editable=False, null=True, blank=True)
 
     def save(self):
         if not self.id:
@@ -104,11 +89,6 @@ class Contact(models.Model):
         else:
             self.updated_on = datetime.datetime.now()
         super(Contact, self).save()
-
-
-class OtherName(models.Model):
-    name = models.CharField(max_length=255)
-    repository = models.ForeignKey(Repository)
 
 
 

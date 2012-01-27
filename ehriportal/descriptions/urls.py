@@ -6,8 +6,8 @@ from haystack.views import FacetedSearchView
 from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
 
-sqs = SearchQuerySet().models(models.Description).facet('language')\
-        .facet('language_of_description')
+sqs = SearchQuerySet().models(models.Description).facet('languages')\
+        .facet('languages_of_description')
 
 urlpatterns = patterns('',
     url(r'^/?$', FacetedSearchView(

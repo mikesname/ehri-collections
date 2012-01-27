@@ -184,6 +184,7 @@ INSTALLED_APPS = [
     "south",
 
     # our apps
+    "archival_resource",
     "repositories",
     "descriptions",
 ]
