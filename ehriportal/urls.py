@@ -23,8 +23,8 @@ urlpatterns = patterns("",
     url(r"^profiles/", include("idios.urls")),
     url(r"^notices/", include("notification.urls")),
     url(r"^announcements/", include("announcements.urls")),
-    url(r"^repositories/", include("repositories.urls")),
-    url(r"^descriptions/", include("descriptions.urls")),
+    url(r"^repositories/", include("portal.repository_urls")),
+    url(r"^collections/", include("portal.collection_urls")),
 )
 
 

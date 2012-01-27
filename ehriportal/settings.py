@@ -184,9 +184,7 @@ INSTALLED_APPS = [
     "south",
 
     # our apps
-    "archival_resource",
-    "repositories",
-    "descriptions",
+    "portal",
 ]
 
 FIXTURE_DIRS = [
@@ -237,7 +235,6 @@ except ImportError:
 HAYSTACK_SITECONF = 'ehriportal.search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
 HAYSTACK_SOLR_URL = 'http://127.0.0.1:8983/solr'
-#HAYSTACK_ITEM_URL = 'http://127.0.0.1:8983/solr/collections'
 
 # translation
 gettext = lambda s: s

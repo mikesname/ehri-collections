@@ -5,7 +5,8 @@
 
 {% block nav %}    
     <ul>{% spaceless %}
-        <li id="tab_repos"><a href="{% url repos %}">{% trans "Repositories" %}</a></li>
+        <li id="tab_repos"><a href="{% url repo_search %}">{% trans "Repositories" %}</a></li>
+        <li id="tab_collections"><a href="{% url collection_search %}">{% trans "Collections" %}</a></li>
         {% if user.is_authenticated %}
             <li id="tab_profile"><a href="{% url profile_detail user.username %}">{% trans "Profile" %}</a></li>
             <li id="tab_notices"><a href="{% url notification_notices %}">{% trans "Notices" %}{% if notice_unseen_count %} ({{ notice_unseen_count }}){% endif %}</a></li>
