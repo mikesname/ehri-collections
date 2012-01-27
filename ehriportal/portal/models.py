@@ -29,7 +29,6 @@ class ResourceType(ModelBase):
 class Resource(models.Model):
     """Archival resource."""
     __metaclass__ = ResourceType
-    #abstract = True
     translatable_fields = ()
 
     ENTITY_TYPES=()
@@ -136,6 +135,9 @@ class Repository(Resource):
         ("sources", "TODO: Help text"),
     )
 
+    class Meta:
+        verbose_name_plural = "repositories"
+
     @property
     def primary_contact(self):
         """Get the main contact property."""
@@ -221,6 +223,9 @@ class Collection(Resource):
     )
 
     repository = models.ForeignKey(Repository)
+
+    class Meta:
+        verbose_name_plural = "collections"
 
     @property
     def languages_of_description(self):
