@@ -9,6 +9,7 @@ babel
 incf.countryutils
 pysolr
 south
+django-autoslug
 django-haystack
 django-modeltranslation
 
