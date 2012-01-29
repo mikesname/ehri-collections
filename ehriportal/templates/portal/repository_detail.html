@@ -8,9 +8,11 @@
 
 
 {% block subnav %}
-<div style="height:200px;border:1px solid grey;">
-    Image goes here.
-</div>
+    {% if object.image %}
+        <img src="{{object.image.url}}" />
+    {% else %}
+    <img width="200px" height="250px" src="{{STATIC_URL}}img/repo_placeholder.png" />
+    {% endif %}
 {% for contact in object.contacts.all %}
     {{contact.street_address}}
     <br />

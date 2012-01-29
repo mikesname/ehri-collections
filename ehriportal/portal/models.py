@@ -135,6 +135,10 @@ class Repository(Resource):
         ("sources", "TODO: Help text"),
     )
 
+    image = models.ImageField(null=True, blank=True,
+            upload_to=lambda inst, fn: "%s%s" % (inst.slug,
+                    os.path.splitext(fn)[1]))
+
     class Meta:
         verbose_name_plural = "repositories"
 
