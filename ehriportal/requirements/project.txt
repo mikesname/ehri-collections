@@ -7,6 +7,7 @@
 # See http://pip-installer.org/requirement-format.html for more information.
 babel
 incf.countryutils
+markdown
 pysolr
 south
 django-autoslug
