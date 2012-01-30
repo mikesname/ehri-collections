@@ -5,6 +5,7 @@ import datetime
 from django.db import models
 from django.db.models.base import ModelBase
 
+from taggit.managers import TaggableManager
 from autoslug import AutoSlugField
 
 from ehriportal.portal import utils
@@ -140,6 +141,8 @@ class Repository(Resource):
             upload_to=lambda inst, fn: "%s%s" % (inst.slug,
                     os.path.splitext(fn)[1]))
 
+    tags = TaggableManager()
+
     class Meta:
         verbose_name_plural = "repositories"
 
@@ -211,7 +214,10 @@ class Contact(models.Model):
 
 class Collection(Resource):
     """Model representing an archival description."""
-    LODS = ()
+    LODS = (
+        ("fonds", "Fonds"),
+        ("collection", "Collection"),
+    )
     ENTITY_TYPES = ()
 
     translatable_fields = (
@@ -238,6 +244,8 @@ class Collection(Resource):
     )
 
     repository = models.ForeignKey(Repository)
+
+    tags = TaggableManager()
 
     class Meta:
         verbose_name_plural = "collections"

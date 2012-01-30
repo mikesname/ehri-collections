@@ -10,6 +10,7 @@ incf.countryutils
 markdown
 pysolr
 south
+django-taggit
 django-autoslug
 django-haystack
 django-modeltranslation

@@ -178,6 +178,9 @@ INSTALLED_APPS = [
     # search
     "haystack",
 
+    # tagging
+    "taggit",
+
     # translation
     "modeltranslation",
 
