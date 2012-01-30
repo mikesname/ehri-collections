@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load ifsetting_tag %}
 {% load highlight %}
+{% load getattribute %}
 {% block head_title %}{% trans "Search Collections" %}{% endblock %}
 
 {% block body_class %}collections{% endblock %}
@@ -12,69 +13,29 @@
 
     <!-- Begin faceting. -->
     <div class="facet-list">
-        {% if facets.fields.languages %}
-        <h4>{% trans "By Language" %}</h4>
+        {% for attr, pretty in facet_names.items %}
+            {% if facets.fields|getattribute:attr %}
+            <h4>{% trans "By "|add:pretty %}</h4>
             <dl>
                 {# Only list languages with results #}
-                {% for lang in facets.fields.languages %}
-                {% if lang.1 > 0 %}
-                    {% with lang.0|urlencode as langcoded %}
-                        {% with "&selected_facets=languages_exact:"|add:langcoded as lfacet %}
-                            {% if lfacet in request.get_full_path %}
-                            <dd>{{ lang.0 }}({{ lang.1 }}) <a href="{{request.get_full_path|cut:lfacet}}">[Remove]</a></dd>
+                {% for item in facets.fields|getattribute:attr %}
+                {% if item.1 > 0 %}
+                    {% with item.0|urlencode as itemcoded %}
+                        {% with "&selected_facets="|add:attr|add:"_exact:"|add:itemcoded as ifacet %}
+                            {% if ifacet in request.get_full_path %}
+                            <dd>{{ item.0 }}({{ item.1 }}) <a href="{{request.get_full_path|cut:ifacet}}">[Remove]</a></dd>
                             {% else %} 
-                            <dd><a href="{{ request.get_full_path }}&amp;selected_facets=languages_exact:{{ lang.0|urlencode }}">
-                                {{ lang.0 }}</a> ({{ lang.1 }})</dd>
+                            <dd><a href="{{ request.get_full_path }}&amp;{{"selected_facets="|add:attr|add:"_exact:"}}{{ item.0|urlencode }}">
+                                {{ item.0 }}</a> ({{ item.1 }})</dd>
                             {% endif %}
                         {% endwith %}
                     {% endwith %}
                 {% endif %}
                 {% endfor %}
             </dl>
-        {% else %}
-        {% endif %}
-        {% if facets.fields.languages_of_description %}
-        <h4>% trans "By Language of description" %}</h4>
-            <dl>
-                {# Only list languages with results #}
-                {% for lang in facets.fields.languages_of_description %}
-                {% if lang.1 > 0 %}
-                    {% with lang.0|urlencode as langcoded %}
-                        {% with "&selected_facets=languages_of_description_exact:"|add:langcoded as lfacet %}
-                            {% if lfacet in request.get_full_path %}
-                            <dd>{{ lang.0 }}({{ lang.1 }}) <a href="{{request.get_full_path|cut:lfacet}}">[Remove]</a></dd>
-                            {% else %} 
-                            <dd><a href="{{ request.get_full_path }}&amp;selected_facets=languages_of_description_exact:{{ lang.0|urlencode }}">
-                                {{ lang.0 }}</a> ({{ lang.1 }})</dd>
-                            {% endif %}
-                        {% endwith %}
-                    {% endwith %}
-                {% endif %}
-                {% endfor %}
-            </dl>
-        {% else %}
-        {% endif %}
-        {% if facets.fields.tags %}
-        <h4>{% trans "By keyword" %}</h4>
-            <dl>
-                {# Only list languages with results #}
-                {% for tag in facets.fields.tags %}
-                {% if tag.1 > 0 %}
-                    {% with tag.0|urlencode as tagcoded %}
-                        {% with "&selected_facets=tags_exact:"|add:tagcoded as tfacet %}
-                            {% if tfacet in request.get_full_path %}
-                            <dd>{{ tag.0 }}({{ tag.1 }}) <a href="{{request.get_full_path|cut:tfacet}}">[Remove]</a></dd>
-                            {% else %} 
-                            <dd><a href="{{ request.get_full_path }}&amp;selected_facets=tags_exact:{{ tag.0|urlencode }}">
-                                {{ tag.0 }}</a> ({{ tag.1 }})</dd>
-                            {% endif %}
-                        {% endwith %}
-                    {% endwith %}
-                {% endif %}
-                {% endfor %}
-            </dl>
-        {% else %}
-        {% endif %}
+            {% else %}
+            {% endif %}
+        {% endfor %}
     </div>
     <!-- End faceting -->
 

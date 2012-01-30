@@ -17,6 +17,11 @@ infodict = dict(
 class CollectionSearchView(FacetedSearchView):
     def extra_context(self, *args, **kwargs):
         extra = super(CollectionSearchView, self).extra_context(*args, **kwargs)
+        extra["facet_names"] = dict(
+                languages_of_description="Language of description",
+                languages="Language",
+                tags="Keyword"
+        )
         # sort counts, ideally we'd do this in the template
         for facet in extra["facets"]["fields"].keys():
             extra["facets"]["fields"][facet].sort(
