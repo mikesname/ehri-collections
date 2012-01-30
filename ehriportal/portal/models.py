@@ -47,14 +47,14 @@ class Resource(models.Model):
     created_on = models.DateTimeField(editable=False)
     updated_on = models.DateTimeField(editable=False, null=True, blank=True)
 
-    def save(self):
+    def save(self, *args, **kwargs):
         if not self.slug:
             self.created_on = datetime.datetime.now()
         else:
             self.updated_on = datetime.datetime.now()
         if not self.type:
             self.type = self.__class__.__name__
-        super(Resource, self).save()
+        super(Resource, self).save(*args, **kwargs)
 
     @property
     def other_names(self):
@@ -195,12 +195,12 @@ class Contact(models.Model):
     created_on = models.DateTimeField(editable=False)
     updated_on = models.DateTimeField(editable=False, null=True, blank=True)
 
-    def save(self):
+    def save(self, *args, **kwargs):
         if not self.id:
             self.created_on = datetime.datetime.now()
         else:
             self.updated_on = datetime.datetime.now()
-        super(Contact, self).save()
+        super(Contact, self).save(*args, **kwargs)
 
     def format(self):
         elems = [e.strip() for e in [
@@ -268,7 +268,7 @@ class FuzzyDate(models.Model):
             ("month", "Month"),
             ("day", "Day"),
     )
-    collection = models.ForeignKey(Collection)
+    collection = models.ForeignKey(Collection, related_name="dates")
     start_date = models.DateField()
     start_time = models.TimeField(null=True)    
     end_date = models.DateField(null=True)
