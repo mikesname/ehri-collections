@@ -72,6 +72,11 @@ class Resource(models.Model):
         return self.get_property("language")
 
     @property
+    def tag_list(self):
+        """Short cut for listing all tags."""
+        return self.tags.all()
+
+    @property
     def scripts(self):
         """Short cut for fetching language properties."""
         return self.get_property("script")

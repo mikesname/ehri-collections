@@ -26,6 +26,7 @@ class CollectionIndex(SearchIndex):
     other_names = MultiValueField(model_attr='other_names')
     repository = CharField(model_attr='repository__name')
     languages = MultiValueField(model_attr='languages', faceted=True)
+    tags = MultiValueField(model_attr='tag_list', faceted=True)
     languages_of_description = MultiValueField(model_attr='languages_of_description', 
             faceted=True)
     text = CharField(document=True, use_template=True, stored=False)

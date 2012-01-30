@@ -72,6 +72,7 @@
                 <h5><a href="{{ result.object.get_absolute_url }}">{{ result.object.name }}</a></h5>                
                 <p>
                 {% highlight result.description with request.GET.q max_length 200 %}
+                {{ result.tags }}
                 </p>
             {% empty %}
                 <p>No results found.</p>

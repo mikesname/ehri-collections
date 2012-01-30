@@ -9,7 +9,10 @@ import json
 import httplib2
 import urllib
 
+from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
+
+from ehriportal.portal import models
 
 from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
 
@@ -153,16 +156,49 @@ class Command(BaseCommand):
         if not len(args) == 1:
             raise CommandError("No input url file given.")
         
-        data = []
+        self.wiener = models.Repository.objects.filter(name="Wiener Library")[0]
+        sys.stderr.write("Clearing current collections...\n")
+        self.wiener.collection_set.all().delete()
         with open(args[0], "r") as infile:
-            for line in infile.readlines():
-                url = line.strip()
-                if not url:
-                    continue
-                print >> sys.stderr, "Scraping url: %s" % url
-                item = scrape_item(url)
-                print >> sys.stderr, item
-                data.append(item)
-        json.dump(data, sys.stdout, indent=2)
+            with transaction.commit_on_success():
+                for line in infile.readlines():
+                    url = line.strip()
+                    if not url:
+                        continue
+                    sys.stderr.write("Scraping url: %s\n" % url)
+                    item = scrape_item(url)
+                    self.import_item(item)
 
+    def import_item(self, data):
+        """Import scraped data."""
+
+        coll, _ = models.Collection.objects.get_or_create(
+                repository=self.wiener,
+                identifier=data.get("identifier"),
+                name=data.get("name"),
+                access_conditions=data.get("access_conditions"),
+                accruals=data.get("accruals"),
+                acquisition=data.get("acquisition"),
+                appraisal=data.get("appraisal"),
+                archival_history=data.get("archival_history"),
+                arrangement=data.get("arrangement"),
+                edition=data.get("edition"),
+                extent_and_medium=data.get("extent_and_medium"),
+                finding_aids=data.get("finding_aids"),
+                institution_responsible_identifier=data.get("institution_responsible_identifier"),
+                location_of_copies=data.get("location_of_copies"),
+                location_of_originals=data.get("location_of_originals"),
+                physical_characteristics=data.get("physical_characteristics"),
+                related_units_of_description=data.get("related_units_of_description"),
+                reproduction_conditions=data.get("reproduction_conditions"),
+                revision_history=data.get("revision_history"),
+                rules=data.get("rules"),
+                scope_and_content=data.get("scope_and_content"),
+                sources=data.get("sources")
+        )
+        coll.save()
+        coll.tags.add(*data["keywords"])
+        fd = models.FuzzyDate.from_fuzzy_date(data["dates"])
+        if fd:
+            coll.dates.add(fd)
 
