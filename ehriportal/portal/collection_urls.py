@@ -7,7 +7,7 @@ from haystack.views import FacetedSearchView
 from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
 
-sqs = SearchQuerySet().models(models.Collection).facet('languages')\
+sqs = SearchQuerySet().models(models.Collection).facet("tags").facet('languages')\
         .facet('languages_of_description')
 
 infodict = dict(
