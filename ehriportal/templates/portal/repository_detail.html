@@ -3,41 +3,37 @@
 {% load i18n %}
 {% load ifsetting_tag %}
 {% load getattribute %}
+{% load markup %}
 
 {% block head_title %}{% trans "Repositories" %}{% endblock %}
 
 
 {% block subnav %}
+    <div class="repo_logo">
     {% if object.image %}
         <img src="{{object.image.url}}" />
     {% else %}
-    <img width="200px" height="250px" src="{{STATIC_URL}}img/repo_placeholder.png" />
+    <img width="200px" height="200px" src="{{STATIC_URL}}img/repo_placeholder.png" />
     {% endif %}
+    </div>
 {% for contact in object.contacts.all %}
-    {{contact.street_address}}
-    <br />
-    {{contact.city}}
-    <br />
-    {{contact.region}}
-    <br />
-    {{contact.country}}
+    {{contact.format|linebreaks}}
     <br />
     Tel: {{contact.telephone}}
     <br />
     Fax: {{contact.fax}}
+    <br />
+    Email: {{contact.email}}
 {% endfor %}
 {% endblock %}
+
 {% block body %}
 <h2>{{object.name}}</h2>
 
-{% for field in object.translatable_fields %}
-    {% with object|getattribute:field.0 as value %}
-        {% if value %}
-            <h2>{{field|title}}</h2>
-            <div class="description-field">
-                {{value|linebreaks}}
-            </div>
-        {% endif %}
-    {% endwith %}
-{% endfor %}
+{{object.general_context|markdown}}
+
+{% if object.reproduction_services %}
+    {{object.reproduction_services|markdown}}
+{% endif %}
+
 {% endblock %}

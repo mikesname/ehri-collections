@@ -38,8 +38,9 @@ class Resource(models.Model):
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from="name", unique=True)
     type = models.CharField(max_length=255)
-    lod = models.CharField(max_length=255, choices=LOD)
-    type_of_entity = models.CharField(max_length=255, choices=ENTITY_TYPES)
+    lod = models.CharField(max_length=255, choices=LOD, blank=True, null=True)
+    type_of_entity = models.CharField(max_length=255,
+            choices=ENTITY_TYPES, blank=True, null=True)
     created_on = models.DateTimeField(editable=False)
     updated_on = models.DateTimeField(editable=False, null=True, blank=True)
 
@@ -158,7 +159,7 @@ class Repository(Resource):
         return utils.get_country_from_code(contact.country_code)
 
     def __unicode__(self):
-        return self.identifier
+        return self.name
 
     @models.permalink
     def get_absolute_url(self):
@@ -195,6 +196,16 @@ class Contact(models.Model):
         else:
             self.updated_on = datetime.datetime.now()
         super(Contact, self).save()
+
+    def format(self):
+        elems = [e.strip() for e in [
+            self.street_address,
+            self.postal_code,
+            self.city,
+            self.region,
+            utils.get_country_from_code(self.country_code)
+        ] if e is not None]
+        return "\n".join(elems).replace(", ", "\n")
 
 
 
