@@ -69,8 +69,9 @@
         <h3>{{paginator.count}} Result{{paginator.count|pluralize}}</h3>
 
             {% for result in page.object_list %}
+                <h5><a href="{{ result.object.get_absolute_url }}">{{ result.object.name }}</a></h5>                
                 <p>
-                    <a href="{{ result.object.get_absolute_url }}">{{ result.object.name }}</a>
+                {% highlight result.description with request.GET.q max_length 200 %}
                 </p>
             {% empty %}
                 <p>No results found.</p>

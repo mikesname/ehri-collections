@@ -1,4 +1,4 @@
-{% extends "banner_base.html" %}
+{% extends "site_base.html" %}
 
 {% load i18n %}
 {% load ifsetting_tag %}
@@ -6,6 +6,18 @@
 {% block head_title %}{% trans "Welcome" %}{% endblock %}
 
 {% block body_class %}home{% endblock %}
+
+{% block body %}
+
+<center>
+    <h1 style="padding-top:150px">{% trans "Welcome to EHRI" %}</h1>
+    <form action="/collections">
+        <input name="q" style="width:400px;font-size:1.3em;" type="text" />
+        <input type="submit" value="Search Collections"
+    </form>
+</center>
+
+{% endblock %}
 
 {% block banner %}
     <h1>{% trans "Welcome to Pinax" %}</h1>

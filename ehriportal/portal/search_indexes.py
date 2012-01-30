@@ -9,6 +9,7 @@ from incf.countryutils import data as countrydata
 
 class RepositoryIndex(SearchIndex):
     name = CharField(model_attr='name', default=True)
+    description = CharField(model_attr='general_context', null=True)
     other_names = MultiValueField(model_attr='other_names')
     country = CharField(model_attr='country', faceted=True, null=True)
     text = CharField(document=True, use_template=True, stored=False)
@@ -21,6 +22,7 @@ class RepositoryIndex(SearchIndex):
 
 class CollectionIndex(SearchIndex):
     name = CharField(model_attr='name', default=True)
+    description = CharField(model_attr='scope_and_content', null=True)
     other_names = MultiValueField(model_attr='other_names')
     repository = CharField(model_attr='repository__name')
     languages = MultiValueField(model_attr='languages', faceted=True)

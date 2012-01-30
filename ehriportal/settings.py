@@ -240,6 +240,7 @@ HAYSTACK_SOLR_URL = 'http://127.0.0.1:8983/solr'
 # translation
 gettext = lambda s: s
 LANGUAGES = (
+        ('en', gettext('English')),
         ('de', gettext('German')),
         ('fr', gettext('French')),
 )
