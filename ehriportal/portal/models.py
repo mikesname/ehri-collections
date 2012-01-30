@@ -1,6 +1,8 @@
-from django.db import models
+"""Portal model classes."""
 
+import re
 import datetime
+import calendar
 
 from django.db import models
 from django.db.models.base import ModelBase
@@ -211,7 +213,6 @@ class Contact(models.Model):
         return "\n".join(elems).replace(", ", "\n")
 
 
-
 class Collection(Resource):
     """Model representing an archival description."""
     LODS = (
@@ -258,5 +259,56 @@ class Collection(Resource):
     def get_absolute_url(self):
         return ('collection_detail', [self.slug])
 
+
+class FuzzyDate(models.Model):
+    """Model representing an approximate historical
+    date or a date range."""
+    CHOICES = (
+            ("year", "Year"),
+            ("month", "Month"),
+            ("day", "Day"),
+    )
+    collection = models.ForeignKey(Collection)
+    start_date = models.DateField()
+    start_time = models.TimeField(null=True)    
+    end_date = models.DateField(null=True)
+    end_time = models.TimeField(null=True)
+    precision = models.CharField(max_length=20, choices=CHOICES)
+    circa = models.BooleanField(default=False)
+
+    @classmethod
+    def from_fuzzy_date(cls, datestr):
+        """Parse dates like "1939-1946", "c 1945" etc. This exists solely
+        for importing dates from Aim25 web scrapes, and will go away some
+        point in the future."""
+        m1 = re.search("^(?P<start>\d{4})-(?P<end>\d{4})(?P<ish>s)?$", datestr.strip())
+        fdate = FuzzyDate()
+        if m1:
+            d1 = datetime.date(int(m1.group("start")), 1, 1)
+            d2 = datetime.date(int(m1.group("end")), 12, 31)
+            fdate.start_date = d1
+            fdate.end_date = d2
+            fdate.circa = m1.group("ish") is not None
+            fdate.precision = "year"
+            return fdate
+        m2 = re.search("^(?P<circa>c)?\s?(?P<year>\d{4})$", datestr.strip())
+        if m2:
+            d1 = datetime.date(int(m2.group("year")), 1, 1)
+            fdate.start_date = d1
+            fdate.circa = m2.group("circa") is not None
+            fdate.precision = "year"
+            return fdate
+
+
+    def __unicode__(self):
+        """Print a sensible representation."""
+        out = ""
+        if self.circa:
+            out += "c"
+        # TODO: Make this format properly
+        out += str(self.start_date.year)
+        if self.end_date:
+            out += "-%d" % self.end_date.year
+        return out
 
 

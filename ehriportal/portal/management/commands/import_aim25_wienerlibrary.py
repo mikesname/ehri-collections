@@ -3,6 +3,7 @@ Attempt to scape AIM25's Wiener Library material.
 """
 
 import os
+import re
 import sys
 import json
 import httplib2
@@ -57,7 +58,7 @@ def get_identity_details(soup):
     for tr in table.findAll("tr"):
         for key, val in idfields.iteritems():
             if tr.find(text=val):
-                ids[key] = tr.findAll("td")[1].text
+                ids[key] = re.sub("^:\s+", "", tr.findAll("td")[1].text)
                 break
     return ids
 
@@ -101,7 +102,7 @@ def get_break_divided(soup):
         p = soup.find("h2", text=val).parent.parent
         parts = [c for c in p.childGenerator()]
         if len(parts) == 4:
-            sects[key] = parts[3].strip()
+            sects[key] = re.sub("^:\s+", "", parts[3].strip())
         else:
             sects[key] = u''
     return sects
