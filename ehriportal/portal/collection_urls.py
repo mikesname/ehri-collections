@@ -8,7 +8,7 @@ from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
 
 sqs = SearchQuerySet().models(models.Collection).facet("tags").facet('languages')\
-        .facet('languages_of_description')
+        .facet("location_of_materials").facet('languages_of_description')
 
 infodict = dict(
         queryset=models.Collection.objects.all()
@@ -18,14 +18,16 @@ class CollectionSearchView(FacetedSearchView):
     def extra_context(self, *args, **kwargs):
         extra = super(CollectionSearchView, self).extra_context(*args, **kwargs)
         extra["facet_names"] = dict(
-                languages_of_description="Language of description",
+                languages_of_description="Language of Description",
                 languages="Language",
-                tags="Keyword"
+                tags="Keyword",
+                location_of_materials="Location of Materials"
         )
         # sort counts, ideally we'd do this in the template
         for facet in extra["facets"]["fields"].keys():
             extra["facets"]["fields"][facet].sort(
                     lambda x, y: cmp(x[0], y[0]))
+        print extra["facets"]["fields"]
         return extra
 
 
