@@ -9,6 +9,8 @@ import json
 import httplib2
 import urllib
 
+import babel
+
 from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
 
@@ -155,7 +157,12 @@ class Command(BaseCommand):
         # input a file containing urls to scrap
         if not len(args) == 1:
             raise CommandError("No input url file given.")
-        
+
+        # get a reverse dict of language-name -> code
+        self.langcodes = dict([(v, k) for k, v in \
+                babel.Locale("en").languages.iteritems()])
+
+        # lookup the repository
         self.wiener = models.Repository.objects.filter(name="Wiener Library")[0]
         sys.stderr.write("Clearing current collections...\n")
         self.wiener.collection_set.all().delete()
@@ -201,4 +208,18 @@ class Command(BaseCommand):
         fd = models.FuzzyDate.from_fuzzy_date(data["dates"])
         if fd:
             coll.dates.add(fd)
+
+        # lang of description is always english here
+        coll.set_property("language_of_description", "en")
+
+        # add languages... bit of a hack, necessarily
+        languages = re.sub("[\W]", " ", data.get("language",""))\
+                .replace("Romani", "Romany").split()
+        sys.stderr.write("Languages: %s\n" % languages)
+        for langword in languages:
+            code = self.langcodes.get(langword)
+            if code is not None:
+                sys.stderr.write("Adding language code %s for %s\n" % (code, coll))
+                coll.set_property("language", code)
+
 
