@@ -75,6 +75,11 @@
             {% for result in page.object_list %}
             <h5>
                 <a href="{{ result.object.get_absolute_url }}">{{ result.object.name }}</a>
+                <span class="collection-dates">
+                    {% for date in result.object.dates.all %}
+                    <span class="result-date">{% if forloop.counter0 > 0 %}{{", "}}{% endif %}{{date}}</span>
+                    {% endfor %}
+                </span>
                 <span class="collection-repo">
                     [<a href="{{result.object.repository.get_absolute_url}}">{{result.object.repository.name}}</a>]
                 </span>
