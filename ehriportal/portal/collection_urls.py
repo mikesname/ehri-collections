@@ -1,3 +1,5 @@
+
+import re
 from datetime import date
 from django.conf.urls.defaults import *
 from django.views.generic.list_detail import object_detail
@@ -25,13 +27,8 @@ class DatedSearchForm(FacetedSearchForm):
     def search(self):
         sqs = super(DatedSearchForm, self).search()
 
-        sqs = sqs.date_facet("start_date", date(1700,1,1), self.start_date, gap_by="year",
-                gap_amount=int(1933-1700))
-        for year in range(self.start_date.year, self.end_date.year):
-            sqs = sqs.date_facet("date", date(year, 1,1), date(year+1, 1,1), 
+        sqs = sqs.date_facet("dates", self.start_date, self.end_date, 
                     gap_by="year")
-        sqs = sqs.date_facet("end_date", self.end_date, date.today(), gap_by="year",
-                gap_amount=int(date.today().year - self.end_date.year))
 
         return sqs
 
@@ -47,22 +44,22 @@ class CollectionSearchView(FacetedSearchView):
                 location_of_materials="Location of Materials"
         )
 
-        #self.searchqueryset = self.searchqueryset\
-        #        .date_facet("start_date", date(1700,1,1),
-        #            date(1933,1,1), gap_by="year")
-        #for i in range(1933, 1946):
-        #    self.searchqueryset = self.searchqueryset\
-        #            .date_facet("start_date", date(i,1,1),
-        #                date(i,1,1), gap_by="year")
-        #self.searchqueryset = self.searchqueryset\
-        #        .date_facet("start_date", date(1946,1,1),
-        #            date.today(), gap_by="year")
-
         # sort counts, ideally we'd do this in the template
         for facet in extra["facets"]["fields"].keys():
             extra["facets"]["fields"][facet].sort(
                     lambda x, y: cmp(x[0], y[0]))
         print extra["facets"]
+
+        # extract the actual date facets for easy listing
+        date_facets = []
+        print "DATES: %s" % extra["facets"]["dates"]
+        for facet, num in extra["facets"]["dates"]["dates"].iteritems():
+            mf = re.match("^(?P<year>\d{4})-\d{2}-\d{2}.*", facet)
+            if mf:
+                date_facets.append((facet, int(num)))
+        date_facets.sort(lambda x, y: cmp(x[0], y[0]))
+        extra["date_facets"] = date_facets
+        print date_facets
         return extra
 
 

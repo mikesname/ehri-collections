@@ -282,6 +282,26 @@ class Collection(Resource):
             return edate.end_date
         return edate.start_date
 
+    @property
+    def date(self):
+        """Average of start/end dates. Not exact."""
+        if not self.end_date and not self.start_date:
+            return
+        if not self.end_date:
+            return self.start_date
+        return self.start_date + ((self.end_date - self.start_date) / 2)
+
+    @property
+    def date_range(self):
+        """List of years this collection covers."""
+        if not self.end_date and not self.start_date:
+            return []
+        if not self.end_date:
+            return [self.start_date]
+        return [datetime.date(y,1,1) for y in \
+                range(self.start_date.year, self.end_date.year + 1)]
+        
+
     @models.permalink
     def get_absolute_url(self):
         return ('collection_detail', [self.slug])

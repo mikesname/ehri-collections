@@ -20,6 +20,15 @@ class RepositoryIndex(SearchIndex):
         return Repository.objects.filter(created_on__lte=datetime.datetime.now())
 
 
+class MultiValueDateField(MultiValueField):
+    """Multi-valued date field."""
+    field_type = "date"
+
+class FacetMultiValueDateField(FacetMultiValueField):
+    """Multi-valued date field."""
+    field_type = "date"
+
+
 class CollectionIndex(SearchIndex):
     name = CharField(model_attr='name', default=True)
     description = CharField(model_attr='scope_and_content', null=True)
@@ -29,7 +38,8 @@ class CollectionIndex(SearchIndex):
     languages = MultiValueField(model_attr='languages', faceted=True)
     tags = MultiValueField(model_attr='tag_list', faceted=True)
     start_date = DateField(model_attr='start_date', faceted=True, null=True)
-    date = DateField(model_attr='start_date', faceted=True, null=True)
+    dates = MultiValueDateField(model_attr='date_range', faceted=True, null=True)
+    dates_exact = FacetMultiValueDateField(model_attr='date_range', null=True)
     end_date = DateField(model_attr='end_date', faceted=True, null=True)
     languages_of_description = MultiValueField(model_attr='languages_of_description', 
             faceted=True)

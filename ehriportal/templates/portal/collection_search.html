@@ -11,6 +11,28 @@
 {% block subnav %}
 <h2>{% trans "Limit search" %}</h2>
 
+    <!-- Begin date facet -->
+    <div class="facet-list">
+        <h4>{% trans "By Date" %}</h4>
+        <dl>
+            {% for year, num in date_facets %}
+                {% if num > 0 %}
+                {% with "&selected_facets=dates_exact:"|add:year as dfacet %}
+
+                    {% if dfacet in request.get_full_path %}
+                    <dd>{{ year|slice:"4" }}({{ num }}) <a href="{{request.get_full_path|cut:dfacet}}">[Remove]</a></dd>
+                    {% else %} 
+                    <dd><a href="{{ request.get_full_path }}&amp;{{"selected_facets=dates_exact:"}}{{ year }}">
+                        {{ year|slice:"4" }}</a> ({{ num }})</dd>
+                    {% endif %}
+                {% endwith %}
+                {% endif %}
+            {% endfor %}
+        </dl>
+    </div>
+    <!-- End date facet -->
+
+
     <!-- Begin faceting. -->
     <div class="facet-list">
         {% for attr, pretty in facet_names.items %}
