@@ -260,6 +260,28 @@ class Collection(Resource):
     def languages_of_description(self):
         return self.get_property("languages_of_description")
 
+    @property
+    def start_date(self):
+        """Shortcut for getting the earliest date to which
+        this collection relates."""
+        try:
+            fdate = self.dates.all().order_by("start_date")[0]
+        except IndexError:
+            return
+        return fdate.start_date
+
+    @property
+    def end_date(self):
+        """Shortcut for getting the lastest date to which
+        this collection relates."""
+        try:
+            edate = self.dates.all().order_by("-end_date", "-start_date")[0]
+        except IndexError:
+            return
+        if edate.end_date:
+            return edate.end_date
+        return edate.start_date
+
     @models.permalink
     def get_absolute_url(self):
         return ('collection_detail', [self.slug])

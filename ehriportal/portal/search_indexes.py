@@ -28,6 +28,8 @@ class CollectionIndex(SearchIndex):
     location_of_materials = CharField(model_attr='repository__country', faceted=True, null=True)
     languages = MultiValueField(model_attr='languages', faceted=True)
     tags = MultiValueField(model_attr='tag_list', faceted=True)
+    start_date = DateField(model_attr='start_date', faceted=True, null=True)
+    end_date = DateField(model_attr='end_date', faceted=True, null=True)
     languages_of_description = MultiValueField(model_attr='languages_of_description', 
             faceted=True)
     text = CharField(document=True, use_template=True, stored=False)
