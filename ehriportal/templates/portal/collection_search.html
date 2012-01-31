@@ -51,10 +51,19 @@
         <h3>{{paginator.count}} Result{{paginator.count|pluralize}}</h3>
 
             {% for result in page.object_list %}
-                <h5><a href="{{ result.object.get_absolute_url }}">{{ result.object.name }}</a></h5>                
+            <h5>
+                <a href="{{ result.object.get_absolute_url }}">{{ result.object.name }}</a>
+                <span class="collection-repo">
+                    [<a href="{{result.object.repository.get_absolute_url}}">{{result.object.repository.name}}</a>]
+                </span>
+            </h5>                
                 <p>
                 {% highlight result.description with request.GET.q max_length 200 %}
-                {{ result.tags }}
+                <div class="keywords">
+                    {% for kw in result.tags %}
+                        <a href="#">{{kw}}</a> &nbsp;
+                    {% endfor %}
+                </div>
                 </p>
             {% empty %}
                 <p>No results found.</p>

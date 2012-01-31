@@ -2,3 +2,17 @@
     font-weight: bold;
 }
 
+.keywords {
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.keywords a {
+    color: #063;
+}
+
+.collection-repo, .collection-repo a {
+    color: #777;
+    font-weight: normal;
+}
+
