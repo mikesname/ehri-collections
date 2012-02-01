@@ -1,0 +1,13 @@
+{% if count > 0 %}
+    {% if param in request.get_full_path %}
+        <dd class="selected-filter">{{ item }} ({{ count }})
+            <a class="remove-filter" href="{{request.get_full_path|cut:param}}">[Remove]</a>
+        </dd>
+    {% else %} 
+        <dd>
+            <a href="{{ request.get_full_path }}{{param}}">{{ item }}</a> ({{ count }})
+        </dd>
+    {% endif %}
+{% endif %}
+
+

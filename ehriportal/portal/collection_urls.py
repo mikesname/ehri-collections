@@ -45,21 +45,20 @@ class CollectionSearchView(FacetedSearchView):
         )
 
         # sort counts, ideally we'd do this in the template
-        for facet in extra["facets"]["fields"].keys():
-            extra["facets"]["fields"][facet].sort(
-                    lambda x, y: cmp(x[0], y[0]))
-        print extra["facets"]
+        if extra.get("facets") and extra.get("facets").get("fields"):
+            for facet in extra["facets"]["fields"].keys():
+                extra["facets"]["fields"][facet].sort(
+                        lambda x, y: cmp(x[0], y[0]))
 
         # extract the actual date facets for easy listing
-        date_facets = []
-        print "DATES: %s" % extra["facets"]["dates"]
-        for facet, num in extra["facets"]["dates"]["dates"].iteritems():
-            mf = re.match("^(?P<year>\d{4})-\d{2}-\d{2}.*", facet)
-            if mf:
-                date_facets.append((facet, int(num)))
-        date_facets.sort(lambda x, y: cmp(x[0], y[0]))
-        extra["date_facets"] = date_facets
-        print date_facets
+        if extra.get("facets") and extra.get("facets").get("dates"):
+            date_facets = []
+            for facet, num in extra["facets"]["dates"]["dates"].iteritems():
+                mf = re.match("^(?P<year>\d{4})-\d{2}-\d{2}.*", facet)
+                if mf:
+                    date_facets.append((facet, int(num)))
+            date_facets.sort(lambda x, y: cmp(x[0], y[0]))
+            extra["date_facets"] = date_facets
         return extra
 
 

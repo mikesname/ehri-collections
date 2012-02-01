@@ -16,3 +16,14 @@
     font-weight: normal;
 }
 
+.remove-filter:hover {
+    background-color: #DDD;    
+}
+
+.selected-filter {
+    font-weight: bold;
+    color: rgb(0, 128, 0);
+}
+
+
+

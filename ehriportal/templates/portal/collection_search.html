@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load ifsetting_tag %}
 {% load getattribute %}
+{% load facetparam %}
 {% block head_title %}{% trans "Search Collections" %}{% endblock %}
 
 {% block body_class %}collections{% endblock %}
@@ -14,18 +15,12 @@
     <div class="facet-list">
         <h4>{% trans "By Date" %}</h4>
         <dl>
-            {% for year, num in date_facets %}
-                {% if num > 0 %}
-                {% with "&selected_facets=dates_exact:"|add:year as dfacet %}
-
-                    {% if dfacet in request.get_full_path %}
-                    <dd>{{ year|slice:"4" }}({{ num }}) <a href="{{request.get_full_path|cut:dfacet}}">[Remove]</a></dd>
-                    {% else %} 
-                    <dd><a href="{{ request.get_full_path }}&amp;{{"selected_facets=dates_exact:"}}{{ year }}">
-                        {{ year|slice:"4" }}</a> ({{ num }})</dd>
-                    {% endif %}
+            {% for timestr, count in date_facets %}
+                {% with "dates"|facetparam:timestr as param %}
+                    {% with timestr|slice:"4" as year %}
+                        {% include "portal/_item_facet.html" with item=year %}
+                    {% endwith %}
                 {% endwith %}
-                {% endif %}
             {% endfor %}
         </dl>
     </div>
@@ -38,23 +33,12 @@
             {% if facets.fields|getattribute:attr %}
             <h4>{% trans "By "|add:pretty %}</h4>
             <dl>
-                {# Only list languages with results #}
-                {% for item in facets.fields|getattribute:attr %}
-                {% if item.1 > 0 %}
-                    {% with item.0|urlencode as itemcoded %}
-                        {% with "&selected_facets="|add:attr|add:"_exact:"|add:itemcoded as ifacet %}
-                            {% if ifacet in request.get_full_path %}
-                            <dd>{{ item.0 }}({{ item.1 }}) <a href="{{request.get_full_path|cut:ifacet}}">[Remove]</a></dd>
-                            {% else %} 
-                            <dd><a href="{{ request.get_full_path }}&amp;{{"selected_facets="|add:attr|add:"_exact:"}}{{ item.0|urlencode }}">
-                                {{ item.0 }}</a> ({{ item.1 }})</dd>
-                            {% endif %}
-                        {% endwith %}
+                {% for item, count in facets.fields|getattribute:attr %}
+                    {% with attr|facetparam:item as param %}
+                        {% include "portal/_item_facet.html" %}
                     {% endwith %}
-                {% endif %}
                 {% endfor %}
             </dl>
-            {% else %}
             {% endif %}
         {% endfor %}
     </div>
@@ -72,7 +56,7 @@
         <h3>{{paginator.count}} Result{{paginator.count|pluralize}}</h3>
 
             {% for result in page.object_list %}
-                {% include "portal/collection_search_result.html" %}
+                {% include "portal/_collection_search_result.html" %}
             {% empty %}
                 <p>No results found.</p>
             {% endfor %}
