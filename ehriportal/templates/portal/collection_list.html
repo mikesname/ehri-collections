@@ -8,6 +8,7 @@
 
 {% block head_title %}{% trans "Repositories" %}{% endblock %}
 
+{% block body_class %}{% if repository %}repositories{% else %}collections{% endif %}{% endblock %}
 
 {% block subnav %}
     {% if repository %}
