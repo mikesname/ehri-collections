@@ -182,7 +182,7 @@ INSTALLED_APPS = [
     "taggit",
 
     # translation
-    "modeltranslation",
+    #"modeltranslation",
 
     # db migrations
     "south",
