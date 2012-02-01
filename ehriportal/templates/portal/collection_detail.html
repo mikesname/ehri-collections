@@ -39,6 +39,18 @@
                     </td>
                     <td>{{object.repository.formated_address}}</td>
                 </td>
+                {% if object.dates.count %}    
+                    <tr>
+                        <td>
+                            <strong>{% trans "Dates" %}</strong>
+                        </td>
+                        <td>
+                            {% for date in object.dates.all %}
+                                {% if forloop.count0 > 0 %}{{", "}}{% endif %}{{date}}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
                 {% if object.finding_aids|length %}    
                     <tr>
                         <td colspan="2">
