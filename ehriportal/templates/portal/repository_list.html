@@ -2,23 +2,18 @@
 
 {% load i18n %}
 {% load ifsetting_tag %}
+{% load pagination_tags %}
 
 {% block head_title %}{% trans "Repositories" %}{% endblock %}
 
-{% block subnav %}
-<h1>{% trans "Filter" %}</h1>
-<ul>
-    <li><a href="#">One</a></li>
-    <li><a href="#">Two</a></li>
-</ul>
-{% endblock %}
 {% block body %}
-<h2>{% trans "Repositories" %}</h2>
-<table class="zebra-striped">
-    {% for object in object_list %}
-    <tr>
-        <td><a href="{{object.get_absolute_url}}">{{object.name}}</a></td>
-    </tr>
-    {% endfor %}
-</table>
+    <h2>{% trans "Repositories" %}</h2>
+    <table class="zebra-striped">
+        {% for object in object_list %}
+        <tr>
+            <td><a href="{{object.get_absolute_url}}">{{object.name}}</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% paginate 2 %}
 {% endblock %}

@@ -16,13 +16,19 @@
 {% endblock %}
 
 {% block body %}
-    <h2>{{repository.name}}</h2>
-    <h3>{% trans "Collections" %}</h3>
+    {% if repository %}
+        <h2>{{repository.name}}</h2>
+        <h3>{% trans "Collections" %}</h3>
+    {% else %}
+        <h2>{% trans "Collections" %}</h2>
+    {% endif %}
     <table class="zebra-striped">
         {% for object in object_list %}
         <tr>
             <td><a href="{{object.get_absolute_url}}">{{object.name}}</a></td>
         </tr>
+        {% empty %}
+        No collections found.
         {% endfor %}
     </table>
     {% paginate 2 %}

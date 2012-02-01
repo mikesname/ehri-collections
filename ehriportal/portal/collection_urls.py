@@ -15,7 +15,7 @@ sqs = SearchQuerySet().models(models.Collection).facet("tags").facet('languages'
         .facet("location_of_materials")\
         .facet('languages_of_description')
 
-infodict = dict(
+infolist = dict(
         queryset=models.Collection.objects.all(),
         paginate_by=20
 )
@@ -37,11 +37,22 @@ class DatedSearchForm(FacetedSearchForm):
 
         return sqs
 
+    def no_query_found(self):
+        """Show all results when not given a query."""
+        sqs = self.searchqueryset.all()
+        if self.load_all:
+            sqs = sqs.load_all()
+        return sqs
+    #    sqs = self.searchqueryset.auto_query("*")        
+    #    if self.load_all:
+    #        sqs = sqs.load_all()        
+    #    return sqs
+
 
 class CollectionSearchView(FacetedSearchView):
     def extra_context(self, *args, **kwargs):
         extra = super(CollectionSearchView, self).extra_context(*args, **kwargs)
-
+        extra["query"] = self.query
         extra["facet_names"] = dict(
                 languages_of_description="Language of Description",
                 languages="Language",
@@ -64,14 +75,15 @@ class CollectionSearchView(FacetedSearchView):
                     date_facets.append((facet, int(num)))
             date_facets.sort(lambda x, y: cmp(x[0], y[0]))
             extra["date_facets"] = date_facets
+        
         return extra
 
 
 urlpatterns = patterns('',
-    url(r'^/?$', CollectionSearchView(
+    url(r'^search/?$', CollectionSearchView(
         form_class=DatedSearchForm, searchqueryset=sqs,
         template="portal/collection_search.html"), name='collection_search'),
-    url(r'^list/?$', object_list, infodict, name='collection_list'),
+    url(r'^/?$', object_list, infolist, name='collection_list'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewdict, name='collection_detail'),
 )
 

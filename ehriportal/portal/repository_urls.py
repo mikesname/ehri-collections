@@ -14,8 +14,8 @@ from haystack.query import SearchQuerySet
 sqs = SearchQuerySet().models(models.Repository).facet('country')
 
 listinfo = dict(
-        queryset=models.Repository.objects.all(),
-        paginate_by=10
+        queryset=models.Repository.objects.all().order_by("name"),
+        paginate_by=20
 )
 
 viewinfo = dict(
@@ -40,11 +40,28 @@ class ListCollectionsView(ListView):
         return extra
 
 
+class RepoSearchView(FacetedSearchView):
+    def extra_context(self, *args, **kwargs):
+        extra = super(RepoSearchView, self).extra_context(*args, **kwargs)
+        extra["query"] = self.query
+        extra["facet_names"] = dict(
+                country="Country"
+        )
+
+        # sort counts, ideally we'd do this in the template
+        if extra.get("facets") and extra.get("facets").get("fields"):
+            for facet in extra["facets"]["fields"].keys():
+                extra["facets"]["fields"][facet].sort(
+                        lambda x, y: cmp(x[0], y[0]))
+        return extra
+
+
 urlpatterns = patterns('',
     #url(r'^/?$', object_list, listinfo, name='repo_list'),
-    url(r'^/?$', FacetedSearchView(
+    url(r'^search/?$', RepoSearchView(
         form_class=FacetedSearchForm, searchqueryset=sqs,
         template="portal/repository_search.html"), name='repo_search'),
+    url(r'^/?$', object_list, listinfo, name='repo_list'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewinfo, name='repo_detail'),
     url(r'^(?P<slug>[-\w]+)/edit/?$', update_object, dict(
             form_class=RepoEditForm

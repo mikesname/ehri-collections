@@ -9,46 +9,46 @@
 {% block body_class %}collections{% endblock %}
 
 {% block subnav %}
-<h2>{% trans "Limit search" %}</h2>
-
-    <!-- Begin date facet -->
-    <div class="facet-list">
-        <h4>{% trans "By Date" %}</h4>
-        <dl>
-            {% for timestr, count in date_facets %}
-                {% with "dates"|facetparam:timestr as param %}
-                    {% with timestr|slice:"4" as year %}
-                        {% include "portal/_item_facet.html" with item=year %}
-                    {% endwith %}
-                {% endwith %}
-            {% endfor %}
-        </dl>
-    </div>
-    <!-- End date facet -->
-
-
-    <!-- Begin faceting. -->
-    <div class="facet-list">
-        {% for attr, pretty in facet_names.items %}
-            {% if facets.fields|getattribute:attr %}
-            <h4>{% trans "By "|add:pretty %}</h4>
+    {% if query %}
+        <h2>{% trans "Limit search" %}</h2>
+        <!-- Begin date facet -->
+        <div class="facet-list">
+            <h4>{% trans "By Date" %}</h4>
             <dl>
-                {% for item, count in facets.fields|getattribute:attr %}
-                    {% with attr|facetparam:item as param %}
-                        {% include "portal/_item_facet.html" %}
+                {% for timestr, count in date_facets %}
+                    {% with "dates"|facetparam:timestr as param %}
+                        {% with timestr|slice:"4" as year %}
+                            {% include "portal/_item_facet.html" with item=year %}
+                        {% endwith %}
                     {% endwith %}
                 {% endfor %}
             </dl>
-            {% endif %}
-        {% endfor %}
-    </div>
-    <!-- End faceting -->
+        </div>
+        <!-- End date facet -->
 
+
+        <!-- Begin faceting. -->
+        <div class="facet-list">
+            {% for attr, pretty in facet_names.items %}
+                {% if facets.fields|getattribute:attr %}
+                <h4>{% trans "By "|add:pretty %}</h4>
+                <dl>
+                    {% for item, count in facets.fields|getattribute:attr %}
+                        {% with attr|facetparam:item as param %}
+                            {% include "portal/_item_facet.html" %}
+                        {% endwith %}
+                    {% endfor %}
+                </dl>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <!-- End faceting -->
+    {% endif %}
 {% endblock %}
 
 {% block body %}
-    <h2>Search Collections</h2>
-    <form method="get" action=".">
+<h2>Search Collections</h2>
+    <form method="get" action="{% url collection_search %}">
             {{ form.q }}
             <input type="submit" value="Search">
 

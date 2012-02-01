@@ -15,7 +15,11 @@
 {% block body %}
 <h1>{{object.name}}</h1>
 
-{{object.general_context|markdown}}
+{% if object.general_context %}
+    {{object.general_context|markdown}}
+{% else %}
+    No information is currently available.
+{% endif %}
 
 {% if object.reproduction_services %}
     {{object.reproduction_services|markdown}}

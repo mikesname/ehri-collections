@@ -3,45 +3,38 @@
 {% load i18n %}
 {% load ifsetting_tag %}
 {% load highlight %}
+{% load getattribute %}
+{% load facetparam %}
 {% block head_title %}{% trans "Repositories" %}{% endblock %}
 
 {% block body_class %}repositories{% endblock %}
 
 {% block subnav %}
-<h2>{% trans "Limit search" %}</h2>
-
-    <!-- Begin faceting. -->
-    <div class="facet-list">
-        {% if facets.fields.country %}
-        <h3>{% trans "By Country" %}</h3>
-            <dl>
-                {# Only list countries with results #}
-                {% for country in facets.fields.country %}
-                {% if country.1 > 0 %}
-                    {% with country.0|urlencode as countrycoded %}
-                        {% with "&selected_facets=country_exact:"|add:countrycoded as cfacet %}
-                            {% if cfacet in request.get_full_path %}
-                            <dd>{{ country.0 }}({{ country.1 }}) <a href="{{request.get_full_path|cut:cfacet}}">[Remove]</a></dd>
-                            {% else %} 
-                            <dd><a href="{{ request.get_full_path }}&amp;selected_facets=country_exact:{{ country.0|urlencode }}">
-                                {{ country.0 }}</a> ({{ country.1 }})</dd>
-                            {% endif %}
+    {% if query %}
+        <h2>{% trans "Limit search" %}</h2>
+        <!-- Begin faceting. -->
+        <div class="facet-list">
+            {% for attr, pretty in facet_names.items %}
+                {% if facets.fields|getattribute:attr %}
+                <h4>{% trans "By "|add:pretty %}</h4>
+                <dl>
+                    {% for item, count in facets.fields|getattribute:attr %}
+                        {% with attr|facetparam:item as param %}
+                            {% include "portal/_item_facet.html" %}
                         {% endwith %}
-                    {% endwith %}
+                    {% endfor %}
+                </dl>
                 {% endif %}
-                {% endfor %}
-            </dl>
-        {% else %}
-        {% endif %}
-    </div>
-    <!-- End faceting -->
-
+            {% endfor %}
+        </div>
+        <!-- End faceting -->
+    {% endif %}
 {% endblock %}
 
 {% block body %}
     <h2>Search Repositories</h2>
 
-    <form method="get" action=".">
+    <form method="get" action="{% url repo_search %}">
             {{ form.q }}
             <input type="submit" value="Search">
 
