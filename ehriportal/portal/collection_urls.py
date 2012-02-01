@@ -2,7 +2,7 @@
 import re
 from datetime import date
 from django.conf.urls.defaults import *
-from django.views.generic.list_detail import object_detail
+from django.views.generic.list_detail import object_detail, object_list
 from django.contrib.auth.decorators import login_required
 from ehriportal.portal import views, models
 
@@ -16,6 +16,11 @@ sqs = SearchQuerySet().models(models.Collection).facet("tags").facet('languages'
         .facet('languages_of_description')
 
 infodict = dict(
+        queryset=models.Collection.objects.all(),
+        paginate_by=20
+)
+
+viewdict = dict(
         queryset=models.Collection.objects.all()
 )
 
@@ -66,6 +71,7 @@ urlpatterns = patterns('',
     url(r'^/?$', CollectionSearchView(
         form_class=DatedSearchForm, searchqueryset=sqs,
         template="portal/collection_search.html"), name='collection_search'),
-    url(r'^(?P<slug>[-\w]+)/?$', object_detail, infodict, name='collection_detail'),
+    url(r'^list/?$', object_list, infodict, name='collection_list'),
+    url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewdict, name='collection_detail'),
 )
 

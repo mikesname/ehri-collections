@@ -1,0 +1,30 @@
+{% extends "subnav_base.html" %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+{% load getattribute %}
+{% load markup %}
+{% load pagination_tags %}
+
+{% block head_title %}{% trans "Repositories" %}{% endblock %}
+
+
+{% block subnav %}
+    {% if repository %}
+        {% include "portal/_repository_info.html" with object=repository %}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    <h2>{{repository.name}}</h2>
+    <h3>{% trans "Collections" %}</h3>
+    <table class="zebra-striped">
+        {% for object in object_list %}
+        <tr>
+            <td><a href="{{object.get_absolute_url}}">{{object.name}}</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% paginate 2 %}
+{% endblock %}
+

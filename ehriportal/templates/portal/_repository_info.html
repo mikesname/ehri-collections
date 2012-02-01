@@ -1,0 +1,17 @@
+<div class="repo_logo">
+{% if object.image %}
+    <img src="{{object.image.url}}" />
+{% else %}
+<img width="200px" height="200px" src="{{STATIC_URL}}img/repo_placeholder.png" />
+{% endif %}
+</div>
+{% for contact in object.contacts.all %}
+    {{contact.format|linebreaks}}
+    <br />
+    Tel: {{contact.telephone}}
+    <br />
+    Fax: {{contact.fax}}
+    <br />
+    Email: {{contact.email}}
+{% endfor %}
+
