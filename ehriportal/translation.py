@@ -12,6 +12,6 @@ class ContactTranslationOptions(TranslationOptions):
             "contact_type",
     )
 
-translator.register(Repository, RepositoryTranslationOptions)
-translator.register(Contact, ContactTranslationOptions)
+#translator.register(Repository, RepositoryTranslationOptions)
+#translator.register(Contact, ContactTranslationOptions)
 

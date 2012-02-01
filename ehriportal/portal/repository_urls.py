@@ -1,7 +1,9 @@
 from django.conf.urls.defaults import *
+from django.forms import ModelForm
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 from django.views.generic.list_detail import object_detail, object_list
+from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required
 from ehriportal.portal import views, models
 
@@ -19,6 +21,10 @@ listinfo = dict(
 viewinfo = dict(
         queryset=models.Repository.objects.all(),
 )
+
+class RepoEditForm(ModelForm):
+    class Meta:
+        model = models.Repository
 
 
 class ListCollectionsView(ListView):
@@ -40,6 +46,9 @@ urlpatterns = patterns('',
         form_class=FacetedSearchForm, searchqueryset=sqs,
         template="portal/repository_search.html"), name='repo_search'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewinfo, name='repo_detail'),
+    url(r'^(?P<slug>[-\w]+)/edit/?$', update_object, dict(
+            form_class=RepoEditForm
+        ), name='repo_edit'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
             ListCollectionsView.as_view(), name='repo_collections'),
 )
