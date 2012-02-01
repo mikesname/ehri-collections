@@ -3,10 +3,10 @@
 from incf.countryutils import data as countrydata
 import babel
 
-def language_name_from_code(code):
+def language_name_from_code(code, locale="en"):
     """Get lang display name."""
     # TODO: Find the correct way to do this
-    return babel.Locale("en").languages.get(code, "")
+    return babel.Locale(locale).languages.get(code, "")
 
 
 def get_country_from_code(code):

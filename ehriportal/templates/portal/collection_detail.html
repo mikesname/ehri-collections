@@ -4,6 +4,7 @@
 {% load ifsetting_tag %}
 {% load getattribute %}
 {% load formatattr %}
+{% load langname %}
 
 {% block head_title %}{{object.name}}{% endblock %}
 
@@ -26,7 +27,29 @@
             </div>
         </div>
         <div class="span4 columns">
+            <h4>{{object.repository.name}}</h4>
             <table class="zebra-striped">
+                <tr>
+                    <td>
+                        {% if object.repository.image %}
+                            <img  src="{{object.repository.image.path}}" />
+                        {% else %}
+                            <img width="100px" height="100px" src="{{STATIC_URL}}img/repo_placeholder.png" />
+                        {% endif %}
+                    </td>
+                    <td>{{object.repository.formated_address}}</td>
+                </td>
+                {% if object.finding_aids|length %}    
+                    <tr>
+                        <td colspan="2">
+                            <strong>{% trans "Languages:" %}</strong>
+                            {% for lang in object.languages %}
+                            <br />
+                            {{ lang|langname }}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
                 {% if object.location_of_copies %}
                     <tr>
                         <td><strong>{% trans "Location:" %}</strong></td><td>{{object.location_of_copies}}</td>
