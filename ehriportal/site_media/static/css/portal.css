@@ -25,5 +25,10 @@
     color: rgb(0, 128, 0);
 }
 
+.result-paginator {
+    text-align: center;
+    margin-top: 3em;
+}
+
 
 
