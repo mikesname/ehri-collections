@@ -1,4 +1,7 @@
 {{ object.repository|default_if_none:"" }}
+{% for othername in object.repository.other_names %}
+    {{ othername }}
+{% endfor %}
 {{ object.access_conditions|default_if_none:"" }}
 {{ object.accruals|default_if_none:"" }}
 {{ object.acquisition|default_if_none:"" }}
