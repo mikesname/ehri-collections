@@ -1,0 +1,19 @@
+{% load highlight %}
+<h5>
+    <a href="{{ result.object.get_absolute_url }}">{{ result.object.name }}</a>
+    <span class="repository-country">[{{ result.object.country|truncatewords:"2" }}]</span>
+</h5>                
+<p>
+{% if result.description %}
+{% highlight result.description with request.GET.q max_length 200 %}
+{% else %}
+    No description available.
+{% endif %}
+{% spaceless %}
+<div class="keywords">
+    {% for kw in result.tags %}{% if forloop.counter0 > 0 %}{{", "}}{% endif %}<a href="#">{{kw}}</a>{% endfor %}
+</div>
+{% endspaceless %}
+</p>
+
+
