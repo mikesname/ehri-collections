@@ -45,6 +45,8 @@ class CollectionIndex(SearchIndex):
     languages_of_description = MultiValueField(model_attr='languages_of_description', 
             faceted=True)
     text = CharField(document=True, use_template=True, stored=False)
+    ngram = EdgeNgramField(use_template=True, template_name="search/indexes/portal/collection_text.txt",
+            stored=False)
     pub_date = DateTimeField(model_attr='created_on')
 
     def prepare_languages(self, desc):
