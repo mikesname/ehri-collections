@@ -1,5 +1,4 @@
-{{ object.identifier|default_if_none:"" }}
-{{ object.authorized_form_of_name|default_if_none:"" }}
+{{ object.name|default_if_none:"" }}
 {{ object.lod|default_if_none:"" }}
 {{ object.type_of_entity|default_if_none:"" }}
 {{ object.access_conditions|default_if_none:"" }}
@@ -27,6 +26,7 @@
 {% for contact in object.contacts.all %}
     {{ contact.street_address|default_if_none:"" }}
     {{ contact.city|default_if_none:"" }}
+    {{ contact.postal_code|default_if_none:"" }}
     {{ contact.region|default_if_none:"" }}
 {% endfor %}
 

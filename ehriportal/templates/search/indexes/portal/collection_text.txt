@@ -1,3 +1,4 @@
+{{ object.name|default_if_none:"" }}
 {{ object.repository|default_if_none:"" }}
 {% for othername in object.repository.other_names %}
     {{ othername }}
