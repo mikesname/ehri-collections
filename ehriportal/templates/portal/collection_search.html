@@ -10,6 +10,7 @@
 
 {% block body_class %}collections{% endblock %}
 
+
 {% block facets %}
     <!-- Begin date facet -->
     <div class="facet-list">
@@ -48,12 +49,12 @@
 {% block resultlist %}
     {% for result in page.object_list %}
         <h5>
-            <a href="{{ result.uri }}">{{ result.name }}</a>
+            <a title="{{result.name}}" href="{{ result.uri }}">{{ result.name|truncatewords:9 }}</a>
             <span class="collection-dates">
                 <span class="result-date">{{result.date_range}}</span>
             </span>
             <span class="collection-repo">
-                [<a href="{{result.repository_uri}}">{{result.repository}}</a>]
+                <a href="{{result.repository_uri}}">{{result.repository}}</a>
             </span>
         </h5>                
         <p>

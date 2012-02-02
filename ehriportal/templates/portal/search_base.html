@@ -14,10 +14,10 @@
     <div class="container">
         {% include "_messages.html" %}
         <div class="row">
-            <div class="span4 columns">&nbsp;</div>
+            <div class="span4 columns">{% block page_heading %}&nbsp;{% endblock %}</div>
             <div class="span12 columns">
                 <form method="get" action="{{request.path}}">
-                        {{ form.q }}
+                    <input type="text" name="q" id="id_q" value="{{query}}" class="span8" />
                         <input type="submit" value="Search">
                 </form>
             </div>
@@ -45,7 +45,7 @@
                 {% endblock %}
             </div>
             <div class="span12 columns">
-                {% if suggestion %}
+                {% if query and suggestion %}
                     <h5>Did you mean <a href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?</h5>
                 {% endif %}
                 {% if paginator.count %}

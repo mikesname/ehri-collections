@@ -1,7 +1,11 @@
 {% load highlight %}
 <h5>
-    <a href="{{ result.uri }}">{{ result.name }}</a>
-    <span class="repository-country"></span>
+    <a title="{{result.name}}" href="{{ result.uri }}">{{ result.name|truncatewords:10 }}</a>
+    <span class="repository-country">
+        <a href="{% url repo_search %}?selected_facets=country_exact:{{result.country|urlencode}}">
+            {{ result.country|truncatewords:2 }}
+        </a>
+    </span>
 </h5>                
 <p>
 {% if result.description %}

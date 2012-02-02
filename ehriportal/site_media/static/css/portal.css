@@ -11,9 +11,16 @@
     color: #063;
 }
 
-.collection-repo, .collection-repo a {
+.collection-repo a {
+    padding-left: 0.2em;
     color: #777;
-    font-weight: normal;
+    font-weight: lighter;
+}
+
+.repository-country a {
+    padding-left: 0.2em;
+    color: #777;
+    font-weight: lighter;
 }
 
 .remove-filter:hover {
