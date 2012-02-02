@@ -8,14 +8,13 @@ from incf.countryutils import data as countrydata
 
 
 class RepositoryIndex(SearchIndex):
-    name = CharField(model_attr='name', default=True)
+    name = CharField(model_attr='name', default=True, boost=1.1)
     uri = CharField(model_attr='get_absolute_url', stored=True, indexed=False, default=True)
     description = CharField(model_attr='general_context', null=True)
     other_names = MultiValueField(model_attr='other_names')
-    country = CharField(model_attr='country', faceted=True, null=True)
+    country = CharField(model_attr='country', faceted=True, null=True, stored=True)
     text = CharField(document=True, use_template=True, stored=False)
     pub_date = DateTimeField(model_attr='created_on')
-
     suggestions = CharField()
 
     def prepare(self, obj):
@@ -38,7 +37,7 @@ class FacetMultiValueDateField(FacetMultiValueField):
 
 
 class CollectionIndex(SearchIndex):
-    name = CharField(model_attr='name', default=True)
+    name = CharField(model_attr='name', default=True, boost=1.1)
     uri = CharField(model_attr='get_absolute_url', default=True, indexed=False, stored=True)
     description = CharField(model_attr='scope_and_content', null=True)
     other_names = MultiValueField(model_attr='other_names')

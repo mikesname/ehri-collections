@@ -11,7 +11,9 @@ from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet, SQ
 from haystack.backends import BaseSearchQuery
 
-sqs = SearchQuerySet().models(models.Collection).facet("tags").facet('languages')\
+sqs = SearchQuerySet()\
+        .models(models.Collection)\
+        .facet("tags").facet('languages')\
         .facet("location_of_materials")\
         .facet('languages_of_description')
 
@@ -29,9 +31,8 @@ class DatedSearchForm(FacetedSearchForm):
     start_date = date(1933,1,1)
     end_date = date(1946,1,1)
 
-    def search(self):
+    def search(self):        
         sqs = super(DatedSearchForm, self).search()
-
         sqs = sqs.date_facet("dates", self.start_date, self.end_date, 
                     gap_by="year")
 
