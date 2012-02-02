@@ -16,6 +16,13 @@ class RepositoryIndex(SearchIndex):
     text = CharField(document=True, use_template=True, stored=False)
     pub_date = DateTimeField(model_attr='created_on')
 
+    suggestions = CharField()
+
+    def prepare(self, obj):
+        prepared_data = super(RepositoryIndex, self).prepare(obj)
+        prepared_data['suggestions'] = prepared_data['text']
+        return prepared_data
+
     def index_queryset(self):
         """Used when the entire index for model is updated."""
         return Repository.objects.filter(created_on__lte=datetime.datetime.now())
@@ -52,6 +59,12 @@ class CollectionIndex(SearchIndex):
     #ngram = EdgeNgramField(use_template=True, template_name="search/indexes/portal/collection_text.txt",
     #        stored=False)
     pub_date = DateTimeField(model_attr='created_on')
+    suggestions = CharField()
+
+    def prepare(self, obj):
+        prepared_data = super(CollectionIndex, self).prepare(obj)
+        prepared_data['suggestions'] = prepared_data['text']
+        return prepared_data
 
     def prepare_languages(self, desc):
         """Get pretty name for language."""

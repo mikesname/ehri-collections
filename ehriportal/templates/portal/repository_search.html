@@ -1,4 +1,4 @@
-{% extends 'subnav_base.html' %}
+{% extends 'portal/search_base.html' %}
 
 {% load i18n %}
 {% load ifsetting_tag %}
@@ -10,49 +10,29 @@
 
 {% block body_class %}repositories{% endblock %}
 
-{% block subnav %}
-    {% if paginator.count %}
-        <h2>{% trans "Limit search" %}</h2>
-        <!-- Begin faceting. -->
-        <div class="facet-list">
-            {% for attr, pretty in facet_names.items %}
-                {% if facets.fields|getattribute:attr %}
-                <h4>{% trans "By "|add:pretty %}</h4>
-                <dl>
-                    {% for item, count in facets.fields|getattribute:attr %}
-                        {% with attr|facetparam:item as param %}
-                            {% include "portal/_item_facet.html" %}
-                        {% endwith %}
-                    {% endfor %}
-                </dl>
-                {% endif %}
-            {% endfor %}
-        </div>
-        <!-- End faceting -->
-    {% endif %}
+{% block facets %}
+    <!-- Begin faceting. -->
+    <div class="facet-list">
+        {% for attr, pretty in facet_names.items %}
+            {% if facets.fields|getattribute:attr %}
+            <h4>{% trans "By "|add:pretty %}</h4>
+            <dl>
+                {% for item, count in facets.fields|getattribute:attr %}
+                    {% with attr|facetparam:item as param %}
+                        {% include "portal/_item_facet.html" %}
+                    {% endwith %}
+                {% endfor %}
+            </dl>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <!-- End faceting -->
 {% endblock %}
 
-{% block body %}
-    <h2>Search Repositories</h2>
-    
-    <form method="get" action="{% url repo_search %}">
-            {{ form.q }}
-            <input type="submit" value="Search">
-
-        {% if paginator.count %}
-            <h3>{{paginator.count}} Result{{paginator.count|pluralize}}</h3>
-
-            {% for result in page.object_list %}
-                {% include "portal/_repository_search_result.html" %}
-            {% empty %}
-                <p>No results found.</p>
-            {% endfor %}
-
-            {% with page as page_obj %}
-                {% paginate 2 %}
-            {% endwith %}
-        {% else %}
-            {# Show some example queries to run, maybe query syntax, something else? #}
-        {% endif %}
-    </form>
+{% block resultlist %}
+    {% for result in page.object_list %}
+        {% include "portal/_repository_search_result.html" %}
+    {% empty %}
+        <p>No results found.</p>
+    {% endfor %}
 {% endblock %}
