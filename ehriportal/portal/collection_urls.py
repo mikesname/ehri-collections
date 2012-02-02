@@ -43,10 +43,6 @@ class DatedSearchForm(FacetedSearchForm):
         if self.load_all:
             sqs = sqs.load_all()
         return sqs
-    #    sqs = self.searchqueryset.auto_query("*")        
-    #    if self.load_all:
-    #        sqs = sqs.load_all()        
-    #    return sqs
 
 
 class CollectionSearchView(FacetedSearchView):
@@ -75,7 +71,6 @@ class CollectionSearchView(FacetedSearchView):
                     date_facets.append((facet, int(num)))
             date_facets.sort(lambda x, y: cmp(x[0], y[0]))
             extra["date_facets"] = date_facets
-        
         return extra
 
 
@@ -83,6 +78,9 @@ urlpatterns = patterns('',
     url(r'^search/?$', CollectionSearchView(
         form_class=DatedSearchForm, searchqueryset=sqs,
         template="portal/collection_search.html"), name='collection_search'),
+    #url(r'^search/?$', FacetedSearchView(
+    #    form_class=FacetedSearchForm, searchqueryset=sqs,
+    #    template="portal/collection_search.html"), name='collection_search'),
     url(r'^/?$', object_list, infolist, name='collection_list'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewdict, name='collection_detail'),
 )

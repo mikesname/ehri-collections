@@ -27,18 +27,19 @@
             </div>
         </div>
         <div class="span4 columns">
-            <h4>{{object.repository.name}}</h4>
+            <h4>
+                <a href="{%url repo_detail object.repository.slug %}">{{object.repository.name}}</a>
+            </h4>
+            <div class="repo-image">
+                <a href="{%url repo_detail object.repository.slug %}">
+                {% if object.repository.image %}
+                    <img  src="{{object.repository.image.path}}" />
+                {% else %}
+                    <img width="100px" height="100px" src="{{STATIC_URL}}img/repo_placeholder.png" />
+                {% endif %}
+                </a>
+            </div>
             <table class="zebra-striped">
-                <tr>
-                    <td>
-                        {% if object.repository.image %}
-                            <img  src="{{object.repository.image.path}}" />
-                        {% else %}
-                            <img width="100px" height="100px" src="{{STATIC_URL}}img/repo_placeholder.png" />
-                        {% endif %}
-                    </td>
-                    <td>{{object.repository.formated_address}}</td>
-                </td>
                 {% if object.dates.count %}    
                     <tr>
                         <td>

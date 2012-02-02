@@ -2,6 +2,7 @@
 Post Repos to a Solr engine.
 """
 
+import sys
 from optparse import make_option
 import unicodedata
 import urllib
@@ -76,9 +77,9 @@ class Command(BaseCommand):
 
         # random selection for now
         repos = []
-        repos.extend(self.session.query(models.Repository)\
-                .filter(models.Repository.identifier=='ehri1691None').all())
-        repos.extend(self.session.query(models.Repository).all()[50:150])
+        #repos.extend(self.session.query(models.Repository)\
+        #        .filter(models.Repository.identifier=='ehri1691None').all())
+        repos.extend(self.session.query(models.Repository).all())
         self.stdout.write("Adding %s repos\n" % len(repos))
         for repo in repos:
             if not repo.identifier:
@@ -92,7 +93,9 @@ class Command(BaseCommand):
         """Import individual repository."""
 
         i18n = repo.get_i18n()
-
+        if not i18n.get("authorized_form_of_name"):
+            self.stderr.write("UNABLE TO IMPORT: %s, no authorized name\n" % repo.identifier)
+            return
         djrepo = DjRepository(
             identifier=repo.identifier,
             # TODO contacts, maintanence notes
@@ -154,6 +157,7 @@ class Command(BaseCommand):
 
     def import_icaatom_description(self, djrepo, desc):
         """Import an archival description/information object."""
+        sys.stderr.write("Importing %s collection: %s\n" % (djrepo.name, desc.identifier))
         i18n = desc.get_i18n()
         djdesc = Collection(
                 repository=djrepo,
@@ -185,7 +189,8 @@ class Command(BaseCommand):
         for prop in desc.properties:
             if prop.name == "language" or prop.name == "languageOfCollection":
                 vals = phpserialize.loads(prop.get_i18n()["value"])
-                for index, val in vals.iteritems():
-                    djdesc.set_property(prop.name, val)
+                if vals:
+                    for index, val in vals.iteritems():
+                        djdesc.set_property(prop.name, val)
 
 

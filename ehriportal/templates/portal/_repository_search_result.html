@@ -1,7 +1,7 @@
 {% load highlight %}
 <h5>
-    <a href="{{ result.object.get_absolute_url }}">{{ result.object.name }}</a>
-    <span class="repository-country">[{{ result.object.country|truncatewords:"2" }}]</span>
+    <a href="{{ result.uri }}">{{ result.name }}</a>
+    <span class="repository-country"></span>
 </h5>                
 <p>
 {% if result.description %}
@@ -9,11 +9,6 @@
 {% else %}
     No description available.
 {% endif %}
-{% spaceless %}
-<div class="keywords">
-    {% for kw in result.tags %}{% if forloop.counter0 > 0 %}{{", "}}{% endif %}<a href="#">{{kw}}</a>{% endfor %}
-</div>
-{% endspaceless %}
 </p>
 
 

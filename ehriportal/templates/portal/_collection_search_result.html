@@ -1,6 +1,6 @@
 {% load highlight %}
 <h5>
-    <a href="{{ result.object.get_absolute_url }}">{{ result.object.name }}</a>
+    <a href="{{ result.object.get_absolute_url }}">{{ result.name }}</a>
     <span class="collection-dates">
         {% for date in result.object.dates.all %}
         <span class="result-date">{% if forloop.counter0 > 0 %}{{", "}}{% endif %}{{date}}</span>
@@ -11,10 +11,14 @@
     </span>
 </h5>                
 <p>
-{% highlight result.description with request.GET.q max_length 200 %}
+{% if query %}
+    {% highlight result.description with request.GET.q max_length 200 %}
+{% else %}
+    {{ result.description|truncatewords:25 }}
+{% endif %}
 {% spaceless %}
 <div class="keywords">
-    {% for kw in result.tags %}{% if forloop.counter0 > 0 %}{{", "}}{% endif %}<a href="#">{{kw}}</a>{% endfor %}
+    {#% for kw in result.tags %}{% if forloop.counter0 > 0 %}{{", "}}{% endif %}<a href="#">{{kw}}</a>{% endfor %#}
 </div>
 {% endspaceless %}
 </p>

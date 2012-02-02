@@ -9,8 +9,8 @@
 
 {% block nav %}    
     <ul>{% spaceless %}
-        <li id="tab_collections"><a href="{% url collection_list %}">{% trans "Collections" %}</a></li>
-        <li id="tab_repositories"><a href="{% url repo_list %}">{% trans "Repositories" %}</a></li>
+        <li id="tab_collections"><a href="{% url collection_search %}">{% trans "Collections" %}</a></li>
+        <li id="tab_repositories"><a href="{% url repo_search %}">{% trans "Repositories" %}</a></li>
         {% if user.is_authenticated %}
             <li id="tab_profile"><a href="{% url profile_detail user.username %}">{% trans "Profile" %}</a></li>
         {% endif %}

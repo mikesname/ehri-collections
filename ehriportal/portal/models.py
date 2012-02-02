@@ -301,6 +301,15 @@ class Collection(Resource):
         return [datetime.date(y,1,1) for y in \
                 range(self.start_date.year, self.end_date.year + 1)]
         
+    @property
+    def date_range_string(self):
+        """List of years this collection covers."""
+        dates = self.date_range
+        if not dates:
+            return None
+        if len(dates) == 1:
+            return str(self.start_date.year)
+        return "%s-%s" % (dates[0].year, dates[-1].year)
 
     @models.permalink
     def get_absolute_url(self):

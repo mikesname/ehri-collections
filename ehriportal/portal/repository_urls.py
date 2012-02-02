@@ -39,6 +39,18 @@ class ListCollectionsView(ListView):
         extra["repository"] = self.repository
         return extra
 
+class RepoSearchForm(FacetedSearchForm):
+    def no_query_found(self):
+        print "No query found!"
+        """Show all results when not given a query."""
+        sqs = self.searchqueryset.all()
+        print sqs
+        if self.load_all:
+            print "Loading all"
+            sqs = sqs.load_all()
+        return sqs
+
+
 
 class RepoSearchView(FacetedSearchView):
     def extra_context(self, *args, **kwargs):
@@ -55,11 +67,18 @@ class RepoSearchView(FacetedSearchView):
                         lambda x, y: cmp(x[0], y[0]))
         return extra
 
+    def build_page(self, *args, **kwargs):
+        res = super(RepoSearchView, self).build_page(*args, **kwargs)
+        print "RESULTS %s" % self.results
+        print "BUILT PAGE: %s %s" % res
+        print "COUNT: %s" % res[0].count
+        return res
+
 
 urlpatterns = patterns('',
     #url(r'^/?$', object_list, listinfo, name='repo_list'),
     url(r'^search/?$', RepoSearchView(
-        form_class=FacetedSearchForm, searchqueryset=sqs,
+        form_class=RepoSearchForm, searchqueryset=sqs,
         template="portal/repository_search.html"), name='repo_search'),
     url(r'^/?$', object_list, listinfo, name='repo_list'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewinfo, name='repo_detail'),
