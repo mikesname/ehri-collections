@@ -13,7 +13,6 @@
         <li id="tab_repositories"><a href="{% url repo_list %}">{% trans "Repositories" %}</a></li>
         {% if user.is_authenticated %}
             <li id="tab_profile"><a href="{% url profile_detail user.username %}">{% trans "Profile" %}</a></li>
-            <li id="tab_notices"><a href="{% url notification_notices %}">{% trans "Notices" %}{% if notice_unseen_count %} ({{ notice_unseen_count }}){% endif %}</a></li>
         {% endif %}
     {% endspaceless %}</ul>
 {% endblock %}
