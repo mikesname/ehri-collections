@@ -11,22 +11,7 @@
 {% block body_class %}repositories{% endblock %}
 
 {% block facets %}
-    <!-- Begin faceting. -->
-    <div class="facet-list">
-        {% for attr, pretty in facet_names.items %}
-            {% if facets.fields|getattribute:attr %}
-            <h4>{% trans "By "|add:pretty %}</h4>
-            <dl>
-                {% for item, count in facets.fields|getattribute:attr %}
-                    {% with attr|facetparam:item as param %}
-                        {% include "portal/_item_facet.html" %}
-                    {% endwith %}
-                {% endfor %}
-            </dl>
-            {% endif %}
-        {% endfor %}
-    </div>
-    <!-- End faceting -->
+    {% include "portal/_facet_list.html" %}
 {% endblock %}
 
 {% block resultlist %}

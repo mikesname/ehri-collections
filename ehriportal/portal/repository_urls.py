@@ -5,13 +5,15 @@ from django.views.generic import ListView
 from django.views.generic.list_detail import object_detail, object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required
-from ehriportal.portal import views, models
+from ehriportal.portal import views, forms, models
 
-from haystack.views import FacetedSearchView
-from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
 
 sqs = SearchQuerySet().models(models.Repository).facet('country')
+
+FACETS = dict(
+        country="Country"
+)
 
 listinfo = dict(
         queryset=models.Repository.objects.all().order_by("name"),
@@ -39,46 +41,12 @@ class ListCollectionsView(ListView):
         extra["repository"] = self.repository
         return extra
 
-class RepoSearchForm(FacetedSearchForm):
-    def no_query_found(self):
-        print "No query found!"
-        """Show all results when not given a query."""
-        sqs = self.searchqueryset.all()
-        print sqs
-        if self.load_all:
-            print "Loading all"
-            sqs = sqs.load_all()
-        return sqs
-
-
-
-class RepoSearchView(FacetedSearchView):
-    def extra_context(self, *args, **kwargs):
-        extra = super(RepoSearchView, self).extra_context(*args, **kwargs)
-        extra["query"] = self.query
-        extra["facet_names"] = dict(
-                country="Country"
-        )
-
-        # sort counts, ideally we'd do this in the template
-        if extra.get("facets") and extra.get("facets").get("fields"):
-            for facet in extra["facets"]["fields"].keys():
-                extra["facets"]["fields"][facet].sort(
-                        lambda x, y: cmp(x[0], y[0]))
-        return extra
-
-    def build_page(self, *args, **kwargs):
-        res = super(RepoSearchView, self).build_page(*args, **kwargs)
-        print "RESULTS %s" % self.results
-        print "BUILT PAGE: %s %s" % res
-        print "COUNT: %s" % res[0].count
-        return res
 
 
 urlpatterns = patterns('',
     #url(r'^/?$', object_list, listinfo, name='repo_list'),
-    url(r'^search/?$', RepoSearchView(
-        form_class=RepoSearchForm, searchqueryset=sqs,
+    url(r'^search/?$', views.PortalSearchView(
+        apply_facets=FACETS, form_class=forms.PortalSearchForm, searchqueryset=sqs,
         template="portal/repository_search.html"), name='repo_search'),
     url(r'^/?$', object_list, listinfo, name='repo_list'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewinfo, name='repo_detail'),

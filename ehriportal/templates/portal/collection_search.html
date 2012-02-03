@@ -2,8 +2,6 @@
 
 {% load i18n %}
 {% load ifsetting_tag %}
-{% load getattribute %}
-{% load facetparam %}
 {% load pagination_tags %}
 {% load highlight %}
 {% load addparam %}
@@ -13,36 +11,7 @@
 
 
 {% block facets %}
-    <!-- Begin faceting. -->
-    <div class="facet-list">
-        {% for facetclass in facet_classes %}
-            {% if facetclass.facets|length %}
-            <h4>{% trans "By "|add:facetclass.prettyname %}</h4>
-            <dl>
-                {% for facet in facetclass.sorted_by_name %}
-                    {% if facet.count > 0 %}
-                        {% with facet.facet_param as param %}
-                        {% if facet.filter_name in narrowed_with %}
-                            <dd class="selected-filter">{{ facet.prettyname }} ({{ facet.count }})
-                            <a class="remove-filter"
-                                href="{{request.get_full_path|removeparam:param}}">[Remove]</a>
-                            </dd>
-                        {% else %} 
-                            <dd>
-                            <a href="{{ request.get_full_path|addparam:param}}">
-                                {{ facet.prettyname }}
-                            </a> ({{ facet.count }})
-                            </dd>
-                            {% endif %}
-                        {% endwith %}
-                    {% endif %}
-
-                {% endfor %}
-            </dl>
-            {% endif %}
-        {% endfor %}
-    </div>
-    <!-- End faceting -->
+    {% include "portal/_facet_list.html" %}
 {% endblock %}
 
 {% block resultlist %}
