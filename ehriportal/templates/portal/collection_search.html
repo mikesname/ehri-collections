@@ -6,6 +6,7 @@
 {% load facetparam %}
 {% load pagination_tags %}
 {% load highlight %}
+{% load addparam %}
 {% block head_title %}{% trans "Search Collections" %}{% endblock %}
 
 {% block body_class %}collections{% endblock %}
@@ -16,10 +17,20 @@
     <div class="facet-list">
         <h4>{% trans "By Date" %}</h4>
         <dl>
-            {% for timestr, count in date_facets %}
-                {% with "dates"|facetparam:timestr as param %}
-                    {% with timestr|slice:"4" as year %}
-                        {% include "portal/_item_facet.html" with item=year %}
+            {% for qfacet in query_facets %}
+                {% with "dates"|facetparam:qfacet.facet as param %}
+                    {% with qfacet.from|slice:"4" as item %}
+                        {% if qfacet.count > 0 %}
+                            {% if param in request.get_full_path %}
+                                <dd class="selected-filter">{{ qfacet.str }} ({{ qfacet.count }})
+                                    <a class="remove-filter" href="{{request.get_full_path|removeparam:param}}">[Remove]</a>
+                                </dd>
+                            {% else %} 
+                                <dd>
+                                    <a href="{{ request.get_full_path|addparam:param}}">{{ qfacet.str }}</a> ({{ qfacet.count }})
+                                </dd>
+                            {% endif %}
+                        {% endif %}
                     {% endwith %}
                 {% endwith %}
             {% endfor %}

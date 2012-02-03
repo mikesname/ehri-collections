@@ -1,6 +1,7 @@
 
 import re
-from datetime import date
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from django.conf.urls.defaults import *
 from django.views.generic.list_detail import object_detail, object_list
 from django.contrib.auth.decorators import login_required
@@ -27,17 +28,50 @@ viewdict = dict(
 )
 
 
+# Crime against programming
+DATEMATH = re.compile("\[(?:(?P<from>\d{4})|(\*))[\s-].*?TO (?:(?P<to>\d{4})|(\*)).*?\]")
+
+
 class DatedSearchForm(FacetedSearchForm):
-    start_date = date(1933,1,1)
-    end_date = date(1946,1,1)
+    def search(self):
+        """Override FacetedSearchForm to not quote ranged facets."""
 
     def search(self):        
-        sqs = super(DatedSearchForm, self).search()
-        sqs = sqs.date_facet("dates", self.start_date, self.end_date, 
-                    gap_by="year")
+        datemarks = [
+                datetime(1933,1,1),
+                datetime(1939,1,1),
+                datetime(1940,1,1),
+                datetime(1941,1,1),
+                datetime(1942,1,1),
+                datetime(1943,1,1),
+                datetime(1944,1,1),
+                datetime(1945,1,1),
+                datetime(1946,1,1),
+        ]
 
-        sqs  = sqs.query_facet("start_date", "[* TO %s]" % self.start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
-        sqs  = sqs.query_facet("end_date", "[%s TO *]" % self.end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        sqs = super(FacetedSearchForm, self).search()
+        # We need to process each facet to ensure that the field name and the
+        # value are quoted correctly and separately:
+        for facet in self.selected_facets:
+            if ":" not in facet:
+                continue
+            field, value = facet.split(":", 1)
+            # FIXME: This part overrides the base class so that
+            # facet values that match a date math string are NOT
+            # quoted, which screws them up.  This is unfortunate 
+            # and a better way needs to be found
+            if value:
+                keyval = u'%s:"%s"' % (field, sqs.query.clean(value))
+                if DATEMATH.match(value):
+                    keyval = u'%s:%s' % (field, value)
+                sqs = sqs.narrow(keyval)
+        
+        # TODO: Fix having to add the 'Z' to the time string
+        sqs = sqs.query_facet("dates", "[* TO %sZ]" % datemarks[0].isoformat())
+        for mark in range(len(datemarks) - 1):
+            sqs = sqs.query_facet("dates", "[%sZ TO %sZ]" % (
+                datemarks[mark].isoformat(), datemarks[mark+1].isoformat()))
+        sqs = sqs.query_facet("dates", "[%sZ TO *]" % datemarks[-1].isoformat())        
 
         return sqs
 
@@ -66,17 +100,31 @@ class CollectionSearchView(FacetedSearchView):
                 extra["facets"]["fields"][facet].sort(
                         lambda x, y: cmp(x[0], y[0]))
 
-        # extract the actual date facets for easy listing
-        if extra.get("facets") and extra.get("facets").get("dates"):
-            date_facets = []
-            for facet, num in extra["facets"]["dates"]["dates"].iteritems():
-                mf = re.match("^(?P<year>\d{4})-\d{2}-\d{2}.*", facet)
+        # this is oh so gross at the moment. Now I have two problems...
+        dmatch = re.compile("dates:(?P<facet>" + DATEMATH.pattern + ")")
+        if extra.get("facets") and extra.get("facets").get("queries"):
+            query_facets = []
+            for facet, num in extra["facets"]["queries"].iteritems():
+                mf = dmatch.match(facet)
                 if mf:
-                    date_facets.append((facet, int(num)))
-            date_facets.sort(lambda x, y: cmp(x[0], y[0]))
-            extra["date_facets"] = date_facets
-        print extra["facets"]["queries"]
+                    query_facets.append({
+                        "facet": mf.group("facet"),
+                        "count": int(num),
+                        "from":  mf.group("from"),
+                        "to"  :  mf.group("to")
+                    })
+            extra["query_facets"] = sorted(query_facets, key=lambda k: k["from"])
+            # make pretty strings for display of glob facets
+            for i in range(len(extra["query_facets"])):
+                f = extra["query_facets"][i]
+                s = "%s-%s" % (f["from"], f["to"])
+                if f["from"] is None:
+                    s = "Before %s" % f["to"]
+                elif f["to"] is None:
+                    s = "Since %s" % f["from"]
+                extra["query_facets"][i]["str"] = s
         return extra
+
 
 
 urlpatterns = patterns('',
