@@ -36,6 +36,9 @@ class DatedSearchForm(FacetedSearchForm):
         sqs = sqs.date_facet("dates", self.start_date, self.end_date, 
                     gap_by="year")
 
+        sqs  = sqs.query_facet("start_date", "[* TO %s]" % self.start_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        sqs  = sqs.query_facet("end_date", "[%s TO *]" % self.end_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+
         return sqs
 
     def no_query_found(self):
@@ -72,6 +75,7 @@ class CollectionSearchView(FacetedSearchView):
                     date_facets.append((facet, int(num)))
             date_facets.sort(lambda x, y: cmp(x[0], y[0]))
             extra["date_facets"] = date_facets
+        print extra["facets"]["queries"]
         return extra
 
 
