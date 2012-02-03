@@ -55,14 +55,12 @@ class PortalSearchView(FacetedSearchView):
 
     def extra_context(self, *args, **kwargs):
         extra = super(PortalSearchView, self).extra_context(*args, **kwargs)
-        extra["query"] = self.query
 
         # we need to process out facets in a way that makes it easy to
         # render them without too much horror in the template.
         extra["facet_names"] = self.apply_facets
 
         facetclasses = []
-
         # this is oh so gross at the moment. Now I have two problems...
         # This regexp matches query facets with the DATE pattern:
         # field:[<DATE> TO <DATE>]
@@ -99,5 +97,17 @@ class PortalSearchView(FacetedSearchView):
         extra["facet_classes"] = facetclasses
         return extra
 
+
+class PaginatedFacetView(PortalSearchView):
+
+    # MASSIVE HACK: SearchView is broken WRT switching
+    # templates in response to request params, such as
+    # whether or not it's an Ajax request.
+    # So overriding __call__ to fix this.
+    def __call__(self, request):
+        if request.is_ajax():
+            self.template = "portal/_expand_facet_list.html"
+        self.template = "portal/facets.html"
+        return super(PaginatedFacetView, self).__call__(request)
 
 

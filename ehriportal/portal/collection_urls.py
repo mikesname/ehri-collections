@@ -53,6 +53,10 @@ urlpatterns = patterns('',
     url(r'^search/?$', views.PortalSearchView(
         apply_facets=FACETS, form_class=forms.PortalSearchForm, searchqueryset=sqs,
         template="portal/collection_search.html"), name='collection_search'),
+    url(r'^facets/?$', views.PaginatedFacetView(
+        apply_facets=FACETS, form_class=forms.PortalSearchForm,
+        searchqueryset=sqs),
+        name='collection_facets'),
     #url(r'^search/?$', FacetedSearchView(
     #    form_class=FacetedSearchForm, searchqueryset=sqs,
     #    template="portal/collection_search.html"), name='collection_search'),
