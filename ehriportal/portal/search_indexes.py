@@ -27,6 +27,15 @@ class RepositoryIndex(SearchIndex):
         return Repository.objects.filter(created_on__lte=datetime.datetime.now())
 
 
+class MultiValueIntegerField(MultiValueField):
+    """Multi-valued Int field."""
+    field_type = "integer"
+
+class FacetMultiValueIntegerField(FacetMultiValueField):
+    """Multi-valued Int field."""
+    field_type = "integer"
+
+
 class MultiValueDateField(MultiValueField):
     """Multi-valued date field."""
     field_type = "date"
@@ -48,6 +57,7 @@ class CollectionIndex(SearchIndex):
     languages = MultiValueField(model_attr='languages', faceted=True)
     tags = MultiValueField(model_attr='tag_list', faceted=True)
     start_date = DateField(model_attr='start_date', faceted=True, null=True)
+    years = MultiValueIntegerField(model_attr='date_range', faceted=True, null=True)
     dates = MultiValueDateField(model_attr='date_range', null=True)
     dates_exact = FacetMultiValueDateField(model_attr='date_range', null=True)
     date_range = CharField(model_attr='date_range_string', stored=True, indexed=False, null=True)
@@ -76,6 +86,10 @@ class CollectionIndex(SearchIndex):
     def index_queryset(self):
         """Used when the entire index for model is updated."""
         return Collection.objects.filter(created_on__lte=datetime.datetime.now())
+
+    def prepare_years(self, desc):
+        """Turn dates into an integer for year."""
+        return [d.year for d in desc.date_range]
 
 
 site.register(Collection, CollectionIndex)
