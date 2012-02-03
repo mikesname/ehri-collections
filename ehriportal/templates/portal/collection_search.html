@@ -13,42 +13,30 @@
 
 
 {% block facets %}
-    <!-- Begin date facet -->
-    <div class="facet-list">
-        <h4>{% trans "By Date" %}</h4>
-        <dl>
-            {% for qfacet in query_facets %}
-                {% with "dates"|facetparam:qfacet.facet as param %}
-                    {% with qfacet.from|slice:"4" as item %}
-                        {% if qfacet.count > 0 %}
-                            {% if param in request.get_full_path %}
-                                <dd class="selected-filter">{{ qfacet.str }} ({{ qfacet.count }})
-                                    <a class="remove-filter" href="{{request.get_full_path|removeparam:param}}">[Remove]</a>
-                                </dd>
-                            {% else %} 
-                                <dd>
-                                    <a href="{{ request.get_full_path|addparam:param}}">{{ qfacet.str }}</a> ({{ qfacet.count }})
-                                </dd>
-                            {% endif %}
-                        {% endif %}
-                    {% endwith %}
-                {% endwith %}
-            {% endfor %}
-        </dl>
-    </div>
-    <!-- End date facet -->
-
-
     <!-- Begin faceting. -->
     <div class="facet-list">
-        {% for attr, pretty in facet_names.items %}
-            {% if facets.fields|getattribute:attr %}
-            <h4>{% trans "By "|add:pretty %}</h4>
+        {% for facetclass in facet_classes %}
+            {% if facetclass.facets|length %}
+            <h4>{% trans "By "|add:facetclass.prettyname %}</h4>
             <dl>
-                {% for item, count in facets.fields|getattribute:attr %}
-                    {% with attr|facetparam:item as param %}
-                        {% include "portal/_item_facet.html" %}
-                    {% endwith %}
+                {% for facet in facetclass.sorted_by_name %}
+                    {% if facet.count > 0 %}
+                        {% with facet.facet_param as param %}
+                        {% if facet.filter_name in narrowed_with %}
+                            <dd class="selected-filter">{{ facet.prettyname }} ({{ facet.count }})
+                            <a class="remove-filter"
+                                href="{{request.get_full_path|removeparam:param}}">[Remove]</a>
+                            </dd>
+                        {% else %} 
+                            <dd>
+                            <a href="{{ request.get_full_path|addparam:param}}">
+                                {{ facet.prettyname }}
+                            </a> ({{ facet.count }})
+                            </dd>
+                            {% endif %}
+                        {% endwith %}
+                    {% endif %}
+
                 {% endfor %}
             </dl>
             {% endif %}
