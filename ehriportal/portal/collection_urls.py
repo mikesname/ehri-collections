@@ -58,7 +58,7 @@ urlpatterns = patterns('',
         model=models.Collection,
         template_name="portal/collection_search.html",
         apply_facets = FACETS), name='collection_search'),
-    url(r'^facets/?$', views.PaginatedFacetView.as_view(
+    url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
         form_class=views.FacetListSearchForm,
         searchqueryset=sqs,
         model=models.Collection,

@@ -40,13 +40,22 @@
     <table class="table zebra-striped table-striped table-bordered table-condensed">
         <thead>
         <tr>
-            <th><a class="sort-header" href="#">Name</a></th>
-            <th><a class="sort-header" href="#">Count</a></th>
+            <th><a class="sort-header" href="{{request.get_full_path|stripparam:"sort"|addparam:"sort=name"}}">Name</a></th>
+            <th><a class="sort-header" href="{{request.get_full_path|stripparam:"sort"|addparam:"sort=count"}}">Count</a></th>
         </tr>
     </thead>
     <tbody>
-    {% for facet in object_list %}
-        <tr><td><a href="#">{{facet.name}}</a></td><td>{{facet.count}}</td></tr>
+        {% for facet in object_list %}
+        
+        <tr><td>
+                {% if facet.is_selected %}
+                <span class="selected-filter">
+                    {{facet.name}}<a class="remove-filter" href="{{redirect|removeparam:facet.facet_param}}">[Remove]</a>
+                </span>
+                {% else %}
+                <a href="{{redirect|addparam:facet.facet_param}}">{{facet.name}}</a>
+                {% endif %}
+        </td><td>{{facet.count}}</td></tr>
     {% endfor %}
     </tbody>
     </table>

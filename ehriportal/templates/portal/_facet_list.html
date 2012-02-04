@@ -9,7 +9,7 @@
             {% if facetclass.facets|length %}
             <h4>{% trans "By "|add:facetclass.prettyname %}</h4>
             <dl>
-                {% for facet in facetclass.sorted_by_name %}
+                {% for facet in facetclass.sorted_by_count|slice:"20" %}
                     {% if facet.count > 0 %}
                         {% with facet.facet_param as param %}
                         {% if facet.is_selected %}
@@ -27,6 +27,9 @@
                         {% endwith %}
                     {% endif %}
                 {% endfor %}
+                {% if facetclass.facets|length > 20 %}
+                <a href="{{request.path|add:"/"|add:facetclass.name|add:"?"|add:querystring}}" class="more-facets">More...</a>
+                {% endif %}
             </dl>
             {% endif %}
         {% endfor %}

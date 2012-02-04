@@ -1,5 +1,5 @@
 $(function() {
 
-    $("#clicker").modal();
+    $(".more-facets").modal();
 
 });

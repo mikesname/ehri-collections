@@ -24,7 +24,9 @@ def removeparam(url, param):
 def stripparam(url, paramname):
     """Removes a param AND its value from an URL, taking care of
     the ? or & parts."""
-    urlstr = re.sub("[&]?" + paramname + "=(?:[^\?&]+)?", "", url).replace("&&", "&")
+    urlstr = re.sub("[&]?" + paramname + "=(?:[^\?&]+)?", "", url)\
+            .replace("&&", "&")\
+            .replace("?&", "?")
     if urlstr.endswith(("?", "&")):
         urlstr = urlstr[:-1]
     return urlstr

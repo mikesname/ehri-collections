@@ -147,12 +147,11 @@ class PortalSearchListView(ListView):
                 self.form.is_valid():
             extra["suggestion"] = self.searchqueryset\
                     .spelling_suggestion(self.form.cleaned_data['q'])
-        
+        extra["querystring"] = self.request.META.get("QUERY_STRING", "")
         return extra
 
 
 class FacetListSearchForm(SearchForm):
-    facet = forms.CharField(label=_("Facet"))
     sort = forms.ChoiceField(required=False, 
             choices=(("count","Count"), ("name", "Name")))
 
@@ -165,10 +164,10 @@ class PaginatedFacetView(PortalSearchListView):
         sqs = super(PaginatedFacetView, self).get_queryset()
         fclasses = process_search_facets(sqs, self.apply_facets)
         # look for the active facet
-        print self.form.cleaned_data
+        print self.kwargs["facet"]
         try:
             fclass = [fc for fc in fclasses \
-                    if fc.name == self.form.cleaned_data["facet"]][0]
+                    if fc.name == self.kwargs["facet"]][0]
         except IndexError:
             raise IndexError("Active class not found.")
         if self.form.cleaned_data["sort"] == "count":
@@ -185,6 +184,9 @@ class PaginatedFacetView(PortalSearchListView):
 
     def get_context_data(self, **kwargs):
         extra = super(PaginatedFacetView, self).get_context_data(**kwargs)
-        extra["facet_name"] = self.apply_facets[self.form.cleaned_data["facet"]]
+        extra["facet_name"] = self.apply_facets[self.kwargs["facet"]]
+        # hack! which tells us where to redirect to again
+        extra["redirect"] = self.request.get_full_path()\
+                .replace("/" + self.kwargs["facet"], "")
         return extra
 
