@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block resultlist %}
-    {% for result in page.object_list %}
+    {% for result in page_obj.object_list %}
         {% include "portal/_repository_search_result.html" %}
     {% empty %}
         <p>No results found.</p>

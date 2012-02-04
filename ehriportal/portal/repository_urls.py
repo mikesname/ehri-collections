@@ -45,9 +45,10 @@ class ListCollectionsView(ListView):
 
 urlpatterns = patterns('',
     #url(r'^/?$', object_list, listinfo, name='repo_list'),
-    url(r'^search/?$', views.PortalSearchView(
-        apply_facets=FACETS, form_class=forms.PortalSearchForm, searchqueryset=sqs,
-        template="portal/repository_search.html"), name='repo_search'),
+    url(r'^search/?$', views.PortalSearchListView.as_view(
+        model=models.Repository,
+        apply_facets=FACETS, searchqueryset=sqs,
+        template_name="portal/repository_search.html"), name='repo_search'),
     url(r'^/?$', object_list, listinfo, name='repo_list'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewinfo, name='repo_detail'),
     url(r'^(?P<slug>[-\w]+)/edit/?$', update_object, dict(

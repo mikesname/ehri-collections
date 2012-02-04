@@ -3,8 +3,15 @@
 import re
 from urllib import quote
 
-from haystack.views import FacetedSearchView
+from django.utils.translation import ugettext_lazy as _
+from django.views.generic import ListView
+from django import forms
+from django.conf import settings
+
+from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
+
+from ehriportal.portal import models
 
 # Crime against programming
 DATEMATH = re.compile("\[(?:(?P<from>\d{4})|(\*))[\s-].*?TO (?:(?P<to>\d{4})|(\*)).*?\]")
@@ -22,6 +29,9 @@ class FacetClass(object):
     def sorted_by_name(self):
         return sorted(self.facets, key=lambda k: k.name)
 
+    def sorted_by_count(self):
+        return sorted(self.facets, key=lambda k: -k.count)
+
 
 class Facet(object):
     def __init__(self, klass, name, count, pretty=None, query=False):
@@ -37,77 +47,144 @@ class Facet(object):
         return '%s:"%s"' % (self.klass.name, self.name)
 
     def facet_param(self):
-        return "selected_facets=%s%%3A%s" % (quote(self.klass.name), quote(self.name))
+        return "sf=%s%%3A%s" % (quote(self.klass.name), quote(self.name))
 
     def is_selected(self):
         return self.filter_name() in self.klass.results.query.narrow_queries
 
 
-class PortalSearchView(FacetedSearchView):
-    def __init__(self, *args, **kwargs):
-        self.apply_facets = kwargs.pop("apply_facets", {})
-        super(PortalSearchView, self).__init__(*args, **kwargs)
+def process_search_facets(sqs, facetnames):
+    """Parse raw facet counts into a more managable set of FacetClass
+    objects containing individual Facet object items."""
+    counts = sqs.facet_counts()
+    facetclasses = []
 
-        if self.searchqueryset is None:
-            self.searchqueryset = SearchQuerySet()
-        for facet in self.apply_facets.keys():
-            self.searchqueryset = self.searchqueryset.facet(facet)
+    # this is oh so gross at the moment. Now I have two problems...
+    # This regexp matches query facets with the DATE pattern:
+    # field:[<DATE> TO <DATE>]
+    qfmatch = re.compile("(?P<fname>[^:]+):(?P<facet>" + DATEMATH.pattern + ")")
 
-    def extra_context(self, *args, **kwargs):
-        extra = super(PortalSearchView, self).extra_context(*args, **kwargs)
+    if counts.get("queries"):
+        qclasses = {}
+        for facet, num in counts["queries"].iteritems():
+            mf = qfmatch.match(facet)
+            if not mf:
+                raise ValueError("Query didn't match expected pattern: '%'" % facet)
+            classname = mf.group("fname")
+            fc = qclasses.get(classname)
+            if not fc:
+                fc = FacetClass(classname, classname.capitalize(), sqs)
+                qclasses[classname] = fc
+            facet = Facet(fc, mf.group("facet"), num, query=True)
+            if mf.group("from") is None:
+                facet.prettyname = "Before %s" % mf.group("to")
+            elif mf.group("to") is None:
+                facet.prettyname = "From %s" % mf.group("from")
+            else:
+                facet.prettyname = "%s-%s" % (mf.group("from"), mf.group("to"))
+            fc.facets.append(facet)
+        facetclasses.extend(qclasses.values())
 
-        # we need to process out facets in a way that makes it easy to
-        # render them without too much horror in the template.
-        extra["facet_names"] = self.apply_facets
-
-        facetclasses = []
-        # this is oh so gross at the moment. Now I have two problems...
-        # This regexp matches query facets with the DATE pattern:
-        # field:[<DATE> TO <DATE>]
-        qfmatch = re.compile("(?P<fname>[^:]+):(?P<facet>" + DATEMATH.pattern + ")")
-        if extra.get("facets") and extra.get("facets").get("queries"):
-            qclasses = {}
-            for facet, num in extra["facets"]["queries"].iteritems():
-                mf = qfmatch.match(facet)
-                if not mf:
-                    raise ValueError("Query didn't match expected pattern: '%'" % facet)
-                classname = mf.group("fname")
-                fc = qclasses.get(classname)
-                if not fc:
-                    fc = FacetClass(classname, classname.capitalize(), self.results)
-                    qclasses[classname] = fc
-                facet = Facet(fc, mf.group("facet"), num, query=True)
-                if mf.group("from") is None:
-                    facet.prettyname = "Before %s" % mf.group("to")
-                elif mf.group("to") is None:
-                    facet.prettyname = "Since %s" % mf.group("from")
-                else:
-                    facet.prettyname = "%s-%s" % (mf.group("from"), mf.group("to"))
-                fc.facets.append(facet)
-            facetclasses.extend(qclasses.values())
-
-        for key, pretty in self.apply_facets.iteritems():
-            flist = extra["facets"]["fields"][key]
-
-            facetclass = FacetClass(key, pretty, self.results)
+    if counts.get("fields"):
+        for key, pretty in facetnames.iteritems():
+            flist = counts["fields"][key]
+            facetclass = FacetClass(key, pretty, sqs)
             for item, count in flist:
                 facetclass.facets.append(Facet(facetclass, item, count))
             facetclasses.append(facetclass)
-                
-        extra["facet_classes"] = facetclasses
+    return facetclasses                
+
+
+class SearchForm(forms.Form):
+    q = forms.CharField(required=False, label=_('Search'))
+
+
+class PortalSearchListView(ListView):
+    model = None
+    searchqueryset = None
+    paginate_by = 20
+    apply_facets = {}
+    form_class = SearchForm
+
+    def get_queryset(self):
+        sqs = self.searchqueryset.models(self.model)
+        for facet in self.apply_facets.keys():
+            sqs = sqs.facet(facet)
+
+        # apply the query
+        self.form = self.form_class(self.request.GET)
+        if self.form.is_valid():
+            if self.form.cleaned_data["q"]:
+                sqs = sqs.auto_query(self.form.cleaned_data["q"])
+
+        # We need to process each facet to ensure that the field name and the
+        # value are quoted correctly and separately:
+        for facet in self.request.GET.getlist("sf"):
+            if ":" not in facet:
+                continue
+            field, value = facet.split(":", 1)
+            # FIXME: This part overrides the base class so that
+            # facet values that match a date math string are NOT
+            # quoted, which screws them up.  This is unfortunate 
+            # and a better way needs to be found
+            if value:
+                keyval = u'%s:"%s"' % (field, sqs.query.clean(value))
+                if DATEMATH.match(value):
+                    keyval = u'%s:%s' % (field, value)
+                sqs = sqs.narrow(keyval)
+        self.searchqueryset = sqs
+        return self.searchqueryset
+
+    def get_context_data(self, *args, **kwargs):
+        extra = super(PortalSearchListView, self).get_context_data(*args, **kwargs)
+        # we need to process out facets in a way that makes it easy to
+        # render them without too much horror in the template.
+        extra["form"] = self.form
+        extra["facet_classes"] = process_search_facets(
+                self.searchqueryset, self.apply_facets)
+
+        if getattr(settings, 'HAYSTACK_INCLUDE_SPELLING', False) and \
+                self.form.is_valid():
+            extra["suggestion"] = self.searchqueryset\
+                    .spelling_suggestion(self.form.cleaned_data['q'])
+        
         return extra
 
 
-class PaginatedFacetView(PortalSearchView):
+class FacetListSearchForm(SearchForm):
+    facet = forms.CharField(label=_("Facet"))
+    sort = forms.ChoiceField(required=False, 
+            choices=(("count","Count"), ("name", "Name")))
 
-    # MASSIVE HACK: SearchView is broken WRT switching
-    # templates in response to request params, such as
-    # whether or not it's an Ajax request.
-    # So overriding __call__ to fix this.
-    def __call__(self, request):
-        if request.is_ajax():
-            self.template = "portal/_expand_facet_list.html"
-        self.template = "portal/facets.html"
-        return super(PaginatedFacetView, self).__call__(request)
+class PaginatedFacetView(PortalSearchListView):
+    paginate_by = 10
+    template_name = "portal/facets.html"
+    template_name_ajax = "portal/_expanded_facet_list.html"
 
+    def get_queryset(self):
+        sqs = super(PaginatedFacetView, self).get_queryset()
+        fclasses = process_search_facets(sqs, self.apply_facets)
+        # look for the active facet
+        print self.form.cleaned_data
+        try:
+            fclass = [fc for fc in fclasses \
+                    if fc.name == self.form.cleaned_data["facet"]][0]
+        except IndexError:
+            raise IndexError("Active class not found.")
+        if self.form.cleaned_data["sort"] == "count":
+            print "Sorting by count"
+            return [f for f in fclass.sorted_by_count() if f.count]
+        else:
+            print "Sorting by name"
+            return [f for f in fclass.sorted_by_name() if f.count]
+
+    def get_template_name(self, **kwargs):
+        if self.request.is_ajax():
+            return [self.template_name_ajax]
+        return [template_name]
+
+    def get_context_data(self, **kwargs):
+        extra = super(PaginatedFacetView, self).get_context_data(**kwargs)
+        extra["facet_name"] = self.apply_facets[self.form.cleaned_data["facet"]]
+        return extra
 

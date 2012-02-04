@@ -1,3 +1,5 @@
+import re
+
 from django.template import Library
 
 register = Library()
@@ -17,4 +19,14 @@ def removeparam(url, param):
     if urlstr.endswith(("?", "&")):
         urlstr = urlstr[:-1]
     return urlstr
+
+@register.filter
+def stripparam(url, paramname):
+    """Removes a param AND its value from an URL, taking care of
+    the ? or & parts."""
+    urlstr = re.sub("[&]?" + paramname + "=(?:[^\?&]+)?", "", url).replace("&&", "&")
+    if urlstr.endswith(("?", "&")):
+        urlstr = urlstr[:-1]
+    return urlstr
+    
     

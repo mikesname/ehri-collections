@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block resultlist %}
-    {% for result in page.object_list %}
+    {% for result in page_obj.object_list %}
         <h5>
             <a title="{{result.name}}" href="{{ result.uri }}">{{ result.name|truncatewords:9 }}</a>
             <span class="collection-dates">

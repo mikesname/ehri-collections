@@ -1,6 +1,7 @@
 {% load i18n %}
 {% load facetparam %}
 {% load addparam %}
+{% load pagination_tags %}
 
 {% block facets %}
     <!-- Begin faceting. -->
@@ -33,4 +34,22 @@
     <!-- End faceting -->
 {% endblock %}
 
+{% block body %}
 
+<h3>{{facet_name}} {% if form.q.value %} for query '{{form.q.value}}'{% endif %}</h3>
+    <table class="table zebra-striped table-striped table-bordered table-condensed">
+        <thead>
+        <tr>
+            <th><a class="sort-header" href="#">Name</a></th>
+            <th><a class="sort-header" href="#">Count</a></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for facet in object_list %}
+        <tr><td><a href="#">{{facet.name}}</a></td><td>{{facet.count}}</td></tr>
+    {% endfor %}
+    </tbody>
+    </table>
+
+    {% paginate 5 %}
+{% endblock %}

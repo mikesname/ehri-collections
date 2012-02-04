@@ -15,11 +15,11 @@
                         {% if facet.is_selected %}
                             <dd class="selected-filter">{{ facet.prettyname }} ({{ facet.count }})
                             <a class="remove-filter"
-                                href="{{request.get_full_path|removeparam:param}}">[Remove]</a>
+                                href="{{request.get_full_path|removeparam:param|stripparam:"page"}}">[Remove]</a>
                             </dd>
                         {% else %} 
                             <dd>
-                            <a href="{{ request.get_full_path|addparam:param}}">
+                            <a href="{{ request.get_full_path|addparam:param|stripparam:"page"}}">
                                 {{ facet.prettyname }}
                             </a> ({{ facet.count }})
                             </dd>

@@ -50,13 +50,21 @@ viewdict = dict(
 
 
 urlpatterns = patterns('',
-    url(r'^search/?$', views.PortalSearchView(
-        apply_facets=FACETS, form_class=forms.PortalSearchForm, searchqueryset=sqs,
-        template="portal/collection_search.html"), name='collection_search'),
-    url(r'^facets/?$', views.PaginatedFacetView(
-        apply_facets=FACETS, form_class=forms.PortalSearchForm,
-        searchqueryset=sqs),
-        name='collection_facets'),
+    #url(r'^search/?$', views.PortalSearchView(
+    #    apply_facets=FACETS, form_class=forms.PortalSearchForm, searchqueryset=sqs,
+    #    template="portal/collection_search.html"), name='collection_search'),
+    url(r'^search/?$', views.PortalSearchListView.as_view(
+        searchqueryset=sqs,
+        model=models.Collection,
+        template_name="portal/collection_search.html",
+        apply_facets = FACETS), name='collection_search'),
+    url(r'^facets/?$', views.PaginatedFacetView.as_view(
+        form_class=views.FacetListSearchForm,
+        searchqueryset=sqs,
+        model=models.Collection,
+        apply_facets=FACETS,
+        template_name="portal/facets.html"),
+            name='collection_facets'),
     #url(r'^search/?$', FacetedSearchView(
     #    form_class=FacetedSearchForm, searchqueryset=sqs,
     #    template="portal/collection_search.html"), name='collection_search'),

@@ -15,7 +15,7 @@
             <div class="span4 columns">{% block page_heading %}&nbsp;{% endblock %}</div>
             <div class="span12 columns">
                 <form method="get" action="{{request.path}}">
-                    <input type="text" name="q" id="id_q" value="{{query}}" class="span8" />
+                    <input type="text" name="q" id="id_q" value="{{form.q.value|default_if_none:""}}" class="span8" />
                         <input type="submit" value="Search">
                 </form>
             </div>
@@ -43,7 +43,7 @@
                 {% endblock %}
             </div>
             <div class="span12 columns">
-                {% if query and suggestion %}
+                {% if form.q.value and suggestion %}
                     <h5>Did you mean <a href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?</h5>
                 {% endif %}
                 {% if paginator.count %}
@@ -51,9 +51,7 @@
 
                     {% endblock %}
 
-                    {% with page as page_obj %}
-                        {% paginate 2 %}
-                    {% endwith %}
+                    {% paginate 2 %}
                 {% else %}
                     {# Show some example queries to run, maybe query syntax, something else? #}
                 {% endif %}
