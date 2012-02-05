@@ -1,0 +1,49 @@
+.highlighted {
+    font-weight: bold;
+}
+
+.keywords {
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.keywords a {
+    color: #063;
+}
+
+.collection-repo a {
+    padding-left: 0.2em;
+    color: #777;
+    font-weight: lighter;
+}
+
+.repository-country a {
+    padding-left: 0.2em;
+    color: #777;
+    font-weight: lighter;
+}
+
+.remove-filter:hover {
+    background-color: #DDD;    
+}
+
+.selected-filter {
+    color: rgb(0, 128, 0);
+}
+
+.result-paginator {
+    text-align: center;
+    margin-top: 3em;
+}
+
+.more-facets {
+    font-weight: bold;
+}
+
+.facet-header {
+    color: #333;
+}
+
+.facet-header:hover {
+
+}
