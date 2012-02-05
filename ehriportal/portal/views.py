@@ -98,7 +98,7 @@ class Facet(object):
         self.klass = klass
         self.count = count
         self.query = query
-        self._selected = selected
+        self.selected = self.filter_name() in selected
         self.prettyname = pretty if pretty else name
 
     def filter_name(self):
@@ -108,10 +108,6 @@ class Facet(object):
 
     def facet_param(self):
         return "sf=%s%%3A%s" % (quote(self.klass.name), quote(self.name))
-
-    @property
-    def selected(self):
-        return self.filter_name() in self._selected
 
 
 class SearchForm(forms.Form):
