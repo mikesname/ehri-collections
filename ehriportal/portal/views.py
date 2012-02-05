@@ -98,10 +98,22 @@ def process_search_facets(sqs, facetnames):
 
 
 class SearchForm(forms.Form):
+    """Simple search form. Just has a field for the query."""
     q = forms.CharField(required=False, label=_('Search'))
+
+class FacetListSearchForm(SearchForm):
+    """Extension of the search form with another field for
+    the order in which facets are sorted.  Since we can't do
+    this natively with Haystack, we have to hack it ourselves.
+    """
+    sort = forms.ChoiceField(required=False, 
+            choices=(("count",_("Count")), ("name", _("Name"))))
 
 
 class PortalSearchListView(ListView):
+    """A view which performs a search using Haystack and parses
+    the facet information into a form that is easily manageable
+    for display within the template."""
     model = None
     searchqueryset = None
     paginate_by = 20
@@ -109,6 +121,8 @@ class PortalSearchListView(ListView):
     form_class = SearchForm
 
     def get_queryset(self):
+        """Perform the appropriate Haystack search and return
+        a SearchQuerySet with the obtained results."""
         sqs = self.searchqueryset.models(self.model)
         for facet in self.apply_facets.keys():
             sqs = sqs.facet(facet)
@@ -144,7 +158,6 @@ class PortalSearchListView(ListView):
         extra["form"] = self.form
         extra["facet_classes"] = process_search_facets(
                 self.searchqueryset, self.apply_facets)
-
         if getattr(settings, 'HAYSTACK_INCLUDE_SPELLING', False) and \
                 self.form.is_valid():
             extra["suggestion"] = self.searchqueryset\
@@ -153,11 +166,10 @@ class PortalSearchListView(ListView):
         return extra
 
 
-class FacetListSearchForm(SearchForm):
-    sort = forms.ChoiceField(required=False, 
-            choices=(("count","Count"), ("name", "Name")))
-
 class PaginatedFacetView(PortalSearchListView):
+    """Subclass of the standard facet view which displays
+    a paginated list of items for a given facet (whose name
+    is passed in the URL) so that the user can select one."""
     paginate_by = 10
     template_name = "portal/facets.html"
     template_name_ajax = "portal/facets_ajax.html"
@@ -166,11 +178,8 @@ class PaginatedFacetView(PortalSearchListView):
         sqs = super(PaginatedFacetView, self).get_queryset()
         fclasses = process_search_facets(sqs, self.apply_facets)
         # look for the active facet
-        try:
-            fclass = [fc for fc in fclasses \
-                    if fc.name == self.kwargs["facet"]][0]
-        except IndexError:
-            raise IndexError("Active class not found.")
+        fclass = [fc for fc in fclasses \
+                if fc.name == self.kwargs["facet"]][0]
         if self.form.cleaned_data["sort"] == "count":
             return [f for f in fclass.sorted_by_count() if f.count]
         return [f for f in fclass.sorted_by_name() if f.count]
@@ -182,6 +191,9 @@ class PaginatedFacetView(PortalSearchListView):
 
     def get_context_data(self, **kwargs):
         extra = super(PaginatedFacetView, self).get_context_data(**kwargs)
+        # all of this is PRETTY gross. The facet class is the name of the
+        # facet that is inserted into the URL.  The facet name is the 
+        # pretty name, i.e. tags => 'Keywords'
         extra["facet_class"] = self.kwargs["facet"]
         extra["facet_name"] = self.apply_facets[self.kwargs["facet"]]
         # hack! which tells us where to redirect to again
