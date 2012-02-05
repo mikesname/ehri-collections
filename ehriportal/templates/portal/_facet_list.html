@@ -2,12 +2,16 @@
 {% load facetparam %}
 {% load addparam %}
 
+{# TODO: Remove hard-coded facet limit... #}
+
 {% block facets %}
     <!-- Begin faceting. -->
     <div class="facet-list">
         {% for facetclass in facet_classes %}
-            {% if facetclass.facets|length %}
-            <h4>{% trans "By "|add:facetclass.prettyname %}</h4>
+            {% if facetclass.sorted_facets|length %}
+            <h4>
+                <a class="facet-header" href="#">{% trans "By "|add:facetclass.prettyname %}</a>
+            </h4>
             <dl>
                 {% for facet in facetclass.sorted_facets|slice:"10" %}
                     {% with facet.facet_param as param %}

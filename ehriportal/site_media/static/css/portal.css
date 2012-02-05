@@ -41,3 +41,10 @@
     font-weight: bold;
 }
 
+.facet-header {
+    color: #333;
+}
+
+.facet-header:hover {
+
+}

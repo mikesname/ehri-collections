@@ -1,4 +1,4 @@
-$(function() {
+$(function($) {
 
     $(".more-facets").each(function(i, elem) {
         $(elem).modal({backdrop:true,
@@ -18,5 +18,8 @@ $(function() {
             $("#modal-popup").load(this.href.replace(/search\?/, "search/" + klass + "/?"))
         }
     });
-
+    $(".facet-header").click(function(event) {
+        event.preventDefault();
+        $(this).parent().next("dl").toggle(200);
+    });
 });
