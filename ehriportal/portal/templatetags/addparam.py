@@ -21,14 +21,17 @@ def removeparam(url, param):
     return urlstr
 
 @register.filter
-def stripparam(url, paramname):
+def stripparam(url, paramnames):
     """Removes a param AND its value from an URL, taking care of
     the ? or & parts."""
-    urlstr = re.sub("[&]?" + paramname + "=(?:[^\?&]+)?", "", url)\
-            .replace("&&", "&")\
-            .replace("?&", "?")
-    if urlstr.endswith(("?", "&")):
-        urlstr = urlstr[:-1]
-    return urlstr
+    params = paramnames.split(",")
+    for param in params:
+        url = re.sub("&" + param + "=(?:[^\?&]+)?", "", url)
+        url = re.sub("\?" + param + "=(?:[^\?&]+)?", "?", url)\
+                .replace("&&", "&")\
+                .replace("?&", "?")
+    if url.endswith(("?", "&")):
+        url = url[:-1]
+    return url
     
     

@@ -27,10 +27,12 @@ class FacetClass(object):
         self.facets = []
 
     def sorted_by_name(self):
-        return sorted(self.facets, key=lambda k: k.name)
+        return [f for f in sorted(self.facets, key=lambda k: k.name) \
+                if f.count > 0]
 
     def sorted_by_count(self):
-        return sorted(self.facets, key=lambda k: -k.count)
+        return [f for f in sorted(self.facets, key=lambda k: -k.count) \
+                if f.count > 0]
 
 
 class Facet(object):
@@ -158,35 +160,32 @@ class FacetListSearchForm(SearchForm):
 class PaginatedFacetView(PortalSearchListView):
     paginate_by = 10
     template_name = "portal/facets.html"
-    template_name_ajax = "portal/_expanded_facet_list.html"
+    template_name_ajax = "portal/facets_ajax.html"
 
     def get_queryset(self):
         sqs = super(PaginatedFacetView, self).get_queryset()
         fclasses = process_search_facets(sqs, self.apply_facets)
         # look for the active facet
-        print self.kwargs["facet"]
         try:
             fclass = [fc for fc in fclasses \
                     if fc.name == self.kwargs["facet"]][0]
         except IndexError:
             raise IndexError("Active class not found.")
         if self.form.cleaned_data["sort"] == "count":
-            print "Sorting by count"
             return [f for f in fclass.sorted_by_count() if f.count]
-        else:
-            print "Sorting by name"
-            return [f for f in fclass.sorted_by_name() if f.count]
+        return [f for f in fclass.sorted_by_name() if f.count]
 
-    def get_template_name(self, **kwargs):
+    def get_template_names(self, **kwargs):
         if self.request.is_ajax():
             return [self.template_name_ajax]
-        return [template_name]
+        return [self.template_name]
 
     def get_context_data(self, **kwargs):
         extra = super(PaginatedFacetView, self).get_context_data(**kwargs)
+        extra["facet_class"] = self.kwargs["facet"]
         extra["facet_name"] = self.apply_facets[self.kwargs["facet"]]
         # hack! which tells us where to redirect to again
-        extra["redirect"] = self.request.get_full_path()\
-                .replace("/" + self.kwargs["facet"], "")
+        extra["redirect"] = re.sub("/" + self.kwargs["facet"] + "/?",
+                "", self.request.get_full_path())
         return extra
 

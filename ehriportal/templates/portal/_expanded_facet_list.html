@@ -3,62 +3,42 @@
 {% load addparam %}
 {% load pagination_tags %}
 
-{% block facets %}
-    <!-- Begin faceting. -->
-    <div class="facet-list">
-        {% for facetclass in facet_classes %}
-            {% if request.GET.active = facetclass.name and facetclass.facets|length %}
-            <dl>
-                {% for facet in facetclass.sorted_by_name %}
-                    {% if facet.count > 0 %}
-                        {% with facet.facet_param as param %}
-                        {% if facet.is_selected %}
-                            <dd class="selected-filter">{{ facet.prettyname }} ({{ facet.count }})
-                            <a class="remove-filter"
-                                href="{{request.get_full_path|removeparam:param}}">[Remove]</a>
-                            </dd>
-                        {% else %} 
-                            <dd>
-                            <a href="{{ request.get_full_path|addparam:param}}">
-                                {{ facet.prettyname }}
-                            </a> ({{ facet.count }})
-                            </dd>
-                            {% endif %}
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}
-            </dl>
-            {% endif %}
-        {% endfor %}
-    </div>
-    <!-- End faceting -->
-{% endblock %}
-
 {% block body %}
-
-<h3>{{facet_name}} {% if form.q.value %} for query '{{form.q.value}}'{% endif %}</h3>
-    <table class="table zebra-striped table-striped table-bordered table-condensed">
-        <thead>
-        <tr>
-            <th><a class="sort-header" href="{{request.get_full_path|stripparam:"sort"|addparam:"sort=name"}}">Name</a></th>
-            <th><a class="sort-header" href="{{request.get_full_path|stripparam:"sort"|addparam:"sort=count"}}">Count</a></th>
-        </tr>
-    </thead>
+    <div class="btn-toolbar">
+        <div class="btn-group">
+            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Sort items by...
+            <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+              <li>
+                <a class="ajax sort-header"
+                      href="{{request.get_full_path|stripparam:"sort"|addparam:"sort=name"}}">Name</a>
+              </li>
+              <li>
+                <a class="ajax sort-header"
+                    href="{{request.get_full_path|stripparam:"sort"|addparam:"sort=count"}}">Count</a>
+              </li>
+          </ul>
+        </div>
+    </div>
+    <table class="table table-striped table-bordered table-condensed">
     <tbody>
-        {% for facet in object_list %}
-        
-        <tr><td>
+        {% for facet in object_list %}        
+        <tr>
+            <td>
                 {% if facet.is_selected %}
                 <span class="selected-filter">
-                    {{facet.name}}<a class="remove-filter" href="{{redirect|removeparam:facet.facet_param}}">[Remove]</a>
+                    {{facet.name}}<a class="remove-filter"
+                        href="{{redirect|removeparam:facet.facet_param|stripparam:"page,sort"}}"><i
+                            class="icon-remove"></i></a>
                 </span>
                 {% else %}
-                <a href="{{redirect|addparam:facet.facet_param}}">{{facet.name}}</a>
+                    <a href="{{redirect|addparam:facet.facet_param|stripparam:"page,sort"}}">{{facet.name}}</a>
                 {% endif %}
-        </td><td>{{facet.count}}</td></tr>
+            </td>
+            <td>{{facet.count}}</td>
+        </tr>
     {% endfor %}
     </tbody>
     </table>
-
-    {% paginate 5 %}
+    {% paginate 2 %}
 {% endblock %}

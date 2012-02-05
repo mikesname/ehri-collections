@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block nav %}    
-    <ul>{% spaceless %}
+    <ul class="nav">{% spaceless %}
         <li id="tab_collections"><a href="{% url collection_search %}">{% trans "Collections" %}</a></li>
         <li id="tab_repositories"><a href="{% url repo_search %}">{% trans "Repositories" %}</a></li>
         {% if user.is_authenticated %}

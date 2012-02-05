@@ -9,26 +9,27 @@
             {% if facetclass.facets|length %}
             <h4>{% trans "By "|add:facetclass.prettyname %}</h4>
             <dl>
-                {% for facet in facetclass.sorted_by_count|slice:"20" %}
-                    {% if facet.count > 0 %}
-                        {% with facet.facet_param as param %}
-                        {% if facet.is_selected %}
-                            <dd class="selected-filter">{{ facet.prettyname }} ({{ facet.count }})
-                            <a class="remove-filter"
-                                href="{{request.get_full_path|removeparam:param|stripparam:"page"}}">[Remove]</a>
-                            </dd>
-                        {% else %} 
-                            <dd>
-                            <a href="{{ request.get_full_path|addparam:param|stripparam:"page"}}">
-                                {{ facet.prettyname }}
-                            </a> ({{ facet.count }})
-                            </dd>
-                            {% endif %}
-                        {% endwith %}
-                    {% endif %}
+                {% for facet in facetclass.sorted_by_count|slice:"10" %}
+                    {% with facet.facet_param as param %}
+                    {% if facet.is_selected %}
+                        <dd class="selected-filter">{{ facet.prettyname }} ({{ facet.count }})
+                        <a class="remove-filter"
+                            href="{{request.get_full_path|removeparam:param|stripparam:"page"}}"><i
+                                class="icon-remove"></i></a>
+                        </dd>
+                    {% else %} 
+                        <dd>
+                        <a href="{{ request.get_full_path|addparam:param|stripparam:"page"}}">
+                            {{ facet.prettyname }}
+                        </a> ({{ facet.count }})
+                        </dd>
+                        {% endif %}
+                    {% endwith %}
                 {% endfor %}
-                {% if facetclass.facets|length > 20 %}
-                <a href="{{request.path|add:"/"|add:facetclass.name|add:"?"|add:querystring}}" class="more-facets">More...</a>
+                {% if facetclass.sorted_by_count|length > 10 %}
+                    <a data-fclass="{{facetclass.name}}"
+                        href="{{request.path|add:"/"|add:facetclass.name|add:"?"|add:querystring|stripparam:"page"}}"
+                        class="more-facets">More...</a>
                 {% endif %}
             </dl>
             {% endif %}

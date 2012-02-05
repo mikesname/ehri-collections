@@ -49,6 +49,12 @@ urlpatterns = patterns('',
         model=models.Repository,
         apply_facets=FACETS, searchqueryset=sqs,
         template_name="portal/repository_search.html"), name='repo_search'),
+    url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
+        form_class=views.FacetListSearchForm,
+        searchqueryset=sqs,
+        model=models.Repository,
+        apply_facets=FACETS),
+            name='collection_facets'),
     url(r'^/?$', object_list, listinfo, name='repo_list'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewinfo, name='repo_detail'),
     url(r'^(?P<slug>[-\w]+)/edit/?$', update_object, dict(

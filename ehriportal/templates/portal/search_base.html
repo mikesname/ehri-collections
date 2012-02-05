@@ -12,24 +12,24 @@
     <div class="container">
         {% include "_messages.html" %}
         <div class="row">
-            <div class="span4 columns">{% block page_heading %}&nbsp;{% endblock %}</div>
-            <div class="span12 columns">
+            <div class="span3 columns">{% block page_heading %}&nbsp;{% endblock %}</div>
+            <div class="span9 columns">
                 <form method="get" action="{{request.path}}">
-                    <input type="text" name="q" id="id_q" value="{{form.q.value|default_if_none:""}}" class="span8" />
+                    <input type="text" name="q" id="id_q" value="{{form.q.value|default_if_none:""}}" class="span5" />
                         <input type="submit" value="Search">
                 </form>
             </div>
         </div>
         <div class="row">
-            <div class="span4 columns">
+            <div class="span3 columns">
                 <h2>Search</h2>
             </div>
-            <div class="span12 columns">
+            <div class="span9 columns">
                 <h4>{{paginator.count}} Result{{paginator.count|pluralize}}</h4>
             </div>
         </div>
         <div class="row">
-            <div class="span4 columns">
+            <div class="span3 columns">
                 {% block subnav %}
                     {% if paginator.count %}
 
@@ -42,7 +42,7 @@
                     {% endif %}
                 {% endblock %}
             </div>
-            <div class="span12 columns">
+            <div class="span9 columns">
                 {% if form.q.value and suggestion %}
                     <h5>Did you mean <a href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?</h5>
                 {% endif %}
