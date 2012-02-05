@@ -176,7 +176,6 @@ class PortalSearchListView(ListView):
         current = self.searchqueryset.query.narrow_queries
         for facetclass in self.facetclasses:
             facetclass.parse(counts, current)
-        print self.facetclasses
         extra["facet_classes"] = self.facetclasses
         extra["form"] = self.form
         if getattr(settings, 'HAYSTACK_INCLUDE_SPELLING', False) and \
