@@ -25,7 +25,7 @@
         {% for facet in object_list %}        
         <tr>
             <td>
-                {% if facet.is_selected %}
+                {% if facet.selected %}
                 <span class="selected-filter">
                     {{facet.name}}<a class="remove-filter"
                         href="{{redirect|removeparam:facet.facet_param|stripparam:"page,sort"}}"><i

@@ -16,15 +16,22 @@ from ehriportal.portal import models
 # Crime against programming
 DATEMATH = re.compile("\[(?:(?P<from>\d{4})|(\*))[\s-].*?TO (?:(?P<to>\d{4})|(\*)).*?\]")
 
+FACET_SORT_COUNT = 0
+FACET_SORT_NAME = 1
 
 class FacetClass(object):
     """Class representing a facet with multiple values
     to filter on. i.e. keywords => [foo, bar ...]"""
-    def __init__(self, name, prettyname, results):
+    def __init__(self, name, prettyname, sort=FACET_SORT_COUNT):
         self.name = name
         self.prettyname = prettyname
-        self.results = results
+        self.sort = sort
         self.facets = []
+
+    def sorted_facets(self):
+        if self.sort == FACET_SORT_COUNT:
+            return self.sorted_by_count()
+        return self.sorted_by_name()
 
     def sorted_by_name(self):
         return [f for f in sorted(self.facets, key=lambda k: k.name) \
@@ -36,11 +43,12 @@ class FacetClass(object):
 
 
 class Facet(object):
-    def __init__(self, klass, name, count, pretty=None, query=False):
+    def __init__(self, klass, name, count, selected, pretty=None, query=False):
         self.name = name
         self.klass = klass
         self.count = count
         self.query = query
+        self._selected = selected
         self.prettyname = pretty if pretty else name
 
     def filter_name(self):
@@ -51,8 +59,9 @@ class Facet(object):
     def facet_param(self):
         return "sf=%s%%3A%s" % (quote(self.klass.name), quote(self.name))
 
-    def is_selected(self):
-        return self.filter_name() in self.klass.results.query.narrow_queries
+    @property
+    def selected(self):
+        return self.filter_name() in self._selected
 
 
 def process_search_facets(sqs, facetnames):
@@ -65,19 +74,21 @@ def process_search_facets(sqs, facetnames):
     # This regexp matches query facets with the DATE pattern:
     # field:[<DATE> TO <DATE>]
     qfmatch = re.compile("(?P<fname>[^:]+):(?P<facet>" + DATEMATH.pattern + ")")
+    current = sqs.query.narrow_queries
 
     if counts.get("queries"):
         qclasses = {}
-        for facet, num in counts["queries"].iteritems():
+        for facet, count in counts["queries"].iteritems():
             mf = qfmatch.match(facet)
             if not mf:
                 raise ValueError("Query didn't match expected pattern: '%'" % facet)
             classname = mf.group("fname")
+            name = mf.group("facet")
             fc = qclasses.get(classname)
             if not fc:
-                fc = FacetClass(classname, classname.capitalize(), sqs)
+                fc = FacetClass(classname, classname.capitalize())
                 qclasses[classname] = fc
-            facet = Facet(fc, mf.group("facet"), num, query=True)
+            facet = Facet(fc, name, count, current, query=True)
             if mf.group("from") is None:
                 facet.prettyname = "Before %s" % mf.group("to")
             elif mf.group("to") is None:
@@ -90,9 +101,10 @@ def process_search_facets(sqs, facetnames):
     if counts.get("fields"):
         for key, pretty in facetnames.iteritems():
             flist = counts["fields"][key]
-            facetclass = FacetClass(key, pretty, sqs)
+            facetclass = FacetClass(key, pretty)
             for item, count in flist:
-                facetclass.facets.append(Facet(facetclass, item, count))
+                facetclass.facets.append(
+                        Facet(facetclass, item, count, current))
             facetclasses.append(facetclass)
     return facetclasses                
 
