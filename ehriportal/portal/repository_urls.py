@@ -6,14 +6,19 @@ from django.views.generic.list_detail import object_detail, object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required
 from ehriportal.portal import views, forms, models
+from ehriportal.portal.views import FacetClass
+
 
 from haystack.query import SearchQuerySet
 
 sqs = SearchQuerySet().models(models.Repository).facet('country')
 
-FACETS = dict(
-        country="Country"
-)
+FACETS = [
+    FacetClass(
+        "country",
+        "Country",
+    )
+]
 
 listinfo = dict(
         queryset=models.Repository.objects.all().order_by("name"),
@@ -47,13 +52,13 @@ urlpatterns = patterns('',
     #url(r'^/?$', object_list, listinfo, name='repo_list'),
     url(r'^search/?$', views.PortalSearchListView.as_view(
         model=models.Repository,
-        apply_facets=FACETS, searchqueryset=sqs,
+        facetclasses=FACETS, searchqueryset=sqs,
         template_name="portal/repository_search.html"), name='repo_search'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
         form_class=views.FacetListSearchForm,
         searchqueryset=sqs,
         model=models.Repository,
-        apply_facets=FACETS),
+        facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', object_list, listinfo, name='repo_list'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewinfo, name='repo_detail'),

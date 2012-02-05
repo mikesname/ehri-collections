@@ -11,32 +11,51 @@ from haystack.query import SearchQuerySet
 sqs = SearchQuerySet()\
         .models(models.Collection)
 
-FACETS = dict(
-    languages_of_description="Language of Description",
-    languages="Language",
-    tags="Keyword",
-    location_of_materials="Location of Materials"
-)                                         
+from ehriportal.portal.views import FacetClass, IntegerFacetClass
+
+FACETS = [
+    IntegerFacetClass(
+        "years_exact",
+        "Date",
+        sort=views.FACET_SORT_NAME
+    ),
+    FacetClass(
+        "languages_of_description",
+        "Language of Description"
+    ),
+    FacetClass(
+        "languages",
+        "Language"
+    ),
+    FacetClass(
+        "location_of_materials",
+        "Location of Materials"
+    ),
+    FacetClass(
+        "tags",
+        "Keyword"
+    ),
+]
 
 DATEPOINTS = [
-        datetime(1933,1,1),
-        datetime(1939,1,1),
-        datetime(1940,1,1),
-        datetime(1941,1,1),
-        datetime(1942,1,1),
-        datetime(1943,1,1),
-        datetime(1944,1,1),
-        datetime(1945,1,1),
-        datetime(1946,1,1),
+        1933,
+        1939,
+        1940,
+        1941,
+        1942,
+        1943,
+        1944,
+        1945,
+        1946,
 ]
 
 # Facet the SearchQuerySet by our significant dates
 # TODO: Fix having to add the 'Z' to the time string
-sqs = sqs.query_facet("dates", "[* TO %sZ]" % DATEPOINTS[0].isoformat())
+sqs = sqs.query_facet("years", "[* TO %d]" % DATEPOINTS[0])
 for mark in range(len(DATEPOINTS) - 1):
-    sqs = sqs.query_facet("dates", "[%sZ TO %sZ]" % (
-        DATEPOINTS[mark].isoformat(), DATEPOINTS[mark+1].isoformat()))
-sqs = sqs.query_facet("dates", "[%sZ TO *]" % DATEPOINTS[-1].isoformat())
+    sqs = sqs.query_facet("years", "[%d TO %d]" % (
+        DATEPOINTS[mark], DATEPOINTS[mark+1]))
+sqs = sqs.query_facet("years", "[%s TO *]" % DATEPOINTS[-1])
 
 
 infolist = dict(
@@ -54,12 +73,12 @@ urlpatterns = patterns('',
         searchqueryset=sqs,
         model=models.Collection,
         template_name="portal/collection_search.html",
-        apply_facets = FACETS), name='collection_search'),
+        facetclasses = FACETS), name='collection_search'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
         form_class=views.FacetListSearchForm,
         searchqueryset=sqs,
         model=models.Collection,
-        apply_facets=FACETS),
+        facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', object_list, infolist, name='collection_list'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewdict, name='collection_detail'),
