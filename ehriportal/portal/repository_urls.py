@@ -8,10 +8,7 @@ from django.contrib.auth.decorators import login_required
 from ehriportal.portal import views, forms, models
 from ehriportal.portal.views import FacetClass
 
-
 from haystack.query import SearchQuerySet
-
-sqs = SearchQuerySet().models(models.Repository).facet('country')
 
 FACETS = [
     FacetClass(
@@ -52,11 +49,10 @@ urlpatterns = patterns('',
     #url(r'^/?$', object_list, listinfo, name='repo_list'),
     url(r'^search/?$', views.PortalSearchListView.as_view(
         model=models.Repository,
-        facetclasses=FACETS, searchqueryset=sqs,
+        facetclasses=FACETS,
         template_name="portal/repository_search.html"), name='repo_search'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
         form_class=views.FacetListSearchForm,
-        searchqueryset=sqs,
         model=models.Repository,
         facetclasses=FACETS),
             name='collection_facets'),

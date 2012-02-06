@@ -42,6 +42,10 @@ class FacetClass(object):
     def sorted_by_count(self):
         return [f for f in sorted(self.facets, key=lambda k: -k.count) \
                 if f.count > 0]
+
+    def apply(self, queryset):
+        """Apply the facet to the search query set."""
+        return queryset.facet(self.name)
     
     def parse(self, counts, current):
         """Parse the facet_counts structure returns from
@@ -60,10 +64,15 @@ class FacetClass(object):
 
 
 class QueryFacetClass(FacetClass):
-    querymatch = re.compile("DUMMY")
     """Abstract class representing a query facet.  Derived classes
     must supply a querymatch that matches the type of ranges being
     operated on, i.e. dates or integers."""
+    querymatch = re.compile("DUMMY")
+
+    def __init__(self, *args, **kwargs):
+        self.points = kwargs.pop("points", [])
+        super(QueryFacetClass, self).__init__(*args, **kwargs)
+
     def parse(self, counts, current):
         self.facets = []
         fqmatch = re.compile("(?P<fname>[^:]+):(?P<facet>" + self.querymatch + ")")
@@ -87,9 +96,26 @@ class QueryFacetClass(FacetClass):
 class IntegerFacetClass(QueryFacetClass):
     querymatch = INTMATH.pattern
 
+    def apply(self, queryset):
+        """Apply the facet to the search query set."""
+        sqs = queryset.query_facet(self.name, "[* TO %d]" % self.points[0])
+        for mark in range(len(self.points) - 1):
+            sqs = sqs.query_facet(self.name, "[%d TO %d]" % (
+                self.points[mark], self.points[mark+1]))
+        return sqs.query_facet(self.name, "[%d TO *]" % self.points[-1])
+
 
 class DateFacetClass(QueryFacetClass):
     querymatch = DATEMATH.pattern
+
+    def apply(self, queryset):
+        """Apply the date facet to the search query set."""
+        sqs = queryset.query_facet(self.name, "[* TO %sZ]" % self.points[0].isoformat())
+        for mark in range(len(self.points) - 1):
+            sqs = sqs.query_facet(self.name, "[%sZ TO %sZ]" % (
+                self.points[mark].isoformat(), self.points[mark+1].isoformat()))
+        return sqs.query_facet(self.name, "[%sZ TO *]" % self.points[-1].isoformat())
+
 
 
 class Facet(object):
@@ -136,9 +162,11 @@ class PortalSearchListView(ListView):
     def get_queryset(self):
         """Perform the appropriate Haystack search and return
         a SearchQuerySet with the obtained results."""
+        if self.searchqueryset is None:
+            self.searchqueryset = SearchQuerySet()
         sqs = self.searchqueryset.models(self.model)
         for facet in self.facetclasses:
-            sqs = sqs.facet(facet.name)
+            sqs = facet.apply(sqs)
 
         # apply the query
         self.form = self.form_class(self.request.GET)
