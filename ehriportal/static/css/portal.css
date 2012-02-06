@@ -1,3 +1,11 @@
+a {
+    color: #636;
+}
+
+a:hover {
+    color: #639;
+}
+
 .highlighted {
     font-weight: bold;
 }
