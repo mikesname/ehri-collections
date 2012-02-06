@@ -25,7 +25,7 @@
                 <h2>Search</h2>
             </div>
             <div class="span9 columns">
-                <h4>{{paginator.count}} Result{{paginator.count|pluralize}}</h4>
+                <h3>{{paginator.count}} Result{{paginator.count|pluralize}}</h3>
             </div>
         </div>
         <div class="row">
@@ -44,7 +44,8 @@
             </div>
             <div class="span9 columns">
                 {% if form.q.value and suggestion %}
-                    <h5>Did you mean <a href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?</h5>
+                    <h4>Did you mean <a
+                            href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?</h4>
                 {% endif %}
                 {% if paginator.count %}
                     {% block resultlist %}
