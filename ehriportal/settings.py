@@ -57,7 +57,6 @@ USE_I18N = True
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, "site_media", "media")
-
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
@@ -74,6 +73,7 @@ STATIC_URL = "/site_media/static/"
 # Additional directories which hold static files
 STATICFILES_DIRS = [
     os.path.join(PROJECT_ROOT, "static"),
+    os.path.join(PROJECT_ROOT, "media"),
 ]
 
 STATICFILES_FINDERS = [
@@ -251,4 +251,8 @@ LANGUAGES = (
 
 MODELTRANSLATION_TRANSLATION_REGISTRY = "ehriportal.translation"
 
-
+# Image stuff
+THUMBNAIL_SIZES = (
+        (100,100), 
+        (300,300),
+)
