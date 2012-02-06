@@ -2,10 +2,17 @@
 
 {% load metron_tags %}
 {% load i18n %}
+{% load staticfiles %}
+
+{% block style_base %}
+    <link href="{% static "pinax/css/theme.css" %}" rel="stylesheet">
+    <link href="{% static "bootstrap/css/bootstrap.css" %}" rel="stylesheet">
+    {% block extra_style %}{% endblock %}
+    <link rel="stylesheet" href="{% static "css/portal.css" %}">
+{% endblock %}
 
 {% block extra_head %}
-     <link rel="stylesheet" href="{{ STATIC_URL }}css/portal.css">
-     <script src="{{ STATIC_URL }}js/portal.js"></script>
+    <script src="{% static "js/portal.js" %}"></script>
 {% endblock %}
 
 {% block nav %}    
