@@ -15,7 +15,7 @@
 {% block resultlist %}
     {% for result in page_obj.object_list %}
         <h4>
-            <a title="{{result.name}}" href="{{ result.uri }}">
+            <a title="{{result.name}}" href="{% url repo_detail slug=result.slug %}">
                 {{ result.name|truncatewords:10 }}
             </a>
             <span class="repository-country">

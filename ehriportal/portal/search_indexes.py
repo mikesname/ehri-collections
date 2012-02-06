@@ -9,7 +9,7 @@ from incf.countryutils import data as countrydata
 
 class RepositoryIndex(SearchIndex):
     name = CharField(model_attr='name', default=True, boost=1.1)
-    uri = CharField(model_attr='get_absolute_url', stored=True, indexed=False, default=True)
+    slug = CharField(model_attr='slug', indexed=False, stored=True)
     description = CharField(model_attr='general_context', null=True)
     other_names = MultiValueField(model_attr='other_names')
     country = CharField(model_attr='country', faceted=True, null=True, stored=True)
@@ -47,7 +47,7 @@ class FacetMultiValueDateField(FacetMultiValueField):
 
 class CollectionIndex(SearchIndex):
     name = CharField(model_attr='name', default=True, boost=1.1)
-    uri = CharField(model_attr='get_absolute_url', default=True, indexed=False, stored=True)
+    slug = CharField(model_attr='slug', indexed=False, stored=True)
     description = CharField(model_attr='scope_and_content', null=True)
     other_names = MultiValueField(model_attr='other_names')
     repository = CharField(model_attr='repository__name')
