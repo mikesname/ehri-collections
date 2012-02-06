@@ -242,8 +242,6 @@ class PaginatedFacetView(PortalSearchListView):
     def get_context_data(self, **kwargs):
         extra = super(PaginatedFacetView, self).get_context_data(**kwargs)
         extra["facetclass"] = self.fclass
-        # hack! which tells us where to redirect to again
-        extra["redirect"] = re.sub("/" + self.kwargs["facet"] + "/?",
-                "", self.request.get_full_path())
+        extra["redirect"] = self.request.META.get("HTTP_REFERER")
         return extra
 
