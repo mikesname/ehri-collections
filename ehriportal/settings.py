@@ -228,13 +228,6 @@ DEBUG_TOOLBAR_CONFIG = {
     "INTERCEPT_REDIRECTS": False,
 }
 
-# local_settings.py can be used to override environment-specific settings
-# like database and email that differ between development and production.
-try:
-    from local_settings import *
-except ImportError:
-    pass
-
 # Haystack config
 HAYSTACK_SITECONF = 'ehriportal.search_sites'
 HAYSTACK_SEARCH_ENGINE = 'solr'
@@ -256,3 +249,9 @@ THUMBNAIL_SIZES = (
         (100,100), 
         (300,300),
 )
+
+try:
+    from local_settings import *
+except ImportError:
+    pass
+
