@@ -1,10 +1,8 @@
 {% extends 'portal/search_base.html' %}
 
+{% load highlight %}
 {% load i18n %}
 {% load ifsetting_tag %}
-{% load highlight %}
-{% load getattribute %}
-{% load facetparam %}
 {% load pagination_tags %}
 {% block head_title %}{% trans "Repositories" %}{% endblock %}
 
@@ -28,7 +26,7 @@
         </h4>                
         <p>
         {% if result.description %}
-            {% highlight result.description with request.GET.q max_length 200 %}
+            {% highlight result.description with form.q.value max_length 200 %}
         {% else %}
             No description available.
         {% endif %}

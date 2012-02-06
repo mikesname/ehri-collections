@@ -7,12 +7,12 @@
 
 {% block body_class %}home{% endblock %}
 
-{% block body %}
+{% block body_base %}
 
 <center>
-    <h1 style="padding-top:150px">{% trans "Welcome to EHRI" %}</h1>
+    <h1 style="padding-top:5em">{% trans "Welcome to EHRI" %}</h1>
     <form action="/collections/search">
-        <input name="q" style="width:400px;font-size:1.3em;" type="text" />
+        <input name="q" class="span5" style="font-size:1.3em;" type="text" />
         <input type="submit" value="Search Collections"
     </form>
 </center>

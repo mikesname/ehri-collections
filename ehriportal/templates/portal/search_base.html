@@ -12,8 +12,8 @@
     <div class="container">
         {% include "_messages.html" %}
         <div class="row">
-            <div class="span3 columns">{% block page_heading %}&nbsp;{% endblock %}</div>
-            <div class="span9 columns">
+            <div class="span3">{% block page_heading %}&nbsp;{% endblock %}</div>
+            <div class="span9">
                 <form method="get" action="{{request.path}}">
                     <input type="text" name="q" id="id_q" value="{{form.q.value|default_if_none:""}}" class="span5" />
                         <input type="submit" value="Search">
@@ -21,32 +21,40 @@
             </div>
         </div>
         <div class="row">
-            <div class="span3 columns">
+            <div class="span3">
                 <h2>Search</h2>
             </div>
-            <div class="span9 columns">
-                <h3>{{paginator.count}} Result{{paginator.count|pluralize}}</h3>
+            <div class="span9">
+                <h3>
+                {% if paginator.count %}
+                    {{paginator.count}} Result{{paginator.count|pluralize}}
+                    {% if form.q.value %}
+                    &nbsp;for <i>{{form.q.value}}</i>
+                    {% endif %}
+                {% else %}
+                    {% if form.q.value %}
+                    {% trans "Nothing found for" %} <i>{{form.q.value}}</i>{% if suggestion %}.&nbsp;Did you mean <a               
+                            href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?{% endif %}
+                    {% endif %}
+                {% endif %}
+                </h3>
             </div>
         </div>
         <div class="row">
-            <div class="span3 columns">
+            <div class="span3">
                 {% block subnav %}
                     {% if paginator.count %}
 
                         {% block facets %}
                         <!-- facets go here -->
-
+                             &nbsp;
                         {% endblock %}
                     {% else %}
                     &nbsp;
                     {% endif %}
                 {% endblock %}
             </div>
-            <div class="span9 columns">
-                {% if form.q.value and suggestion %}
-                    <h4>Did you mean <a
-                            href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?</h4>
-                {% endif %}
+            <div class="span9">
                 {% if paginator.count %}
                     {% block resultlist %}
 
@@ -54,7 +62,7 @@
 
                     {% paginate 2 %}
                 {% else %}
-                    {# Show some example queries to run, maybe query syntax, something else? #}
+                    &nbsp;
                 {% endif %}
                     </div>
                 </div>
