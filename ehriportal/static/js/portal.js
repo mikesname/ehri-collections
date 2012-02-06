@@ -22,4 +22,5 @@ $(function($) {
         event.preventDefault();
         $(this).parent().next("dl").toggle(200);
     });
+
 });

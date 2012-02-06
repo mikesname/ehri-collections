@@ -6,6 +6,21 @@ a:hover {
     color: #639;
 }
 
+.tag-list a {
+    display: inline-block;
+    color: #3E6D8E;
+    border: 1px solid #3E6D8E;
+    border-radius: 2px;
+    background-color: #E0EAF1;
+    padding: 0.2em 0.4em;
+    margin: 0.2em;
+}
+
+.tag-list a:hover {
+    text-decoration: none;
+    background-color: #D0D9E1;
+}
+
 .highlighted {
     font-weight: bold;
 }
@@ -54,4 +69,12 @@ a:hover {
 
 .facet-header:hover {
 
+}
+
+.logo-placeholder {
+    background-image: url(../img/repo_placeholder.png);
+    background-repeat: no-repeat;
+    background-position: center;
+    padding: 1em;
+    border-radius: 0.2em;
 }

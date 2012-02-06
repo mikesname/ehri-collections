@@ -25,17 +25,22 @@
             <div class="rules-field">
                 {{object.rules|linebreaks}}
             </div>
+            <h3>{% trans "Keywords" %}</h3>
+            <div class="tag-list">
+                {% for tag in object.tag_list %}
+                <a href="{% url collection_search %}?sf=tags{{":"|add:tag.name|urlencode}}">
+                    {{tag.name}}
+                </a>
+                {% endfor %}
+            </div>
         </div>
         <div class="span3 columns">
-            <h4>
-                <a href="{%url repo_detail object.repository.slug %}">{{object.repository.name}}</a>
-            </h4>
-            <div class="repo-image">
+            <div class="repo-logo">
                 <a href="{%url repo_detail object.repository.slug %}">
-                {% if object.repository.image %}
-                    <img  src="{{object.repository.image.path}}" />
+                {% if object.repository.logo %}
+                    <img  src="{{object.repository.logo.url}}" />
                 {% else %}
-                    <img width="100px" height="100px" src="{{STATIC_URL}}img/repo_placeholder.png" />
+                <div class="logo-placeholder"><h3>{{object.repository.name}}</h3></div>
                 {% endif %}
                 </a>
             </div>
@@ -109,8 +114,7 @@
                             {{object.arrangement}}
                         </td>
                     </tr>
-                {% endif %}
-
+                {% endif %}                
             </table>
         </div>
     </div>

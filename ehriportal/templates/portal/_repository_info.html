@@ -1,10 +1,26 @@
-<div class="repo_logo">
-{% if object.image %}
-    <img src="{{object.image.url}}" />
-{% else %}
-<img width="200px" height="200px" src="{{STATIC_URL}}img/repo_placeholder.png" />
-{% endif %}
+{% load staticfiles %}
+<div class="repo-logo">
+    <a href="{{object.get_absolute_url}}">
+        {% if object.logo %}
+        <img width="200px" src="{{object.logo.url }}" />
+        {% else %}
+        <img width="200px" height="200px" src="{% static "img/repo_placeholder.png" %}" />
+        {% endif %}
+    </a>
 </div>
+
+{% if object.images|length %}
+<div class="repo-images carousel carousel-static">
+    <!-- Carousel items -->
+    {% for img in object.images %}
+    <div id="repo-images" class="carousel-inner">
+        <div class="item active">
+            <img title="{{img.caption|default_if_none:""}}" width="200px" src="{{img.image.url_300x300}}" />  
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
 <address>
 {% for contact in object.contacts.all %}
     {{contact.format|linebreaks}}

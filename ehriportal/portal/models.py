@@ -1,16 +1,40 @@
 """Portal model classes."""
 
+import os
 import re
 import datetime
 import calendar
 
 from django.db import models
 from django.db.models.base import ModelBase
+from django.conf import settings
 
 from taggit.managers import TaggableManager
 from autoslug import AutoSlugField
 
 from ehriportal.portal import utils
+from ehriportal.portal.thumbs import ImageWithThumbsField
+
+from south.modelsinspector import add_introspection_rules
+
+# get South to play nice with ImageWithThumbsField
+add_introspection_rules(
+    [
+        (
+            (ImageWithThumbsField, ),
+            [],
+            {
+                "verbose_name": ["verbose_name", {"default": None}],
+                "name":         ["name",         {"default": None}],
+                "width_field":  ["width_field",  {"default": None}],
+                "height_field": ["height_field", {"default": None}],
+                "sizes":        ["sizes",        {"default": None}],
+            },
+        ),
+    ],
+    ["^ehriportal\.portal\.thumbs\.ImageWithThumbsField",]
+)
+
 
 class ResourceType(ModelBase):
     """Metaclass for archival resources. Don't fear the magic.
@@ -62,6 +86,11 @@ class Resource(models.Model):
         return [on.name for on in self.othername_set.all()]
 
     @property
+    def images(self):
+        """Shortcut for fetching associated images."""
+        return self.resourceimage_set.all()
+
+    @property
     def properties(self):
         """Get a list of property key/value pairs."""
         return [(p.name, p.value) for p in self.property_set.all()]
@@ -99,8 +128,20 @@ class Resource(models.Model):
             qset = self.property_set.filter(value=value)
         qset.delete()
 
+    def __repr__(self):
+        return u"<%s: %s>" % (self.type, self.slug)
+
     def __unicode__(self):
-        return u"<%s: %s>" % (self.type, self.identifier)
+        return self.name
+
+class ResourceImage(models.Model):
+    """Images associated with resources."""
+    resource = models.ForeignKey(Resource)
+    image = ImageWithThumbsField(
+            upload_to=lambda inst, fn: os.path.join(inst.resource.slug,
+                "%s%s" % (inst.resource.slug,
+                    os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
+    caption = models.CharField(max_length=255, null=True, blank=True)
 
 
 class OtherName(models.Model):
@@ -144,9 +185,10 @@ class Repository(Resource):
         ("sources", "TODO: Help text"),
     )
 
-    image = models.ImageField(null=True, blank=True,
-            upload_to=lambda inst, fn: "%s%s" % (inst.slug,
-                    os.path.splitext(fn)[1]))
+    logo = ImageWithThumbsField(null=True, blank=True,
+            upload_to=lambda inst, fn: os.path.join(inst.slug,
+                "%s_logo%s" % (inst.slug,
+                    os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
 
     tags = TaggableManager()
 
