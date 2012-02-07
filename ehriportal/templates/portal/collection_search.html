@@ -19,9 +19,7 @@
         <h4>
             <a title="{{result.name}}" href="{% url collection_detail slug=result.slug %}">
                 {{ result.name|truncatewords:9 }}</a>
-            <span class="collection-dates">
-                <span class="result-date">{{result.date_range|default_if_none:""}}</span>
-            </span>
+            <span class="result-date">{{result.date_range|default_if_none:""}}</span>
             <span class="collection-repo">
                 <a href="{{result.repository_uri}}">{{result.repository}}</a>
             </span>
