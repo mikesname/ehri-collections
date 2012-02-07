@@ -7,23 +7,23 @@ from django.contrib.auth.decorators import login_required
 from haystack.query import SearchQuerySet
 
 from ehriportal.portal import views, forms, models
-from ehriportal.portal.views import FacetClass, IntegerFacetClass
+from ehriportal.portal.views import FacetPoint, FacetClass, QueryFacetClass
 
 FACETS = [
-    IntegerFacetClass(
+    QueryFacetClass(
         "years_exact",
         "Date",
         sort=views.FACET_SORT_NAME,
         points=[
-            1933,
-            1939,
-            1940,
-            1941,
-            1942,
-            1943,
-            1944,
-            1945,
-            1946,
+            FacetPoint(("*", 1933), "Before 1933"),
+            FacetPoint((1933, 1939), "1933-1939"),
+            FacetPoint(1940),
+            FacetPoint(1941),
+            FacetPoint(1942),
+            FacetPoint(1943),
+            FacetPoint(1944),
+            FacetPoint(1945),
+            FacetPoint((1946, "*"), "After 1945"),
         ]
     ),
     FacetClass(

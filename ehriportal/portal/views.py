@@ -1,6 +1,7 @@
 # Create your views here.
 
 import re
+import datetime
 from urllib import quote
 
 from django.utils.translation import ugettext_lazy as _
@@ -13,13 +14,38 @@ from haystack.query import SearchQuerySet
 
 from ehriportal.portal import models
 
-# Crime against programming - regexes to match
-# '[* TO 1928-01-01T00:00:00Z]' and [* TO 1939]
-DATEMATH = re.compile("\[(?:(?P<from>\d{4})|(\*))[\s-].*?TO (?:(?P<to>\d{4})|(\*)).*?\]")
-INTMATH = re.compile("\[(?:(?P<from>\d{4})|(\*))\sTO\s(?:(?P<to>\d{4})|(\*))\]")
-
 FACET_SORT_COUNT = 0
 FACET_SORT_NAME = 1
+
+INTMATH = re.compile("\[(?:(?P<from>\d{4})|(\*))\sTO\s(?:(?P<to>\d{4})|(\*))\]")
+
+class FacetPoint(object):
+    """Class representing a Query Facet point."""
+    def __init__(self, point, desc=None):
+        self.range = isinstance(point, tuple)
+        self.point = point
+        self.desc = desc if desc else str(point)
+
+    def __str__(self):
+        if self.range:
+            return u"[%s TO %s]" % self.point
+        return str(self.point)
+
+
+class DateFacetPoint(object):
+    """Specialisation of FacetPoint for dates, where
+    each point is either a datetime.datetime object 
+    or a string, such as glob ("*")."""
+    def _strpoint(self, p):
+        if isinstance(p, basestring):
+            return p
+        return p.isoformat() + "Z"
+
+    def __str__(self):
+        if self.range:
+            return u"[%s TO %s]" % (self._strpoint(p[0]), self._strpoint(p[1]))
+        return str(self.point)
+            
 
 class FacetClass(object):
     """Class representing a facet with multiple values
@@ -64,71 +90,48 @@ class FacetClass(object):
 
 
 class QueryFacetClass(FacetClass):
-    """Abstract class representing a query facet.  Derived classes
-    must supply a querymatch that matches the type of ranges being
-    operated on, i.e. dates or integers."""
-    querymatch = re.compile("DUMMY")
-
+    """Class representing a query facet."""
     def __init__(self, *args, **kwargs):
         self.points = kwargs.pop("points", [])
         super(QueryFacetClass, self).__init__(*args, **kwargs)
 
+    def sorted_by_name(self):
+        """Name sort should respect the order in which
+        the Query facet points were added in the point spec."""
+        return [f for f in self.facets if f.count > 0]
+
     def parse(self, counts, current):
         self.facets = []
-        fqmatch = re.compile("(?P<fname>[^:]+):(?P<facet>" + self.querymatch + ")")
+        print counts
+        fqmatch = re.compile("(?P<fname>[^:]+):(?P<query>.+)")
         if not counts.get("queries"):
             return
-        for facet, count in counts["queries"].iteritems():
-            mf = fqmatch.match(facet)
-            if not mf or not mf.group("fname") == self.name:
-                continue
-            name = mf.group("facet")
-            facet = Facet(self, mf.group("facet"), count, current, query=True)
-            if mf.group("from") is None:
-                facet.prettyname = "Before %s" % mf.group("to")
-            elif mf.group("to") is None:
-                facet.prettyname = "From %s" % mf.group("from")
-            else:
-                facet.prettyname = "%s-%s" % (mf.group("from"), mf.group("to"))
-            self.facets.append(facet)
-
-
-class IntegerFacetClass(QueryFacetClass):
-    querymatch = INTMATH.pattern
+        for point in self.points:
+            count = counts["queries"].get("%s:%s" % (self.name, point))
+            self.facets.append(Facet(
+                self, str(point), count, current,
+                pretty=point.desc, isrange=point.range))
 
     def apply(self, queryset):
         """Apply the facet to the search query set."""
-        sqs = queryset.query_facet(self.name, "[* TO %d]" % self.points[0])
-        for mark in range(len(self.points) - 1):
-            sqs = sqs.query_facet(self.name, "[%d TO %d]" % (
-                self.points[mark], self.points[mark+1]))
-        return sqs.query_facet(self.name, "[%d TO *]" % self.points[-1])
-
-
-class DateFacetClass(QueryFacetClass):
-    querymatch = DATEMATH.pattern
-
-    def apply(self, queryset):
-        """Apply the date facet to the search query set."""
-        sqs = queryset.query_facet(self.name, "[* TO %sZ]" % self.points[0].isoformat())
-        for mark in range(len(self.points) - 1):
-            sqs = sqs.query_facet(self.name, "[%sZ TO %sZ]" % (
-                self.points[mark].isoformat(), self.points[mark+1].isoformat()))
-        return sqs.query_facet(self.name, "[%sZ TO *]" % self.points[-1].isoformat())
-
+        for point in self.points:
+            queryset = queryset.query_facet(self.name, str(point))
+        return queryset
 
 
 class Facet(object):
-    def __init__(self, klass, name, count, selected, pretty=None, query=False):
+    """Class representing an individual facet constraint,
+    i.e. 'language:Afrikaans'."""
+    def __init__(self, klass, name, count, selected, pretty=None, isrange=False):
         self.name = name
         self.klass = klass
         self.count = count
-        self.query = query
+        self.range = isrange
         self.selected = self.filter_name() in selected
         self.prettyname = pretty if pretty else name
 
     def filter_name(self):
-        if self.query:
+        if self.range:
             return '%s:%s' % (self.klass.name, self.name)
         return '%s:"%s"' % (self.klass.name, self.name)
 
