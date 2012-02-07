@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic import ListView
 from django import forms
 from django.conf import settings
+from django.http import Http404
 
 from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
@@ -207,8 +208,6 @@ class PortalSearchListView(ListView):
         # render them without too much horror in the template.
         counts = self.searchqueryset.facet_counts()
         current = self.searchqueryset.query.narrow_queries
-        print counts
-        print current
         for facetclass in self.facetclasses:
             facetclass.parse(counts, current)
         extra["facet_classes"] = self.facetclasses
@@ -238,8 +237,11 @@ class PaginatedFacetView(PortalSearchListView):
         # look for the active facet
         counts = self.searchqueryset.facet_counts()
         current = self.searchqueryset.query.narrow_queries
-        self.fclass = [fc for fc in self.facetclasses \
-                if fc.name == self.kwargs["facet"]][0]
+        try:
+           self.fclass = [fc for fc in self.facetclasses \
+                    if fc.name == self.kwargs["facet"]][0]
+        except IndexError:
+            raise Http404
         self.fclass.parse(counts, current)
         if self.form.cleaned_data["sort"] == "count":
             return [f for f in self.fclass.sorted_by_count() if f.count]
@@ -253,6 +255,11 @@ class PaginatedFacetView(PortalSearchListView):
     def get_context_data(self, **kwargs):
         extra = super(PaginatedFacetView, self).get_context_data(**kwargs)
         extra["facetclass"] = self.fclass
-        extra["redirect"] = self.request.META.get("HTTP_REFERER")
+        ref = self.request.META.get("HTTP_REFERER")
+        # Fragile hack in case there's no referer - assume the redirect
+        # we want is that minus the facet class name...
+        if ref is None:
+            ref = re.sub("/" + self.fclass.name + "/?", "", self.request.get_full_path())
+        extra["redirect"] = ref
         return extra
 
