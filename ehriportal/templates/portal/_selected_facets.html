@@ -1,0 +1,17 @@
+{% load facetparam %}
+{% load addparam %}
+
+{% for fclass in facet_classes %}
+    {% for facet in fclass.sorted_by_name %}
+        {% if facet.selected %}
+            {% with facet.facet_param as param %}
+            <span class="selected-facet">
+                {{fclass.prettyname}}: {{facet.prettyname}} <a class="remove-filter"
+        href="{{request.get_full_path|removeparam:param|stripparam:"page"}}"><i
+            class="icon-remove"></i></a>
+            </span>
+            {% endwith %}
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+

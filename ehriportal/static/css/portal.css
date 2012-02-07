@@ -6,14 +6,19 @@ a:hover {
     color: #639;
 }
 
-.tag-list a {
+.tag-list a, .selected-facet {
     display: inline-block;
     color: #3E6D8E;
     border: 1px solid #3E6D8E;
     border-radius: 2px;
     background-color: #E0EAF1;
     padding: 0.2em 0.4em;
-    margin: 0.2em;
+    margin-right: 0.2em;
+    margin-bottom: 0.4em;
+}
+
+.result-list {
+    margin-top: 0.4em;
 }
 
 .tag-list a:hover {

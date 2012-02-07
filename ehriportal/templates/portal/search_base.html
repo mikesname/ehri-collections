@@ -56,11 +56,16 @@
             </div>
             <div class="span9">
                 {% if paginator.count %}
+
+                    {% include "portal/_selected_facets.html" %}
+
+                    <div class="result-list">
                     {% block resultlist %}
 
                     {% endblock %}
 
                     {% paginate 2 %}
+                    </div>
                 {% else %}
                     &nbsp;
                 {% endif %}
