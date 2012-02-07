@@ -1,0 +1,20 @@
+"""
+Production settings used to override settings.py on the server.
+"""
+import os
+
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+
+DEBUG = False
+TEMPLATE_DEBUG = DEBUG
+SERVE_MEDIA = DEBUG
+
+ADMINS = [
+    ("Mike", "michael.bryant@kcl.ac.uk"),
+]
+
+STATIC_ROOT = os.path.join(PROJECT_ROOT, "../../../site_media", "static")
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, "../../../site_media", "media")
+
+
+
