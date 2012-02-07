@@ -60,6 +60,7 @@ urlpatterns = patterns('',
         facetclasses = FACETS),
             name='collection_search'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
+        redirect='collection_search',
         form_class=views.FacetListSearchForm,
         model=models.Collection,
         facetclasses=FACETS),

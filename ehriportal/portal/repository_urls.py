@@ -52,6 +52,7 @@ urlpatterns = patterns('',
         facetclasses=FACETS,
         template_name="portal/repository_search.html"), name='repo_search'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
+        redirect='repo_search',
         form_class=views.FacetListSearchForm,
         model=models.Repository,
         facetclasses=FACETS),

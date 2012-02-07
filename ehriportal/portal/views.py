@@ -9,6 +9,7 @@ from django.views.generic import ListView
 from django import forms
 from django.conf import settings
 from django.http import Http404
+from django.core.urlresolvers import reverse
 
 from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
@@ -227,6 +228,7 @@ class PaginatedFacetView(PortalSearchListView):
     paginate_by = 10
     template_name = "portal/facets.html"
     template_name_ajax = "portal/facets_ajax.html"
+    redirect = None
     
     def __init__(self, *args, **kwargs):
         super(PaginatedFacetView, self).__init__(*args, **kwargs)
@@ -255,11 +257,11 @@ class PaginatedFacetView(PortalSearchListView):
     def get_context_data(self, **kwargs):
         extra = super(PaginatedFacetView, self).get_context_data(**kwargs)
         extra["facetclass"] = self.fclass
-        ref = self.request.META.get("HTTP_REFERER")
-        # Fragile hack in case there's no referer - assume the redirect
-        # we want is that minus the facet class name...
-        if ref is None:
-            ref = re.sub("/" + self.fclass.name + "/?", "", self.request.get_full_path())
-        extra["redirect"] = ref
+        # FIXME: This is probably a bit fragile since we're assuming
+        # we redirect to a path like /collections/search
+        extra["redirect"] = self.request.get_full_path()
+        if self.redirect:
+            extra["redirect"] = "%s?%s" % (reverse(self.redirect),
+                    self.request.META.get("QUERY_STRING",""))
         return extra
 
