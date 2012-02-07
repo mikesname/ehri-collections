@@ -246,8 +246,8 @@ class PaginatedFacetView(PortalSearchListView):
             raise Http404
         self.fclass.parse(counts, current)
         if self.form.cleaned_data["sort"] == "count":
-            return [f for f in self.fclass.sorted_by_count() if f.count]
-        return [f for f in self.fclass.sorted_by_name() if f.count]
+            return self.fclass.sorted_by_count()
+        return self.fclass.sorted_by_name()
 
     def get_template_names(self, **kwargs):
         if self.request.is_ajax():
