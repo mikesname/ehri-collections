@@ -102,7 +102,6 @@ class QueryFacetClass(FacetClass):
 
     def parse(self, counts, current):
         self.facets = []
-        print counts
         fqmatch = re.compile("(?P<fname>[^:]+):(?P<query>.+)")
         if not counts.get("queries"):
             return
@@ -133,7 +132,15 @@ class Facet(object):
     def filter_name(self):
         if self.range:
             return '%s:%s' % (self.klass.name, self.name)
-        return '%s:"%s"' % (self.klass.name, self.name)
+        # FIXME: Hack for rare facets with '(', ')', etc
+        # in the name, need to find a cleaner way of 
+        # handling quoting: see 'clean' func in
+        # haystack/backends/__init__.py
+        def clean(val):
+            for char in ['(', ')', '-']:
+                val = val.replace(char, '\\%s' % char)
+            return val
+        return clean('%s:"%s"' % (self.klass.name, self.name))
 
     def facet_param(self):
         return "sf=%s%%3A%s" % (quote(self.klass.name), quote(self.name))
@@ -183,15 +190,14 @@ class PortalSearchListView(ListView):
             if ":" not in facet:
                 continue
             field, value = facet.split(":", 1)
-            # FIXME: This part overrides the base class so that
-            # facet values that match a date math string are NOT
-            # quoted, which screws them up.  This is unfortunate 
-            # and a better way needs to be found
-            if value:
+            # FIXME: everything should be quoted with the
+            # exception of MATH ranges ([* TO X]) which 
+            # we've constructed ourselves. This is a hacky
+            # way of checking for them
+            keyval = u'%s:%s' % (field, value)
+            if not value.startswith("["):
                 keyval = u'%s:"%s"' % (field, sqs.query.clean(value))
-                if INTMATH.match(value):
-                    keyval = u'%s:%s' % (field, value)
-                sqs = sqs.narrow(keyval)
+            sqs = sqs.narrow(keyval)
         self.searchqueryset = sqs
         return self.searchqueryset
 
@@ -201,6 +207,8 @@ class PortalSearchListView(ListView):
         # render them without too much horror in the template.
         counts = self.searchqueryset.facet_counts()
         current = self.searchqueryset.query.narrow_queries
+        print counts
+        print current
         for facetclass in self.facetclasses:
             facetclass.parse(counts, current)
         extra["facet_classes"] = self.facetclasses
