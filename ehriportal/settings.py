@@ -250,8 +250,10 @@ THUMBNAIL_SIZES = (
         (300,300),
 )
 
+# if production settings exists (as it will on the server)
+# import it and override things defined here, like DEBUG
 try:
-    from local_settings import *
+    from production_settings import *
 except ImportError:
     pass
 
