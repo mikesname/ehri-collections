@@ -1,4 +1,4 @@
-{% extends 'site_base.html' %}
+{% extends 'subnav_base.html' %}
 
 {% load i18n %}
 {% load ifsetting_tag %}
@@ -8,70 +8,59 @@
 
 {% block body_class %}{% endblock %}
 
-{% block body_base %}
-    <div class="container">
-        {% include "_messages.html" %}
-        <div class="row">
-            <div class="span3">{% block page_heading %}&nbsp;{% endblock %}</div>
-            <div class="span9">
-                <form method="get" action="{{request.path}}">
-                    <input type="text" name="q" id="id_q" value="{{form.q.value|default_if_none:""}}" class="span5" />
-                        <input type="submit" value="Search">
-                </form>
-            </div>
+{% block subnav %}
+    <div class="search-sidebar">
+        <div class="search-sidebar-heading">
+            {% block page_heading %}{% endblock %}
         </div>
-        <div class="row">
-            <div class="span3">
-                <h2>Search</h2>
-            </div>
-            <div class="span9">
-                <h3>
-                {% if paginator.count %}
-                    {{paginator.count}} Result{{paginator.count|pluralize}}
-                    {% if form.q.value %}
-                    &nbsp;for <i>{{form.q.value}}</i>
-                    {% endif %}
-                {% else %}
-                    {% if form.q.value %}
-                    {% trans "Nothing found for" %} <i>{{form.q.value}}</i>{% if suggestion %}.&nbsp;Did you mean <a               
-                            href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?{% endif %}
-                    {% endif %}
-                {% endif %}
-                </h3>
-            </div>
+        {% if paginator.count %}
+            <h2>Search</h2>
+
+            {% block facets %}
+            <!-- facets go here -->
+                 &nbsp;
+            {% endblock %}
+        {% else %}
+            &nbsp;
+        {% endif %}
+
+    </div>
+{% endblock %}
+
+{% block body %}
+    <form method="get" action="{{request.path}}">
+        <input type="text" name="q" id="id_q" value="{{form.q.value|default_if_none:""}}" class="span5" />
+            <input type="submit" value="Search">
+    </form>
+    <h3>
+        {% if paginator.count %}
+        {% with paginator.count|pluralize as pluralcount %}
+        {{paginator.count}} {% trans "Result"|add:pluralcount %}
+        {% endwith %}
+        {% if form.q.value %}
+        &nbsp;for <i>{{form.q.value}}</i>
+        {% endif %}
+    {% else %}
+        {% if form.q.value %}
+        {% trans "Nothing found for" %} <i>{{form.q.value}}</i>{% if suggestion %}.&nbsp;{% trans "Did you mean" %} <a               
+                href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?{% endif %}
+        {% endif %}
+    {% endif %}
+    </h3>
+    {% if paginator.count %}
+
+        {% include "portal/_selected_facets.html" %}
+
+        <div class="result-list">
+        {% block resultlist %}
+
+        {% endblock %}
+
+        {% paginate 2 %}
         </div>
-        <div class="row">
-            <div class="span3">
-                {% block subnav %}
-                    {% if paginator.count %}
-
-                        {% block facets %}
-                        <!-- facets go here -->
-                             &nbsp;
-                        {% endblock %}
-                    {% else %}
-                    &nbsp;
-                    {% endif %}
-                {% endblock %}
-            </div>
-            <div class="span9">
-                {% if paginator.count %}
-
-                    {% include "portal/_selected_facets.html" %}
-
-                    <div class="result-list">
-                    {% block resultlist %}
-
-                    {% endblock %}
-
-                    {% paginate 2 %}
-                    </div>
-                {% else %}
-                    &nbsp;
-                {% endif %}
-                    </div>
-                </div>
-            </div>
+    {% else %}
+        &nbsp;
+    {% endif %}
         </div>
     </div>
 {% endblock %}

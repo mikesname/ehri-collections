@@ -33,7 +33,7 @@ $(function($) {
         tabLocation: 'left',                               
         speed: 300,                                        
         action: 'click',                                   
-        topPos: '150px',                                   
+        topPos: '50px',                                   
         fixedPosition: true,
         onSlideOut: function() {
         },

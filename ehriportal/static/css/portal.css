@@ -6,6 +6,10 @@ a:hover {
     color: #6C003B;
 }
 
+.search-sidebar-heading {
+    min-height: 50px;
+}
+
 .tag-list a, .selected-facet {
     display: inline-block;
     color: #3E6D8E;
