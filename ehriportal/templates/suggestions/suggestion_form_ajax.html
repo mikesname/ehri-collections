@@ -1,9 +1,8 @@
 {% load i18n %}
 
-<div class="modal-header">
+<div class="well">
     <a href="#" class="close modal-close">&times;</a>
-    <h3>{% trans "Make a suggestion..." %}</h3>
+    {% include "suggestions/_suggestion_form.html" %}
 </div>
-{% include "suggestions/_suggestion_form.html" %}
 
 

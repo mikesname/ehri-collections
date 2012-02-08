@@ -16,6 +16,13 @@ listdict = dict(
 )
 
 class CreateSuggestionView(CreateView):
+    form_prefix = None
+    def get_form_kwargs(self):
+        kwargs = super(CreateSuggestionView, self).get_form_kwargs()
+        if self.form_prefix:
+            kwargs.update({'prefix': self.form_prefix})
+        return kwargs
+
     def get_template_names(self):
         if self.request.is_ajax():
             return ["suggestions/suggestion_form_ajax.html"]
@@ -23,7 +30,8 @@ class CreateSuggestionView(CreateView):
 
 urlpatterns = patterns('',
     url(r'^create/?$', CreateSuggestionView.as_view(
-            form_class=forms.SuggestionForm), name='suggestion_create'),
+            form_class=forms.SuggestionForm,
+            form_prefix="suggestion"), name='suggestion_create'),
     url(r'^detail/(?P<object_id>\d+)/?$', object_detail, listdict,
             name="suggestion_detail"),
     url(r'^list/?$', object_list, listdict,

@@ -135,6 +135,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     
     "notification.context_processors.notification",
     "announcements.context_processors.site_wide_announcements",
+    "suggestions.context_processors.suggestions_form",
 ]
 
 INSTALLED_APPS = [

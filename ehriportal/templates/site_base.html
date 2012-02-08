@@ -12,6 +12,7 @@
 {% endblock %}
 
 {% block extra_head %}
+    <script src="{% static "js/jquery.tabSlideOut.v1.3.js" %}"></script>
     <script src="{% static "js/portal.js" %}"></script>
 {% endblock %}
 
@@ -27,6 +28,19 @@
 
 {% block footer %}
     {% include "_footer.html" %}
+
+    <!-- tab slideOut -->
+    <div class="slide-out-div hidden">
+        <a class="handle" href="http://link-for-non-js-users">Content</a>
+        <div id="suggestions-form">
+            <div id="suggestion-thanks" style="position:absolute;z-index:10;display:none" class="alert alert-success">
+                <h4>Thanks!</h4>
+                You feedback is greatly appreciated.
+            </div>
+            {% include "suggestions/suggestion_form_ajax.html" with form=suggestionform %}
+        </div>
+    </div>
+    
 {% endblock %}
 
 {% block extra_body_base %}
