@@ -144,6 +144,14 @@ def update_solr_schema():
             run('sleep 10')
             rebuild_index()
 
+def reset_south():
+    """Reset the south table."""
+    with virtualenv():
+        with cd("%(path)s/releases/current/%(project_name)s" % env):
+            run('python manage.py reset south --noinput')
+            run('rm -r portal/migrations')
+            run('python manage.py convert_to_south portal')
+
 def update_index():
     """Rebuild document index from database."""
     with virtualenv():
