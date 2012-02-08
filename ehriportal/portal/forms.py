@@ -4,7 +4,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 
 from haystack.forms import FacetedSearchForm
-from ehriportal.portal import views
+from portal import views
 
 class SearchForm(forms.Form):
     q = forms.CharField(required=False, label=_('Search'))

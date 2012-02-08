@@ -1,8 +1,8 @@
 import datetime
 from haystack.indexes import *
 from haystack import site
-from ehriportal.portal.models import Repository, Collection
-from ehriportal.portal import utils
+from portal.models import Repository, Collection
+from portal import utils
 
 from incf.countryutils import data as countrydata
 

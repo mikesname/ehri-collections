@@ -3,7 +3,7 @@ from django.template import Library
 
 register = Library()
 
-from ehriportal.portal import utils
+from portal import utils
 
 @register.filter
 def langname(code):

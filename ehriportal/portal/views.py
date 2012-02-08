@@ -14,7 +14,7 @@ from django.core.urlresolvers import reverse
 from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
 
-from ehriportal.portal import models
+from portal import models
 
 FACET_SORT_COUNT = 0
 FACET_SORT_NAME = 1

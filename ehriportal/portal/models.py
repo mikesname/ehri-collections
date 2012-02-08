@@ -12,8 +12,8 @@ from django.conf import settings
 from taggit.managers import TaggableManager
 from autoslug import AutoSlugField
 
-from ehriportal.portal import utils
-from ehriportal.portal.thumbs import ImageWithThumbsField
+from portal import utils
+from portal.thumbs import ImageWithThumbsField
 
 from south.modelsinspector import add_introspection_rules
 
@@ -32,7 +32,7 @@ add_introspection_rules(
             },
         ),
     ],
-    ["^ehriportal\.portal\.thumbs\.ImageWithThumbsField",]
+    ["^portal\.thumbs\.ImageWithThumbsField",]
 )
 
 

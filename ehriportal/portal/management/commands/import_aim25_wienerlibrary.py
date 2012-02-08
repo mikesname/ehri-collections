@@ -14,7 +14,7 @@ import babel
 from django.db import transaction
 from django.core.management.base import BaseCommand, CommandError
 
-from ehriportal.portal import models
+from portal import models
 
 from BeautifulSoup import BeautifulSoup, BeautifulStoneSoup
 

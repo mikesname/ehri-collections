@@ -10,7 +10,7 @@ import httplib2
 import json
 
 from django.core.management.base import BaseCommand, CommandError
-from ehriportal.portal.models import Repository as DjRepository, \
+from portal.models import Repository as DjRepository, \
         Contact as DjContact, Collection, OtherName
 
 from incf.countryutils import data as countrydata

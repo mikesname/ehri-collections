@@ -3,7 +3,7 @@ Admin config for models.
 """
 from django.contrib import admin
 #from modeltranslation.admin import TranslationAdmin
-from ehriportal.portal.models import Repository, Collection, ResourceImage
+from portal.models import Repository, Collection, ResourceImage
 
 #class PortalAdmin(TranslationAdmin):
 #    """Translatable admin page."""

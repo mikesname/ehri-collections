@@ -6,8 +6,8 @@ from django.views.generic.list_detail import object_detail, object_list
 from django.contrib.auth.decorators import login_required
 from haystack.query import SearchQuerySet
 
-from ehriportal.portal import views, forms, models
-from ehriportal.portal.views import FacetPoint, FacetClass, QueryFacetClass
+from portal import views, forms, models
+from portal.views import FacetPoint, FacetClass, QueryFacetClass
 
 FACETS = [
     QueryFacetClass(

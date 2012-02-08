@@ -5,8 +5,8 @@ from django.views.generic import ListView
 from django.views.generic.list_detail import object_detail, object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required
-from ehriportal.portal import views, forms, models
-from ehriportal.portal.views import FacetClass
+from portal import views, forms, models
+from portal.views import FacetClass
 
 from haystack.query import SearchQuerySet
 
