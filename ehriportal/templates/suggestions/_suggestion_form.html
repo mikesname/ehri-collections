@@ -1,0 +1,19 @@
+{% load bootstrap_tags %}
+
+<form class="form-horizontal well" method="POST" action="{% url suggestion_create %}">
+    <fieldset>
+        <div class="modal-body">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="control-group">
+                {{field}}
+            </div>
+            {% endfor %}
+            <div style="display:none"></div>
+        </div>
+        <div class="form-actions modal-footer">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+    </fieldset>
+</form>
+

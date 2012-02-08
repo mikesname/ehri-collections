@@ -189,6 +189,7 @@ INSTALLED_APPS = [
 
     # our apps
     "portal",
+    "suggestions",
 ]
 
 FIXTURE_DIRS = [

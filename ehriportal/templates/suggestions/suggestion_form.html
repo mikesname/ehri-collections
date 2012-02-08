@@ -1,0 +1,16 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+
+{% block head_title %}{{object.name}}{% endblock %}
+
+{% block body_class %}suggestions{% endblock %}
+
+{% block body %}
+
+    {% include "suggestions/_suggestion_form.html" %}
+
+{% endblock %}
+
+

@@ -25,6 +25,7 @@ urlpatterns = patterns("",
     url(r"^announcements/", include("announcements.urls")),
     url(r"^repositories/", include("portal.repository_urls")),
     url(r"^collections/", include("portal.collection_urls")),
+    url(r"^suggestions/", include("suggestions.urls")),
 )
 
 
