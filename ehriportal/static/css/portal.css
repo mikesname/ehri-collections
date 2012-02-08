@@ -1,9 +1,9 @@
 a {
-    color: #636;
+    color: #6C003B;
 }
 
 a:hover {
-    color: #639;
+    color: #6C003B;
 }
 
 .tag-list a, .selected-facet {
@@ -56,7 +56,7 @@ a:hover {
 }
 
 .selected-filter {
-    color: rgb(0, 128, 0);
+    color: #3E6D8E;
 }
 
 .result-paginator {
