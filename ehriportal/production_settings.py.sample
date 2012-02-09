@@ -16,5 +16,6 @@ ADMINS = [
 STATIC_ROOT = os.path.join(PROJECT_ROOT, "../../../site_media", "static")
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, "../../../site_media", "media")
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 

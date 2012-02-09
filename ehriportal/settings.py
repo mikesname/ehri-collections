@@ -255,6 +255,10 @@ THUMBNAIL_SIZES = (
 # if production settings exists (as it will on the server)
 # import it and override things defined here, like DEBUG
 try:
+    from devel_settings import *
+except ImportError:
+    pass
+try:
     from production_settings import *
 except ImportError:
     pass
