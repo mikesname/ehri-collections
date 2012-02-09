@@ -28,7 +28,8 @@
             <h3>{% trans "Keywords" %}</h3>
             <div class="tag-list">
                 {% for tag in object.tag_list %}
-                <a href="{% url collection_search %}?sf=tags{{":"|add:tag.name|urlencode}}">
+                {# FIXME: The url here will break for tags with a space in them. #}
+                <a href="{% url collection_search %}?tag={{":"|add:tag.name|urlencode}}">
                     {{tag.name}}
                 </a>
                 {% endfor %}
