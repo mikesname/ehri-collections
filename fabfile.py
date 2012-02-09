@@ -116,6 +116,8 @@ def activate_production_settings():
     folder where they will be imported by settings.py"""
     require("path", "release")
     with cd(env.path):
+        put("%(project_name)s/production_settings.py.sample" % env,
+                "shared/production_settings.py") 
         run("cp shared/production_settings.py releases/%(release)s/%(project_name)s/production_settings.py" % env)
 
 
