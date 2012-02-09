@@ -2,7 +2,6 @@
 
 import re
 import datetime
-from urllib import quote
 
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import ListView
@@ -11,141 +10,9 @@ from django.conf import settings
 from django.http import Http404
 from django.core.urlresolvers import reverse
 
-from haystack.forms import FacetedSearchForm
 from haystack.query import SearchQuerySet
 
 from portal import models
-
-FACET_SORT_COUNT = 0
-FACET_SORT_NAME = 1
-
-INTMATH = re.compile("\[(?:(?P<from>\d{4})|(\*))\sTO\s(?:(?P<to>\d{4})|(\*))\]")
-
-class FacetPoint(object):
-    """Class representing a Query Facet point."""
-    def __init__(self, point, desc=None):
-        self.range = isinstance(point, tuple)
-        self.point = point
-        self.desc = desc if desc else str(point)
-
-    def __str__(self):
-        if self.range:
-            return u"[%s TO %s]" % self.point
-        return str(self.point)
-
-
-class DateFacetPoint(object):
-    """Specialisation of FacetPoint for dates, where
-    each point is either a datetime.datetime object 
-    or a string, such as glob ("*")."""
-    def _strpoint(self, p):
-        if isinstance(p, basestring):
-            return p
-        return p.isoformat() + "Z"
-
-    def __str__(self):
-        if self.range:
-            return u"[%s TO %s]" % (self._strpoint(p[0]), self._strpoint(p[1]))
-        return str(self.point)
-            
-
-class FacetClass(object):
-    """Class representing a facet with multiple values
-    to filter on. i.e. keywords => [foo, bar ...]"""
-    def __init__(self, name, prettyname, sort=FACET_SORT_COUNT):
-        self.name = name
-        self.prettyname = prettyname
-        self.sort = sort
-        self.facets = []
-
-    def sorted_facets(self):
-        if self.sort == FACET_SORT_COUNT:
-            return self.sorted_by_count()
-        return self.sorted_by_name()
-
-    def sorted_by_name(self):
-        return [f for f in sorted(self.facets, key=lambda k: k.name) \
-                if f.count > 0]
-
-    def sorted_by_count(self):
-        return [f for f in sorted(self.facets, key=lambda k: -k.count) \
-                if f.count > 0]
-
-    def apply(self, queryset):
-        """Apply the facet to the search query set."""
-        return queryset.facet(self.name)
-    
-    def parse(self, counts, current):
-        """Parse the facet_counts structure returns from
-        the Haystack query."""
-        self.facets = []
-        flist = counts.get("fields", {}).get(self.name)
-        for item, count in flist:
-            self.facets.append(Facet(self, item, count, current))
-
-    def __repr__(self):
-        return u"<%s: %s (%d)" % (
-                self.__class__.__name__, self.name, len(self.facets))
-
-    def __unicode__(self):
-        return self.prettyname
-
-
-class QueryFacetClass(FacetClass):
-    """Class representing a query facet."""
-    def __init__(self, *args, **kwargs):
-        self.points = kwargs.pop("points", [])
-        super(QueryFacetClass, self).__init__(*args, **kwargs)
-
-    def sorted_by_name(self):
-        """Name sort should respect the order in which
-        the Query facet points were added in the point spec."""
-        return [f for f in self.facets if f.count > 0]
-
-    def parse(self, counts, current):
-        self.facets = []
-        fqmatch = re.compile("(?P<fname>[^:]+):(?P<query>.+)")
-        if not counts.get("queries"):
-            return
-        for point in self.points:
-            count = counts["queries"].get("%s:%s" % (self.name, point))
-            self.facets.append(Facet(
-                self, str(point), count, current,
-                pretty=point.desc, isrange=point.range))
-
-    def apply(self, queryset):
-        """Apply the facet to the search query set."""
-        for point in self.points:
-            queryset = queryset.query_facet(self.name, str(point))
-        return queryset
-
-
-class Facet(object):
-    """Class representing an individual facet constraint,
-    i.e. 'language:Afrikaans'."""
-    def __init__(self, klass, name, count, selected, pretty=None, isrange=False):
-        self.name = name
-        self.klass = klass
-        self.count = count
-        self.range = isrange
-        self.selected = self.filter_name() in selected
-        self.prettyname = pretty if pretty else name
-
-    def filter_name(self):
-        if self.range:
-            return '%s:%s' % (self.klass.name, self.name)
-        # FIXME: Hack for rare facets with '(', ')', etc
-        # in the name, need to find a cleaner way of 
-        # handling quoting: see 'clean' func in
-        # haystack/backends/__init__.py
-        def clean(val):
-            for char in ['(', ')', '-']:
-                val = val.replace(char, '\\%s' % char)
-            return val
-        return clean('%s:"%s"' % (self.klass.name, self.name))
-
-    def facet_param(self):
-        return "sf=%s%%3A%s" % (quote(self.klass.name), quote(self.name))
 
 
 class SearchForm(forms.Form):
@@ -186,20 +53,9 @@ class PortalSearchListView(ListView):
             if self.form.cleaned_data["q"]:
                 sqs = sqs.auto_query(self.form.cleaned_data["q"])
 
-        # We need to process each facet to ensure that the field name and the
-        # value are quoted correctly and separately:
-        for facet in self.request.GET.getlist("sf"):
-            if ":" not in facet:
-                continue
-            field, value = facet.split(":", 1)
-            # FIXME: everything should be quoted with the
-            # exception of MATH ranges ([* TO X]) which 
-            # we've constructed ourselves. This is a hacky
-            # way of checking for them
-            keyval = u'%s:%s' % (field, value)
-            if not value.startswith("["):
-                keyval = u'%s:"%s"' % (field, sqs.query.clean(value))
-            sqs = sqs.narrow(keyval)
+        for facetclass in self.facetclasses:
+            sqs = facetclass.narrow(sqs, self.request.GET)
+
         self.searchqueryset = sqs
         return self.searchqueryset
 
@@ -209,6 +65,7 @@ class PortalSearchListView(ListView):
         # render them without too much horror in the template.
         counts = self.searchqueryset.facet_counts()
         current = self.searchqueryset.query.narrow_queries
+        print current
         for facetclass in self.facetclasses:
             facetclass.parse(counts, current)
         extra["facet_classes"] = self.facetclasses

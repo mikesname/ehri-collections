@@ -7,23 +7,23 @@ from django.contrib.auth.decorators import login_required
 from haystack.query import SearchQuerySet
 
 from portal import views, forms, models
-from portal.views import FacetPoint, FacetClass, QueryFacetClass
+from portal.haystack_util import QueryFacet, FacetClass, QueryFacetClass
 
 FACETS = [
     QueryFacetClass(
         "years_exact",
         "Date",
-        sort=views.FACET_SORT_NAME,
-        points=[
-            FacetPoint(("*", 1933), "Before 1933"),
-            FacetPoint((1933, 1939), "1933-1939"),
-            FacetPoint(1940),
-            FacetPoint(1941),
-            FacetPoint(1942),
-            FacetPoint(1943),
-            FacetPoint(1944),
-            FacetPoint(1945),
-            FacetPoint((1946, "*"), "After 1945"),
+        sort=FacetClass.FACET_SORT_NAME,
+        queries=[
+            QueryFacet(query=("*", 1933), desc="Before 1933"),
+            QueryFacet(query=(1933, 1939), desc="1933-1939"),
+            QueryFacet(query=1940),
+            QueryFacet(query=1941),
+            QueryFacet(query=1942),
+            QueryFacet(query=1943),
+            QueryFacet(query=1944),
+            QueryFacet(query=1945),
+            QueryFacet(query=(1946, "*"), desc="After 1945"),
         ]
     ),
     FacetClass(
