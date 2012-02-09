@@ -19,6 +19,11 @@ a:hover {
     padding: 0.2em 0.4em;
     margin-right: 0.2em;
     margin-bottom: 0.4em;
+    margin-bottom: 0.4em;
+}
+
+.selected-facet-list {
+    margin-top: 0.4em;
 }
 
 .result-list {
