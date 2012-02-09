@@ -1,10 +1,11 @@
-{% load facetparam %}
 {% load addparam %}
 
+<div class="selected-facet-list">
 {% for fclass in facet_classes %}
-    {% for facet in fclass.sorted_by_name %}
+    {% for facet in fclass.all_sorted_by_name %}
         {% if facet.selected %}
             {% with facet.facet_param as param %}
+            <input type="hidden" name="{{fclass.name}}" value="{{facet.name}}" />
             <span class="selected-facet">
                 {{fclass.prettyname}}: {{facet.prettyname}} <a class="remove-filter"
         href="{{request.get_full_path|removeparam:param|stripparam:"page"}}"><i
@@ -14,4 +15,5 @@
         {% endif %}
     {% endfor %}
 {% endfor %}
+</div>
 
