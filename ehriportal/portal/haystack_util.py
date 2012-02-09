@@ -17,9 +17,10 @@ class FacetClass(object):
     FACET_SORT_COUNT = 0
     FACET_SORT_NAME = 1
 
-    def __init__(self, name, prettyname, sort=FACET_SORT_COUNT):
+    def __init__(self, name, prettyname, sort=FACET_SORT_COUNT, paramname=None):
         self.name = name
         self.prettyname = prettyname
+        self.paramname = paramname if paramname else name
         self.sort = sort
         self.facets = []
 
@@ -59,11 +60,10 @@ class FacetClass(object):
     def __unicode__(self):
         return self.prettyname
 
-    def narrow(self, queryset, params):
+    def narrow(self, queryset, active):
         """Narrow the queryset appropriately if one if
         our points is in the params."""
-        activefacets = params.getlist(self.name)
-        for facet in activefacets:
+        for facet in active:
             queryset = queryset.narrow('%s:"%s"' % (self.name, 
                 queryset.query.clean(facet)))
         return queryset
@@ -98,11 +98,10 @@ class QueryFacetClass(FacetClass):
             queryset = queryset.query_facet(self.name, facet.querystr())
         return queryset
 
-    def narrow(self, queryset, params):
+    def narrow(self, queryset, active):
         """Narrow the queryset appropriately if one if
         our points is in the params."""
-        activepoints = params.getlist(self.name)
-        for pname in activepoints:
+        for pname in active:
             point = [p for p in self.facets if str(p) == pname][0]
             queryset = queryset.narrow(point.query())
         return queryset
@@ -137,7 +136,7 @@ class Facet(object):
         return clean('%s:"%s"' % (self.klass.name, self.name))
 
     def facet_param(self):
-        return "%s=%s" % (self.klass.name, quote_plus(self.name))
+        return "%s=%s" % (self.klass.paramname, quote_plus(self.name))
 
 
 class QueryFacet(Facet):

@@ -54,7 +54,8 @@ class PortalSearchListView(ListView):
                 sqs = sqs.auto_query(self.form.cleaned_data["q"])
 
         for facetclass in self.facetclasses:
-            sqs = facetclass.narrow(sqs, self.request.GET)
+            sqs = facetclass.narrow(sqs, self.request.GET.getlist(
+                facetclass.paramname))
 
         self.searchqueryset = sqs
         return self.searchqueryset

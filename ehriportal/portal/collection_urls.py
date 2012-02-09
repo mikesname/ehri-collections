@@ -13,6 +13,7 @@ FACETS = [
     QueryFacetClass(
         "years_exact",
         "Date",
+        paramname="date",
         sort=FacetClass.FACET_SORT_NAME,
         queries=[
             QueryFacet(query=("*", 1933), desc="Before 1933"),
@@ -28,19 +29,23 @@ FACETS = [
     ),
     FacetClass(
         "languages_of_description",
-        "Language of Description"
+        "Language of Description",
+        paramname="langdesc"
     ),
     FacetClass(
         "languages",
-        "Language"
+        "Language",
+        paramname="lang"
     ),
     FacetClass(
         "location_of_materials",
-        "Location of Materials"
+        "Location of Materials",
+        paramname="country",
     ),
     FacetClass(
         "tags",
-        "Keyword"
+        "Keyword",
+        paramname="tag"
     ),
 ]
 
