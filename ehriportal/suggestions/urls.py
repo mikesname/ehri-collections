@@ -16,17 +16,18 @@ listdict = dict(
 )
 
 class CreateSuggestionView(CreateView):
-    form_prefix = None
     def get_form_kwargs(self):
         kwargs = super(CreateSuggestionView, self).get_form_kwargs()
-        if self.form_prefix:
-            kwargs.update({'prefix': self.form_prefix})
-        if kwargs.get("data"):
-            data = kwargs["data"].copy()
-            data["meta"] = self.request.META
-            kwargs["data"] = data
-            print "Updated META with: %s" % self.request.META
+        if self.request.is_ajax():
+            kwargs.update({'prefix': "suggestion"})
         return kwargs
+
+    def form_valid(self, form):
+        """Extract the instance from the form and insert
+        request metadata."""
+        object = form.instance
+        object.meta = models.get_suggestion_meta(self.request)
+        return super(CreateSuggestionView, self).form_valid(form)
 
     def get_template_names(self):
         if self.request.is_ajax():
@@ -35,8 +36,8 @@ class CreateSuggestionView(CreateView):
 
 urlpatterns = patterns('',
     url(r'^create/?$', CreateSuggestionView.as_view(
-            form_class=forms.SuggestionForm,
-            form_prefix="suggestion"), name='suggestion_create'),
+            form_class=forms.SuggestionForm),
+                name='suggestion_create'),
     url(r'^detail/(?P<object_id>\d+)/?$', object_detail, listdict,
             name="suggestion_detail"),
     url(r'^list/?$', object_list, listdict,

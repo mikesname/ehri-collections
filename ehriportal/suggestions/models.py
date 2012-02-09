@@ -4,6 +4,29 @@ import datetime
 from django.db import models
 import jsonfield
 
+
+GRAB_META = [
+        "HTTP_USER_AGENT",
+        "HTTP_HOST",
+        "REMOTE_HOST",
+        "HTTP_ACCEPT",
+        "HTTP_REFERER",
+        "REMOTE_ADDR",
+        "CONTEXT_TYPE",
+        "HTTP_ACCEPT_LANGUAGE",
+        "QUERY_STRING",
+]
+
+def get_suggestion_meta(request):
+    """Return a dictionary of interesting things about
+    a request that we want to store with the suggestion,
+    since it might give some useful extra context."""
+    meta = dict([(k, v) for k, v in request.META.iteritems() \
+            if k in GRAB_META])
+    meta["FULL_PATH"] = request.get_full_path()
+    return meta
+
+
 class Suggestion(models.Model):
     """Suggestion class."""
     name = models.CharField(max_length=255)
