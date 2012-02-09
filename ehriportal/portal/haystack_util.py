@@ -102,7 +102,13 @@ class QueryFacetClass(FacetClass):
         """Narrow the queryset appropriately if one if
         our points is in the params."""
         for pname in active:
-            point = [p for p in self.facets if str(p) == pname][0]
+            # this shouldn't happen unless people diddle with
+            # the params, in which case they don't deserve any
+            # results
+            try:
+                point = [p for p in self.facets if str(p) == pname][0]
+            except IndexError:
+                continue
             queryset = queryset.narrow(point.query())
         return queryset
 
