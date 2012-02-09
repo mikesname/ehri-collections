@@ -2,27 +2,16 @@
 
 import datetime
 from django.db import models
-
-
-class SuggestionType(models.Model):
-    """Category for suggestions."""
-    name = models.CharField(max_length=255)
-
-    def __unicode__(self):
-        return self.name
+import jsonfield
 
 class Suggestion(models.Model):
     """Suggestion class."""
     name = models.CharField(max_length=255)
     email = models.EmailField(null=True, blank=True)
-    types = models.ManyToManyField(SuggestionType)
     text = models.TextField()
+    meta = jsonfield.JSONField(null=True)
     created_on = models.DateTimeField(editable=False)
     updated_on = models.DateTimeField(editable=False, null=True, blank=True)
-
-    def type_list(self):
-        """Shortcut for fetching a list of types."""
-        return [t.name for t in self.types.all()]
 
     def save(self, *args, **kwargs):
         if not self.id:

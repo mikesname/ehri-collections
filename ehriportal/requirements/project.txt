@@ -16,5 +16,6 @@ south
 django-taggit
 django-autoslug
 django-haystack
+django-jsonfield
 django-modeltranslation
 

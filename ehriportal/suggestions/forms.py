@@ -10,12 +10,10 @@ class SuggestionForm(forms.ModelForm):
             widget=forms.TextInput(attrs={'placeholder': _('Name')}))
     email = forms.EmailField(label=_("Email"), required=False,
             widget=forms.TextInput(attrs={'placeholder': _('Email (Optional)')}))
-    types = forms.ModelMultipleChoiceField(
-                required=False,
-                queryset=models.SuggestionType.objects.all().order_by(_("name")))
+    meta = forms.CharField(widget=forms.HiddenInput())
     text = forms.CharField(widget=forms.Textarea(
                 attrs={'rows':5, 'placeholder': _("Let us know what you think...")}))
 
     class Meta:
         model = models.Suggestion
-        fields = ("name", "email", "types", "text",)
+        fields = ("name", "email", "text",)

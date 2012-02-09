@@ -44,12 +44,12 @@ $(function($) {
     // handle suggestion form submission... this is a bit
     // gross and fragile.
     var emailregexp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    $("#id_suggestion-name, #id_suggestion-text").keyup(function(event) {
+    $("#id_suggestion-name, #id_suggestion-text, #id_suggestion-email").keyup(function(event) {
         var name = $.trim($("#id_suggestion-name").val());
         var text = $.trim($("#id_suggestion-text").val());
         var email = $.trim($("#id_suggestion-email").val());
         // email is not reqired, so only check it if filled in
-        var emailvalid = email !== "" && email.match(emailregexp);
+        var emailvalid = (email === "" || email !== "" && email.match(emailregexp));
         var ok = name !== "" && text !== "" && emailvalid;
         $("#submit-suggestion").prop("disabled", !ok);
     });

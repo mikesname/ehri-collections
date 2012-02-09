@@ -21,6 +21,11 @@ class CreateSuggestionView(CreateView):
         kwargs = super(CreateSuggestionView, self).get_form_kwargs()
         if self.form_prefix:
             kwargs.update({'prefix': self.form_prefix})
+        if kwargs.get("data"):
+            data = kwargs["data"].copy()
+            data["meta"] = self.request.META
+            kwargs["data"] = data
+            print "Updated META with: %s" % self.request.META
         return kwargs
 
     def get_template_names(self):
