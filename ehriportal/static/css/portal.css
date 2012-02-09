@@ -99,13 +99,13 @@ a:hover {
     opacity: 0.6;
 }
 
-#suggestions-form {
+#suggestion-form {
     -webkit-box-shadow: 2px 2px 15px rgba(50, 50, 50, 0.3);
     -moz-box-shadow:    2px 2px 15px rgba(50, 50, 50, 0.3);
     box-shadow:         2px 2px 15px rgba(50, 50, 50, 0.3);
 }
 
-#suggestions-form .well {
+#suggestion-form .well {
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     border-bottom-right-radius: 4px;

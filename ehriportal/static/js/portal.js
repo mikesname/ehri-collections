@@ -43,32 +43,39 @@ $(function($) {
 
     // handle suggestion form submission... this is a bit
     // gross and fragile.
-    var emailregexp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    $("#id_suggestion-name, #id_suggestion-text, #id_suggestion-email").keyup(function(event) {
-        var name = $.trim($("#id_suggestion-name").val());
-        var text = $.trim($("#id_suggestion-text").val());
-        var email = $.trim($("#id_suggestion-email").val());
+    var form = $("#suggestion-form"),
+        submit = $("button[type='submit']", form),
+        thanks = $(".alert-success", form),
+        name = $("#id_suggestion-name", form),
+        text = $("#id_suggestion-text", form),
+        email = $("#id_suggestion-email", form),
+        emailregexp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+    name.add(text).add(email).keyup(function(event) {
+        var nameval = $.trim(name.val());
+        var textval = $.trim(text.val());
+        var emailval = $.trim(email.val());
         // email is not reqired, so only check it if filled in
-        var emailvalid = (email === "" || email !== "" && email.match(emailregexp));
-        var ok = name !== "" && text !== "" && emailvalid;
-        $("#submit-suggestion").prop("disabled", !ok);
+        var emailvalid = (emailval === "" || emailval !== "" && emailval.match(emailregexp));
+        var ok = nameval !== "" && textval !== "" && emailvalid;
+        submit.prop("disabled", !ok);
     });
 
-    $("#suggestions-form").find(".modal-close").click(function() {
+    $(".modal-close", form).click(function() {
         $(".slide-out-div > .handle").click(); 
     });
 
-    $("#submit-suggestion").click(function(event) {
+    submit.prop("disabled", true).click(function(event) {
         event.preventDefault();
-        var form = $(this).closest("form");
-        $.post(form.attr("action"), form.serialize(), function(data, textStatus) {
+        submit.prop("disabled", true);
+        var formele = $(this).closest("form");
+        $.post(formele.attr("action"), formele.serialize(), function(data, textStatus) {
             // FIXME: This is rubbish.
-            var thanks = $("#suggestion-thanks");            
             thanks.width(thanks.parent().width() - (thanks.outerWidth(true) - thanks.width()));
             thanks.slideDown(500, function() {
                 setTimeout(function() {
                     $(".slide-out-div > .handle").click();
-                    $("#id_suggestion-text").val("");
+                    text.val("");
                     thanks.slideUp(500); 
                 }, 1000);
             });
