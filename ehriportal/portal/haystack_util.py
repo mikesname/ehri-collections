@@ -4,10 +4,7 @@
 
 import re
 import datetime
-
 from urllib import quote_plus
-
-
 
 
 class FacetClass(object):
@@ -17,7 +14,8 @@ class FacetClass(object):
     FACET_SORT_COUNT = 0
     FACET_SORT_NAME = 1
 
-    def __init__(self, name, prettyname, sort=FACET_SORT_COUNT, paramname=None):
+    def __init__(self, name, prettyname, sort=FACET_SORT_COUNT,
+                paramname=None):
         self.name = name
         self.prettyname = prettyname
         self.paramname = paramname if paramname else name
@@ -43,7 +41,7 @@ class FacetClass(object):
     def apply(self, queryset):
         """Apply the facet to the search query set."""
         return queryset.facet(self.name)
-    
+
     def parse(self, counts, current):
         """Parse the facet_counts structure returns from
         the Haystack query."""
@@ -64,7 +62,7 @@ class FacetClass(object):
         """Narrow the queryset appropriately if one if
         our points is in the params."""
         for facet in active:
-            queryset = queryset.narrow('%s:"%s"' % (self.name, 
+            queryset = queryset.narrow('%s:"%s"' % (self.name,
                 queryset.query.clean(facet)))
         return queryset
 
@@ -84,11 +82,11 @@ class QueryFacetClass(FacetClass):
         return [f for f in self.facets if f.count > 0]
 
     def parse(self, counts, current):
-        fqmatch = re.compile("(?P<fname>[^:]+):(?P<query>.+)")
         if not counts.get("queries"):
             return
         for facet in self.facets:
-            count = counts["queries"].get("%s:%s" % (self.name, facet.querystr()))
+            count = counts["queries"].get("%s:%s" % (
+                    self.name, facet.querystr()))
             facet.count = count
             facet._selected = current
 
@@ -113,11 +111,11 @@ class QueryFacetClass(FacetClass):
         return queryset
 
 
-
 class Facet(object):
     """Class representing an individual facet constraint,
     i.e. 'language:Afrikaans'."""
-    def __init__(self, name, klass=None, count=None, selected=[], desc=None):
+    def __init__(self, name, klass=None, count=None,
+                selected=[], desc=None):
         self.name = name
         self.klass = klass
         self.count = count
@@ -132,7 +130,7 @@ class Facet(object):
 
     def filter_name(self):
         # FIXME: Hack for rare facets with '(', ')', etc
-        # in the name, need to find a cleaner way of 
+        # in the name, need to find a cleaner way of
         # handling quoting: see 'clean' func in
         # haystack/backends/__init__.py
         def clean(val):
@@ -158,6 +156,13 @@ class QueryFacet(Facet):
     def query(self):
         return u"%s:%s" % (self.klass.name, self.querystr())
 
+    def querystr(self):
+        if self.range:
+            return u"[%s TO %s]" % (
+                    self._qpoint(self.point[0]),
+                        self._qpoint(self.point[1]))
+        return str(self.point)
+
     def filter_name(self):
         return "%s:%s" % (self.klass.name, str(self))
 
@@ -178,22 +183,12 @@ class QueryFacet(Facet):
                         self._strpoint(self.point[1]))
         return str(self.point)
 
-    def querystr(self):
-        if self.range:
-            return u"[%s TO %s]" % (
-                    self._qpoint(self.point[0]),
-                        self._qpoint(self.point[1]))
-        return str(self.point)
-            
 
 class DateQueryFacet(QueryFacet):
     """Specialisation of QueryFacet for dates, where
-    each point is either a datetime.datetime object 
+    each point is either a datetime.datetime object
     or a string, such as glob ("*")."""
-    def _strpoint(self, p):
+    def _qpoint(self, p):
         if isinstance(p, basestring):
             return p
         return p.isoformat() + "Z"
-
-
-
