@@ -104,7 +104,7 @@ a:hover {
     opacity: 0.6;
 }
 
-#suggestion-form {
+.slide-out-div.open #suggestion-form {
     -webkit-box-shadow: 2px 2px 15px rgba(50, 50, 50, 0.3);
     -moz-box-shadow:    2px 2px 15px rgba(50, 50, 50, 0.3);
     box-shadow:         2px 2px 15px rgba(50, 50, 50, 0.3);
