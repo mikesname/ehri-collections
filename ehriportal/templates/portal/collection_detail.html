@@ -27,7 +27,7 @@
             <div class="tag-list">
                 {% for tag in object.tag_list %}
                 {# FIXME: The url here will break for tags with a space in them. #}
-                <a href="{% url collection_search %}?tag={{":"|add:tag.name|urlquote_plus}}">
+                <a href="{% url collection_search %}?tag={{tag.name|quote_plus}}">
                     {{tag.name}}
                 </a>
                 {% endfor %}

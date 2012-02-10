@@ -7,7 +7,9 @@ from portal import utils
 
 register = Library()
 
-register.filter(urlquote_plus)
+@register.filter
+def quote_plus(string):
+    return urlquote_plus(string)
 
 @register.filter
 def addparam(url, param):
