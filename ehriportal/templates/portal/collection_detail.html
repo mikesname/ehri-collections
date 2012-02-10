@@ -2,9 +2,7 @@
 
 {% load i18n %}
 {% load ifsetting_tag %}
-{% load getattribute %}
-{% load formatattr %}
-{% load langname %}
+{% load portal_tags %}
 
 {% block head_title %}{{object.name}}{% endblock %}
 
@@ -29,7 +27,7 @@
             <div class="tag-list">
                 {% for tag in object.tag_list %}
                 {# FIXME: The url here will break for tags with a space in them. #}
-                <a href="{% url collection_search %}?tag={{":"|add:tag.name|urlencode}}">
+                <a href="{% url collection_search %}?tag={{":"|add:tag.name|urlquote_plus}}">
                     {{tag.name}}
                 </a>
                 {% endfor %}
@@ -64,7 +62,7 @@
                             <strong>{% trans "Languages:" %}</strong>
                             {% for lang in object.languages %}
                             <br />
-                            {{ lang|langname }}
+                            {{ lang|langcode2name }}
                             {% endfor %}
                         </td>
                     </tr>

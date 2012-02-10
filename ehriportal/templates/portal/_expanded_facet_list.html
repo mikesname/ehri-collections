@@ -1,5 +1,5 @@
 {% load i18n %}
-{% load addparam %}
+{% load portal_tags %}
 {% load pagination_tags %}
 
 {% block body %}
@@ -27,8 +27,9 @@
                 {% if facet.selected %}
                 <span class="selected-filter">
                     {{facet.name}}<a class="remove-filter"
-                        href="{{redirect|removeparam:facet.facet_param|stripparam:"page,sort"}}"><i
-                            class="icon-remove"></i></a>
+                        href="{{redirect|removeparam:facet.facet_param|stripparam:"page,sort"}}"
+                        ><i class="icon-remove"></i>
+                    </a>
                 </span>
                 {% else %}
                     <a href="{{redirect|addparam:facet.facet_param|stripparam:"page,sort"}}">{{facet.name}}</a>

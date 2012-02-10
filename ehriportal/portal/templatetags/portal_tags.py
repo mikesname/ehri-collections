@@ -1,8 +1,13 @@
 import re
 
 from django.template import Library
+from django.utils.http import urlquote_plus
+
+from portal import utils
 
 register = Library()
+
+register.filter(urlquote_plus)
 
 @register.filter
 def addparam(url, param):
@@ -34,4 +39,16 @@ def stripparam(url, paramnames):
         url = url[:-1]
     return url
     
+@register.filter
+def langcode2name(code):
+    """Creates a haystack facet parameter in format:
+        &selected_facets=<name>_exact:<value>"""
+    return utils.language_name_from_code(code)
+
+@register.filter
+def us2title(value):
+    """Formats an object's nested attribute for display"""
+    value = value.split(".")[-1]
+    return " ".join([p.capitalize() for p in value.split("_")])
+
     
