@@ -1,6 +1,10 @@
+import os
 import sys
-sys.path.insert(0, "/home/michaelb/ehri-collections/lib/python2.6/site-packages")
-sys.path.insert(0, "/home/michaelb/ehri-collections/releases/current/ehriportal")
+
+PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+sys.path.insert(0, PROJECT_ROOT)
+sys.path.insert(0, os.path.abspath(os.path.join(PROJECT_ROOT, "../../../lib/python2.6/site-packages")))
+
 
 from django.core.handlers.wsgi import WSGIHandler
 
