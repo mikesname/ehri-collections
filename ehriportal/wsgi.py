@@ -1,5 +1,6 @@
 import sys
 sys.path.insert(0, "/home/michaelb/ehri-collections/lib/python2.6/site-packages")
+sys.path.insert(0, "/home/michaelb/ehri-collections/releases/current/ehriportal")
 
 from django.core.handlers.wsgi import WSGIHandler
 
