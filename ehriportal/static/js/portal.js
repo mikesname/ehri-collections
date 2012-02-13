@@ -27,7 +27,7 @@ $(function($) {
 
     var slider = $('.slide-out-div').tabSlideOut({
         tabHandle: '.handle',                              
-        pathToTabImage: '/site_media/static/img/feedback_tab.png',          
+        pathToTabImage: TAB_PATH, 
         imageHeight: '75px',                               
         imageWidth: '24px',                               
         tabLocation: 'left',                               
