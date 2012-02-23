@@ -12,6 +12,7 @@ class RepositoryIndex(SearchIndex):
     slug = CharField(model_attr='slug', indexed=False, stored=True)
     description = CharField(model_attr='general_context', null=True)
     other_names = MultiValueField(model_attr='other_names')
+    address = CharField(model_attr='primary_contact', null=True, stored=True, indexed=False)
     country = CharField(model_attr='country', faceted=True, null=True, stored=True)
     text = CharField(document=True, use_template=True, stored=False)
     pub_date = DateTimeField(model_attr='created_on')
@@ -21,6 +22,11 @@ class RepositoryIndex(SearchIndex):
         prepared_data = super(RepositoryIndex, self).prepare(obj)
         prepared_data['suggestions'] = prepared_data['text']
         return prepared_data
+
+    def prepare_address(self, desc):
+        contact = desc.primary_contact
+        if contact:
+            return contact.format()
 
     def index_queryset(self):
         """Used when the entire index for model is updated."""

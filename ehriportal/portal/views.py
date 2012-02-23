@@ -12,20 +12,7 @@ from django.core.urlresolvers import reverse
 
 from haystack.query import SearchQuerySet
 
-from portal import models
-
-
-class SearchForm(forms.Form):
-    """Simple search form. Just has a field for the query."""
-    q = forms.CharField(required=False, label=_('Search'))
-
-class FacetListSearchForm(SearchForm):
-    """Extension of the search form with another field for
-    the order in which facets are sorted.  Since we can't do
-    this natively with Haystack, we have to hack it ourselves.
-    """
-    sort = forms.ChoiceField(required=False, 
-            choices=(("count",_("Count")), ("name", _("Name"))))
+from portal import models, forms
 
 
 class PortalSearchListView(ListView):
@@ -36,7 +23,7 @@ class PortalSearchListView(ListView):
     searchqueryset = None
     paginate_by = 20
     facetclasses = []
-    form_class = SearchForm
+    form_class = forms.PortalSearchForm
 
     def get_queryset(self):
         """Perform the appropriate Haystack search and return
@@ -50,25 +37,20 @@ class PortalSearchListView(ListView):
         # apply the query
         self.form = self.form_class(self.request.GET)
         if self.form.is_valid():
-            if self.form.cleaned_data["q"]:
-                sqs = sqs.auto_query(self.form.cleaned_data["q"])
-
+            sqs = self.form.filter(sqs)
         for facetclass in self.facetclasses:
             sqs = facetclass.narrow(sqs, self.request.GET.getlist(
                 facetclass.paramname))
+        counts = sqs.facet_counts()
+        current = sqs.query.narrow_queries
+        for facetclass in self.facetclasses:
+            facetclass.parse(counts, current)
 
         self.searchqueryset = sqs
         return self.searchqueryset
 
     def get_context_data(self, *args, **kwargs):
         extra = super(PortalSearchListView, self).get_context_data(*args, **kwargs)
-        # we need to process out facets in a way that makes it easy to
-        # render them without too much horror in the template.
-        counts = self.searchqueryset.facet_counts()
-        current = self.searchqueryset.query.narrow_queries
-        print current
-        for facetclass in self.facetclasses:
-            facetclass.parse(counts, current)
         extra["facet_classes"] = self.facetclasses
         extra["form"] = self.form
         if getattr(settings, 'HAYSTACK_INCLUDE_SPELLING', False) and \
