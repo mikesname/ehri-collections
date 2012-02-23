@@ -46,7 +46,7 @@ class FacetClass(object):
         """Parse the facet_counts structure returns from
         the Haystack query."""
         self.facets = []
-        flist = counts.get("fields", {}).get(self.name)
+        flist = counts.get("fields", {}).get(self.name, [])
         for item, count in flist:
             self.facets.append(Facet(
                 item, klass=self, count=count, selected=current))
