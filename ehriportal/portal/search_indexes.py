@@ -1,8 +1,7 @@
 import datetime
 from haystack.indexes import *
 from haystack import site
-from portal.models import Repository, Collection
-from portal import utils
+from portal import models, utils
 
 from incf.countryutils import data as countrydata
 
@@ -30,7 +29,7 @@ class RepositoryIndex(SearchIndex):
 
     def index_queryset(self):
         """Used when the entire index for model is updated."""
-        return Repository.objects.filter(created_on__lte=datetime.datetime.now())
+        return models.Repository.objects.filter(created_on__lte=datetime.datetime.now())
 
 
 class MultiValueIntegerField(MultiValueField):
@@ -98,5 +97,5 @@ class CollectionIndex(SearchIndex):
         return [d.year for d in desc.date_range]
 
 
-site.register(Collection, CollectionIndex)
-site.register(Repository, RepositoryIndex)
+site.register(models.Collection, CollectionIndex)
+site.register(models.Repository, RepositoryIndex)
