@@ -1,18 +1,18 @@
-# Create your views here.
+"""Portal search views."""
 
 import re
 import datetime
+import json
 
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import ListView
 from django import forms
 from django.conf import settings
-from django.http import Http404
+from django.http import HttpResponse, Http404
 from django.core.urlresolvers import reverse
 
 from haystack.query import SearchQuerySet
-
-from portal import models, forms
+from portal import models, forms, utils
 
 
 class PortalSearchListView(ListView):
@@ -59,6 +59,16 @@ class PortalSearchListView(ListView):
                     .spelling_suggestion(self.form.cleaned_data['q'])
         extra["querystring"] = self.request.META.get("QUERY_STRING", "")
         return extra
+
+    def render_to_response(self, context, **rkwargs):
+        # Look for a 'format=json' GET argument
+        if self.request.GET.get('format','html') == 'json':
+            response = HttpResponse(mimetype="application/json")
+            json.dump(context["page_obj"], response, cls=utils.HaystackPaginationEncoder)
+            return response
+        return super(PortalSearchListView, self).render_to_response(
+                    context, **rkwargs)
+
 
 
 class PaginatedFacetView(PortalSearchListView):
