@@ -96,8 +96,8 @@ SECRET_KEY = "g4m_(mc2(a#ylfq0d8ao3v2l^_ukv0sce+)qa_+#+&)kladb(2"
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = [
-    "django.template.loaders.filesystem.load_template_source",
-    "django.template.loaders.app_directories.load_template_source",
+    "django.template.loaders.filesystem.Loader",
+    "django.template.loaders.app_directories.Loader",
 ]
 
 MIDDLEWARE_CLASSES = [
