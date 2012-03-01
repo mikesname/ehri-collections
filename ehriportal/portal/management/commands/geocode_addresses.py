@@ -1,6 +1,7 @@
 """Geocode Contact objects."""
 
 import sys
+import time
 
 from geopy import geocoders
 
@@ -14,14 +15,14 @@ class Command(BaseCommand):
     currently just using Google's geocoder."""
     def handle(self, *args, **kwargs):
         """Run geocode."""
-        self.geocoder = geocoders.GeoNames()
+        self.geocoder = geocoders.Google()
 
         for contact in models.Contact.objects.all():
             self.geocode_contact(contact)
 
     def geocode_contact(self, contact):
         """Set lat/long fields on contact objects."""
-        if contact.street_address:
+        if contact.street_address and not contact.lat:
             sys.stderr.write("Geocoding: %s: %s\n" % (contact.repository.name, contact.format()))
             try:
                 formaddr, latlon = self.geocoder.geocode(contact.format().encode("utf8"))
@@ -35,7 +36,9 @@ class Command(BaseCommand):
                 contact.lat = latlon[0]
                 contact.lon = latlon[1]
                 contact.save()
-                sys.stderr("Set lat/lon: %s, %s\n\n" % latlon)
+                sys.stderr.write("Set lat/lon: %s, %s\n\n" % latlon)
+                # delay to keep Google rate limit happy (hopefully)
+                time.sleep(0.25)
 
 
         
