@@ -5,7 +5,7 @@ ADMINS = (
         ("Mike", "michael.bryant@kcl.ac.uk"),
 )
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 if "test" in sys.argv:
     DATABASES = {
