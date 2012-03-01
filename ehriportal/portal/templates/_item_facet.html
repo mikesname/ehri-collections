@@ -1,0 +1,17 @@
+{% load portal_tags %}
+
+{% if count > 0 %}
+{% with attr|add:":\""|add:item|add:"\"" as narrower %}
+    {% if narrower in narrowed_with %}
+        <dd class="selected-filter">{{ item }} ({{ count }})
+            <a class="remove-filter" href="{{request.get_full_path|removeparam:param}}">[Remove]</a>
+        </dd>
+    {% else %} 
+        <dd>
+            <a href="{{ request.get_full_path|addparam:param}}">{{ item }}</a> ({{ count }})
+        </dd>
+    {% endif %}
+{% endwith %}
+{% endif %}
+
+

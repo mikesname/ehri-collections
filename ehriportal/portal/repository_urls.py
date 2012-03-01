@@ -51,12 +51,12 @@ urlpatterns = patterns('',
     url(r'^search/?$', views.PortalSearchListView.as_view(
         model=models.Repository,
         facetclasses=FACETS,
-        template_name="portal/repository_search.html"), name='repo_search'),
+        template_name="repository_search.html"), name='repo_search'),
     url(r'^map/?$', views.PortalSearchListView.as_view(
         model=models.Repository,
         facetclasses=FACETS,
         form_class=forms.MapSearchForm,
-        template_name="portal/repository_map.html"), name='repo_map'),
+        template_name="repository_map.html"), name='repo_map'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
         redirect='repo_search',
         form_class=forms.FacetListSearchForm,

@@ -1,0 +1,44 @@
+{% load i18n %}
+{% load portal_tags %}
+
+{# TODO: Remove hard-coded facet limit... #}
+
+{% block facets %}
+    <!-- Begin faceting. -->
+    <div class="facet-list">
+        {% for facetclass in facet_classes %}
+            {% if facetclass.sorted_facets|length %}
+            <h4>
+                <a class="facet-header" href="#">{% trans "By "|add:facetclass.prettyname %}</a>
+            </h4>
+            <dl>
+                {% for facet in facetclass.sorted_facets|slice:"10" %}
+                    {% with facet.facet_param as param %}
+                    {% if facet.selected %}
+                        <dd class="selected-filter">{{ facet.prettyname }} ({{ facet.count }})
+                        <a class="remove-filter"
+                            href="{{request.get_full_path|removeparam:param|stripparam:"page"}}"><i
+                                class="icon-remove"></i></a>
+                        </dd>
+                    {% else %} 
+                        <dd>
+                        <a href="{{ request.get_full_path|addparam:param|stripparam:"page"}}">
+                            {{ facet.prettyname }}
+                        </a> ({{ facet.count }})
+                        </dd>
+                        {% endif %}
+                    {% endwith %}
+                {% endfor %}
+                {% if facetclass.sorted_facets|length > 10 %}
+                    <a data-fclass="{{facetclass.name}}"
+                        href="{{request.path|add:"/"|add:facetclass.name|add:"?"|add:querystring|stripparam:"page"}}"
+                        class="more-facets">More...</a>
+                {% endif %}
+            </dl>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <!-- End faceting -->
+{% endblock %}
+
+

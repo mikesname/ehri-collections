@@ -1,0 +1,120 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+{% load portal_tags %}
+
+{% block head_title %}{{object.name}}{% endblock %}
+
+{% block body_class %}collections{% endblock %}
+
+{% block body %}
+    <h2>{{object.name}}</h2>
+    <div class="row">
+        <div class="span9 columns">
+            <div class="description-field">
+                {{object.scope_and_content|linebreaks}}
+            </div>
+            <h3>{% trans "Revision history" %}</h3>
+            <div class="revision-field">
+                {{object.revision_history|linebreaks}}
+            </div>
+            <h3>{% trans "Rules" %}</h3>
+            <div class="rules-field">
+                {{object.rules|linebreaks}}
+            </div>
+            <h3>{% trans "Keywords" %}</h3>
+            <div class="tag-list">
+                {% for tag in object.tag_list %}
+                {# FIXME: The url here will break for tags with a space in them. #}
+                <a href="{% url collection_search %}?tag={{tag.name|quote_plus}}">
+                    {{tag.name}}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="span3 columns">
+            <div class="repo-logo">
+                <a href="{%url repo_detail object.repository.slug %}">
+                {% if object.repository.logo %}
+                    <img  src="{{object.repository.logo.url}}" />
+                {% else %}
+                <div class="logo-placeholder"><h3>{{object.repository.name}}</h3></div>
+                {% endif %}
+                </a>
+            </div>
+            <table class="table table-striped">
+                {% if object.dates.count %}    
+                    <tr>
+                        <td>
+                            <strong>{% trans "Dates" %}</strong>
+                        </td>
+                        <td>
+                            {% for date in object.dates.all %}
+                                {% if forloop.count0 > 0 %}{{", "}}{% endif %}{{date}}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if object.finding_aids|length %}    
+                    <tr>
+                        <td colspan="2">
+                            <strong>{% trans "Languages:" %}</strong>
+                            {% for lang in object.languages %}
+                            <br />
+                            {{ lang|langcode2name }}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if object.location_of_copies %}
+                    <tr>
+                        <td><strong>{% trans "Location:" %}</strong></td><td>{{object.location_of_copies}}</td>
+                    </tr>
+                {% endif %}
+                {% if object.extent_and_medium %}
+                    <tr>
+                        <td><strong>{% trans "Extent:" %}</strong></td><td>{{object.extent_and_medium}}</td>
+                    </tr>
+                {% endif %}
+                {% if object.access_conditions %}
+                    <tr>
+                        <td><strong>{% trans "Access:" %}</strong></td><td>{{object.access_conditions}}</td>
+                    </tr>
+                {% endif %}
+                {% if object.acquisition %}
+                    <tr>
+                        <td><strong>{% trans "Acquisition:" %}</strong></td><td>{{object.acquisition}}</td>
+                    </tr>
+                {% endif %}
+                {% if object.reproduction_conditions %}
+                    <tr>
+                        <td colspan="2">
+                            <strong>{% trans "Reproduction:" %}</strong>
+                            <br />
+                            {{object.reproduction_conditions}}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if object.finding_aids %}    
+                    <tr>
+                        <td colspan="2">
+                            <strong>{% trans "Finding aids:" %}</strong>
+                            <br />
+                            {{object.finding_aids}}
+                        </td>
+                    </tr>
+                {% endif %}
+                {% if object.arrangement %}    
+                    <tr>
+                        <td colspan="2">
+                            <strong>{% trans "Arrangement:" %}</strong>
+                            <br />
+                            {{object.arrangement}}
+                        </td>
+                    </tr>
+                {% endif %}                
+            </table>
+        </div>
+    </div>
+{% endblock %}

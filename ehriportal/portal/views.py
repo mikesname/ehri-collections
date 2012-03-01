@@ -66,8 +66,8 @@ class PaginatedFacetView(PortalSearchListView):
     a paginated list of items for a given facet (whose name
     is passed in the URL) so that the user can select one."""
     paginate_by = 10
-    template_name = "portal/facets.html"
-    template_name_ajax = "portal/facets_ajax.html"
+    template_name = "facets.html"
+    template_name_ajax = "facets_ajax.html"
     redirect = None
     
     def __init__(self, *args, **kwargs):

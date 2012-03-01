@@ -1,0 +1,10 @@
+{% load i18n %}
+
+<div class="modal-header">
+    <a href="#" class="close modal-close">&times;</a>
+    <h3>{{facetclass.prettyname}} {% if form.q.value %} for query '{{form.q.value}}'{% endif %}</h3>
+</div>
+<div id="facet-popup" class="modal-body" data-fclass="{{facetclass.name}}">
+    {% include "_expanded_facet_list.html" %}
+</div>
+

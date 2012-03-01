@@ -1,0 +1,43 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+{% load markup %}
+
+{% block head_title %}{% trans "Repositories" %}{% endblock %}
+
+{% block body_class %}repositories{% endblock %}
+
+{% block body %}
+
+<div class="row">
+    <div class="span3 columns">
+        {% include "_repository_info.html" %}
+    </div>
+
+    <div class="span9 columns">
+        <h1>{{object.name}}</h1>
+
+        {% if object.general_context %}
+            {{object.general_context|markdown}}
+        {% else %}
+            <p>No additional repository information is currently available.</p>
+        {% endif %}
+
+        {% if object.reproduction_services %}
+            {{object.reproduction_services|markdown}}
+        {% endif %}
+
+        {% with object.collection_set.count as count %}
+            {% if count %}
+            <h3>
+                <a href={%url repo_collections object.slug %}>Browse {{count}} collection{{count|pluralize}}</a>
+            </h3>
+            {% else %}
+                <p>No collection information is currently available.</p>
+            {% endif %}
+        {% endwith %}
+    </div>
+</div>
+{% endblock %}
+
