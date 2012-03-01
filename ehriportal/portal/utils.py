@@ -1,7 +1,15 @@
 """Utility functions for dealing with repository and geo data."""
 
+import json
+import datetime
+from types import MethodType  
 from incf.countryutils import transformations
 import babel
+
+from haystack.query import SearchQuerySet
+from django.core.paginator import Paginator, Page, InvalidPage, EmptyPage
+from haystack.models import SearchResult
+from haystack.query import SearchQuerySet
 
 # Hacky dictionary of official country/languages names
 # we want to substitute for friendlier versions... 
@@ -25,3 +33,27 @@ def get_country_from_code(code):
         pass
 
 
+class HaystackPaginationEncoder(json.JSONEncoder):
+    """JSON Encoder a Django pagination object."""
+    def default(self, obj):
+        # handle dates
+        if isinstance(obj, datetime.datetime):
+            return obj.strftime('%Y-%m-%dT%H:%M:%S')
+        # handle searchresult objects
+        elif isinstance(obj, SearchResult):
+            return dict([(f, getattr(obj, f)) for f in obj.get_stored_fields() \
+                    if f != u'suggestions'])
+        # handle pagination objects
+        elif isinstance(obj, Page):
+            serializedpage = dict(
+                    object_list=[self.default(r) for r in obj.object_list])
+            for attr in ("end_index", "has_next", "has_other_pages",
+                    "has_previous", "next_page_number", "number",
+                    "start_index", "previous_page_number", "object_list"):
+                v = getattr(obj, attr)
+                if isinstance(v, MethodType):
+                    serializedpage[attr] = v()
+                elif isinstance(v, (str, int)):
+                    serializedpage[attr] = v
+            return serializedpage        
+        return json.JSONEncoder.default(self, obj) 
