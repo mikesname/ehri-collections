@@ -19,3 +19,4 @@ django-haystack
 django-jsonfield
 django-modeltranslation
 
+geopy
