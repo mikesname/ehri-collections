@@ -5,6 +5,8 @@ from django.conf.urls.defaults import *
 from django.views.generic.list_detail import object_detail, object_list
 from django.contrib.auth.decorators import login_required
 from haystack.query import SearchQuerySet
+import haystack
+haystack.autodiscover()
 
 from portal import views, forms, models
 from portal.haystack_util import QueryFacet, FacetClass, QueryFacetClass
