@@ -10,8 +10,10 @@
 
 
 {% block body %}
-    <input type="text" name="q" id="id_q" value="{{form.q.value|default_if_none:""}}" class="span5" />
+    <form id="search-form">
+        <input type="text" name="q" id="id_q" value="{{form.q.value|default_if_none:""}}" class="span5" />
         <input type="submit" value="Search">
+    </form>
     <h3>
         {% if paginator.count %}
         {% with paginator.count|pluralize as pluralcount %}
@@ -45,8 +47,38 @@
             myOptions);
     }
 
+    function getParameterByName(url, name) {
+        name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+        var regexS = "[\\?&]" + name + "=([^&#]*)";
+        var regex = new RegExp(regexS);
+        var results = regex.exec(url);
+        if(results == null)
+            return "";
+        else
+            return decodeURIComponent(results[1].replace(/\+/g, " "));
+    }
+
     $(function() {
         initialize();
+
+        window.onpopstate = function(event) {
+            $("#id_q").val(getParameterByName(window.location.search, "q"));
+            $("#search-form").submit();
+        };
+
+        $("#search-form").submit(function(event) {
+            var val = $("#id_q").val();
+            console.log("Submit!", val);
+            // fix the browser URL
+            window.history.pushState({q:val}, window.title, 
+                window.location.pathname + "?" + $(this).serialize());
+            // fetch the data
+            $.getJSON(window.location.href, function(data) {
+                console.log("Got data");
+            });
+
+            event.preventDefault();        
+        });
     });
 </script>
 
