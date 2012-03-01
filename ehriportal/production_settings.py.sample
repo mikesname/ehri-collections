@@ -18,6 +18,8 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, "../../..", PROJECT_NAME, "static")
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, "../../..", PROJECT_NAME, "media")
 MEDIA_URL = "/%s/media/" % PROJECT_NAME
 STATIC_URL = "/%s/static/" % PROJECT_NAME
+ADMIN_MEDIA_PREFIX = posixpath.join(STATIC_URL, "admin/")
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
