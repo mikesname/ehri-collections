@@ -249,6 +249,10 @@ class Contact(models.Model):
             self.updated_on = datetime.datetime.now()
         super(Contact, self).save(*args, **kwargs)
 
+    def coordinates(self):
+        """Get coords as a tuple."""
+        return self.latitude, self.longitude
+
     def format(self):
         elems = [e.strip() for e in [
             self.street_address,

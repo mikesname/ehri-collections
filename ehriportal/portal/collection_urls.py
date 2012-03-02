@@ -5,8 +5,6 @@ from django.conf.urls.defaults import *
 from django.views.generic.list_detail import object_detail, object_list
 from django.contrib.auth.decorators import login_required
 from haystack.query import SearchQuerySet
-import haystack
-haystack.autodiscover()
 
 from portal import views, forms, models
 from portal.haystack_util import QueryFacet, FacetClass, QueryFacetClass
@@ -63,7 +61,7 @@ viewdict = dict(
 urlpatterns = patterns('',
     url(r'^search/?$', views.PortalSearchListView.as_view(
         model=models.Collection,
-        template_name="collection_search.html",
+        template_name="portal/collection_search.html",
         facetclasses = FACETS),
             name='collection_search'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(

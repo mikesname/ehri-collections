@@ -231,10 +231,15 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 
 # Haystack config
-HAYSTACK_SITECONF = 'ehriportal.search_sites'
-HAYSTACK_SEARCH_ENGINE = 'solr'
-HAYSTACK_SOLR_URL = 'http://127.0.0.1:8983/solr'
-HAYSTACK_INCLUDE_SPELLING = True
+HAYSTACK_CONNECTIONS = {
+    "default": {
+        "ENGINE": "haystack.backends.solr_backend.SolrEngine",
+        "URL": "http://127.0.0.1:8983/solr",
+        "TIMEOUT": 60 * 5,
+        "INCLUDE_SPELLING": True,
+        "BATCH_SIZE": 100,
+    },
+}
 
 # translation
 gettext = lambda s: s

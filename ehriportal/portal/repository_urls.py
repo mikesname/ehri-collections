@@ -5,8 +5,6 @@ from django.views.generic import ListView
 from django.views.generic.list_detail import object_detail, object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required
-import haystack
-haystack.autodiscover()
 
 from portal import views, forms, models
 from portal.haystack_util import FacetClass
@@ -53,12 +51,12 @@ urlpatterns = patterns('',
     url(r'^search/?$', views.PortalSearchListView.as_view(
         model=models.Repository,
         facetclasses=FACETS,
-        template_name="repository_search.html"), name='repo_search'),
+        template_name="portal/repository_search.html"), name='repo_search'),
     url(r'^map/?$', views.PortalSearchListView.as_view(
         model=models.Repository,
         facetclasses=FACETS,
         form_class=forms.MapSearchForm,
-        template_name="repository_map.html"), name='repo_map'),
+        template_name="portal/repository_map.html"), name='repo_map'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
         redirect='repo_search',
         form_class=forms.FacetListSearchForm,
