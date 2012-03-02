@@ -8,6 +8,7 @@ import babel
 
 from haystack.query import SearchQuerySet
 from django.core.paginator import Paginator, Page, InvalidPage, EmptyPage
+from django.contrib.gis import geos
 from haystack.models import SearchResult
 from haystack.query import SearchQuerySet
 
@@ -37,12 +38,17 @@ class HaystackPaginationEncoder(json.JSONEncoder):
     """JSON Encoder a Django pagination object."""
     def default(self, obj):
         # handle dates
-        if isinstance(obj, datetime.datetime):
+        if isinstance(obj, geos.Point):
+            return (obj.x, obj.y)
+        elif isinstance(obj, datetime.datetime):
             return obj.strftime('%Y-%m-%dT%H:%M:%S')
         # handle searchresult objects
         elif isinstance(obj, SearchResult):
-            return dict([(f, getattr(obj, f)) for f in obj.get_stored_fields() \
+            d = dict([(f, getattr(obj, f)) for f in obj.get_stored_fields() \
                     if f != u'suggestions'])
+            if obj.location:
+                d["location"] = (obj.location.x, obj.location.y)
+            return d
         # handle pagination objects
         elif isinstance(obj, Page):
             serializedpage = dict(
