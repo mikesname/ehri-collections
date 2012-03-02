@@ -43,7 +43,7 @@
             zoom: 4,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
-        var map = new google.maps.Map(document.getElementById("map_canvas"),
+        return new google.maps.Map(document.getElementById("map_canvas"),
             myOptions);
     }
 
@@ -57,9 +57,9 @@
         else
             return decodeURIComponent(results[1].replace(/\+/g, " "));
     }
-
+    var gmap, gmarkers = [];
     $(function() {
-        initialize();
+        gmap = initialize();
 
         window.onpopstate = function(event) {
             $("#id_q").val(getParameterByName(window.location.search, "q"));
@@ -73,8 +73,30 @@
             window.history.pushState({q:val}, window.title, 
                 window.location.pathname + "?" + $(this).serialize());
             // fetch the data
-            $.getJSON(window.location.href, function(data) {
-                console.log("Got data");
+            $.ajax({
+                url: window.location.href,
+                data: {format: "json"},
+                dataType: "json",
+                error: function() {
+                    console.error(arguments);
+                },
+                success: function(data) {
+                    console.log("" + data.object_list.length + " Results");
+                    $.each(gmarkers, function(i, m) { m.setMap(null);});
+                    $.each(data.object_list, function(i, repo) {
+                        if (repo.location) {
+                            console.log("Adding repo", repo.name, repo.location);
+                            gmarkers.push(new google.maps.Marker({
+                                position: new google.maps.LatLng(repo.location[1],
+                                              repo.location[0]),
+                                map: gmap,
+                                title: repo.name,
+                            }));    
+                        } else {
+                            console.log("NO LOCATION for ", repo.name);
+                        }
+                    });
+                },
             });
 
             event.preventDefault();        
