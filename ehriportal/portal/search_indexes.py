@@ -29,8 +29,8 @@ class RepositoryIndex(indexes.SearchIndex, indexes.Indexable):
     description = indexes.CharField(model_attr='general_context', null=True)
     other_names = indexes.MultiValueField(model_attr='other_names')
     address = indexes.CharField(model_attr='primary_contact', null=True, stored=True, indexed=False)
-    country = indexes.CharField(model_attr='country', faceted=True, null=True, stored=True)
-    location = indexes.LocationField(null=True)
+    country = indexes.CharField(faceted=True, null=True, stored=True)
+    location = indexes.LocationField(null=True, stored=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
     pub_date = indexes.DateTimeField(model_attr='created_on')
     suggestions = indexes.CharField()
@@ -42,6 +42,9 @@ class RepositoryIndex(indexes.SearchIndex, indexes.Indexable):
         prepared_data = super(RepositoryIndex, self).prepare(obj)
         prepared_data['suggestions'] = prepared_data['text']
         return prepared_data
+
+    def prepare_country(self, desc):
+        return desc.country
 
     def prepare_address(self, desc):
         contact = desc.primary_contact
