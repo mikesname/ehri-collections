@@ -28,7 +28,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql", # Add "postgresql_psycopg2", "postgresql", "mysql", "sqlite3" or "oracle".
+        "ENGINE": "django.contrib.gis.db.backends.mysql",
         "NAME": "portaltest",                       # Or path to database file if using sqlite3.
         "USER": "portaltest",                             # Not used with sqlite3.
         "PASSWORD": "changeme",                         # Not used with sqlite3.
@@ -148,6 +148,7 @@ INSTALLED_APPS = [
     "django.contrib.markup",
     "django.contrib.messages",
     "django.contrib.humanize",
+    "django.contrib.gis",
     
     "pinax.templatetags",
     

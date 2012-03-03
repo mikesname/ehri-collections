@@ -7,6 +7,7 @@ from geopy import geocoders
 
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
+from django.contrib.gis import geos
 
 from portal import models
 
@@ -17,18 +18,21 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         """Run geocode."""
         appid = getattr(settings, "YAHOO_APP_ID", None)
-        if appid is not None:
+        if 0 and appid is not None:
             self.geocoder = geocoders.Yahoo(appid)
+            sys.stderr.write("Geocoding with Yahoo world...\n")
         else:
             self.geocoder = geocoders.Google()
+            sys.stderr.write("Geocoding with Google maps...\n")
 
 
-        for contact in models.Contact.objects.all():
-            self.geocode_contact(contact)
+        for repo in models.Repository.objects.all():
+            self.geocode_contact(repo)
 
-    def geocode_contact(self, contact):
+    def geocode_contact(self, resource):
         """Set lat/long fields on contact objects."""
-        if contact.street_address and not contact.latitude:
+        contact = resource.primary_contact
+        if resource.place_set.count() == 0 and contact and contact.street_address:
             sys.stderr.write("Geocoding: %s: %s\n" % (contact.repository.name, contact.format()))
             try:
                 formaddr, (lat, lon) = self.geocoder.geocode(contact.format().encode("utf8"))
@@ -39,9 +43,9 @@ class Command(BaseCommand):
             except geocoders.google.GQueryError:
                 sys.stderr.write(" - Unable to get latlong for address\n")
             else:
-                contact.latitude = lat
-                contact.longitude = lon
-                contact.save()
+                point = models.Place(point=geos.Point(lat, lon), 
+                        resource=resource)
+                point.save()
                 sys.stderr.write("Set lat/lon: %s, %s\n\n" % (lat, lon))
                 # delay to keep Google rate limit happy (hopefully)
                 time.sleep(0.25)

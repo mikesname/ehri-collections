@@ -5,7 +5,7 @@ import re
 import datetime
 import calendar
 
-from django.db import models
+from django.contrib.gis.db import models
 from django.db.models.base import ModelBase
 from django.conf import settings
 
@@ -156,6 +156,13 @@ class Property(models.Model):
     value = models.CharField(max_length=255)
 
 
+class Place(models.Model):
+    """A point on the earth associated with a resource."""
+    resource = models.ForeignKey(Resource)
+    point = models.PointField()
+    objects = models.GeoManager()
+
+
 class Repository(Resource):
     """Repository."""
     ENTITY_TYPES=()
@@ -230,8 +237,6 @@ class Contact(models.Model):
     email = models.EmailField(null=True, blank=True)
     telephone = models.CharField(max_length=100, null=True, blank=True)
     fax = models.CharField(max_length=100, null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
-    latitude = models.FloatField(null=True, blank=True)
     contact_type = models.CharField(
             max_length=100, blank=True, null=True, choices=CONTACT_TYPES)
     postal_code = models.CharField(max_length=100, null=True, blank=True)

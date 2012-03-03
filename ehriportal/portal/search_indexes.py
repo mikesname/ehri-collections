@@ -52,10 +52,11 @@ class RepositoryIndex(indexes.SearchIndex, indexes.Indexable):
             return contact.format()
 
     def prepare_location(self, desc):
-        pc = desc.primary_contact
-        if not pc or not pc.latitude:
-            return None
-        return "%s,%s" % (pc.latitude, pc.longitude)
+        try:
+            place = desc.place_set.all()[0]
+        except IndexError:
+            return
+        return "%s,%s" % (place.point.x, place.point.y)
 
     def index_queryset(self):
         """Used when the entire index for model is updated."""
