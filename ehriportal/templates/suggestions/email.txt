@@ -1,9 +1,0 @@
-Suggestion from {{object.name}} {% if object.email %}({{object.email}}) {% endif %}
-
-{{object.text}}
-
-{% for key, val in object.meta.items %}
-    {{key|stringformat:"-20s"}}  :  {{val}}
-{% empty %}
-    No metadata available.
-{% endfor %}
