@@ -51,12 +51,12 @@ urlpatterns = patterns('',
     url(r'^search/?$', views.PortalSearchListView.as_view(
         model=models.Repository,
         facetclasses=FACETS,
-        template_name="portal/repository_search.html"), name='repo_search'),
+        template_name="repository_search.html"), name='repo_search'),
     url(r'^map/?$', views.PortalSearchListView.as_view(
         model=models.Repository,
         facetclasses=FACETS,
         form_class=forms.MapSearchForm,
-        template_name="portal/repository_map.html"), name='repo_map'),
+        template_name="repository_map.html"), name='repo_map'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
         redirect='repo_search',
         form_class=forms.FacetListSearchForm,
@@ -64,11 +64,16 @@ urlpatterns = patterns('',
         facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', object_list, listinfo, name='repo_list'),
-    url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewinfo, name='repo_detail'),
+    url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
+            queryset=models.Repository.objects.all(),
+            template_name="repository_detail.html"
+        ), name='repo_detail'),
     url(r'^(?P<slug>[-\w]+)/edit/?$', update_object, dict(
             form_class=RepoEditForm
         ), name='repo_edit'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
-            ListCollectionsView.as_view(), name='repo_collections'),
+            ListCollectionsView.as_view(
+                template_name="collection_list.html"    
+            ), name='repo_collections'),
 )
 

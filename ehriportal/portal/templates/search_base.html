@@ -9,15 +9,16 @@
 {% block body_class %}{% endblock %}
 
 {% block body_base %}
-    <div class="container">
+    <div class="container-fluid">
         {% include "_messages.html" %}
-        <form method="get" action="{{request.path}}">
-            <div class="row">
+        <form id="search-form" method="get" action="{{request.path}}">
+            <div class="row-fluid">
                 <div class="span3 columns">
                     <div class="search-sidebar">
+                        {% block subnav %}
                         <div class="search-sidebar-heading">
                             {% block page_heading %}{% endblock %}
-                        </div>
+                        </div>                        
                         {% if paginator.count %}
                             <h2>Search</h2>
 
@@ -28,6 +29,7 @@
                         {% else %}
                             &nbsp;
                         {% endif %}
+                        {% endblock %}
                     </div>
                 </div>
                 <div class="span9 columns">
@@ -49,6 +51,7 @@
                         {% endif %}
                     {% endif %}
                     </h3>
+                    {% block body %}
                     {% if paginator.count %}
 
 
@@ -62,7 +65,7 @@
                     {% else %}
                         &nbsp;
                     {% endif %}
-                        </div>
+                    {% endblock %}
                     </div>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-{% extends 'site_base.html' %}
+{% extends 'search_base.html' %}
 
 {% load highlight %}
 {% load i18n %}
@@ -8,29 +8,8 @@
 
 {% block body_class %}repositories{% endblock %}
 
-
 {% block body %}
-    <form id="search-form">
-        <input type="text" name="q" id="id_q" value="{{form.q.value|default_if_none:""}}" class="span5" />
-        <input type="submit" value="Search">
-    </form>
-    <h3>
-        {% if paginator.count %}
-        {% with paginator.count|pluralize as pluralcount %}
-        {{paginator.count}} {% trans "Result"|add:pluralcount %}
-        {% endwith %}
-        {% if form.q.value %}
-        &nbsp;for <i>{{form.q.value}}</i>
-        {% endif %}
-    {% else %}
-        {% if form.q.value %}
-        {% trans "Nothing found for" %} <i>{{form.q.value}}</i>{% if suggestion %}.&nbsp;{% trans "Did you mean" %} <a               
-                href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?{% endif %}
-        {% endif %}
-    {% endif %}
-    </h3>
     <div id="map_canvas" style="width:100%;height:600px;">
-
     </div>
 
 <script type="text/javascript"

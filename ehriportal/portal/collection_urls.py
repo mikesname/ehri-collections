@@ -61,7 +61,7 @@ viewdict = dict(
 urlpatterns = patterns('',
     url(r'^search/?$', views.PortalSearchListView.as_view(
         model=models.Collection,
-        template_name="portal/collection_search.html",
+        template_name="collection_search.html",
         facetclasses = FACETS),
             name='collection_search'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
@@ -71,6 +71,9 @@ urlpatterns = patterns('',
         facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', object_list, infolist, name='collection_list'),
-    url(r'^(?P<slug>[-\w]+)/?$', object_detail, viewdict, name='collection_detail'),
+    url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
+            queryset=models.Collection.objects.all(),
+            template_name="collection_detail.html"
+        ), name='collection_detail'),
 )
 
