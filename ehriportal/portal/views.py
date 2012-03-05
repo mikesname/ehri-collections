@@ -30,7 +30,9 @@ class PortalSearchListView(ListView):
         a SearchQuerySet with the obtained results."""
         if self.searchqueryset is None:
             self.searchqueryset = SearchQuerySet()
-        sqs = self.searchqueryset.models(self.model)
+        sqs = self.searchqueryset
+        if self.model:
+            sqs = sqs.models(self.model)
         for facet in self.facetclasses:
             sqs = facet.apply(sqs)
 

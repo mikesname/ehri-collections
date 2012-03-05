@@ -30,7 +30,7 @@ class RepositoryIndex(indexes.SearchIndex, indexes.Indexable):
     other_names = indexes.MultiValueField(model_attr='other_names')
     address = indexes.CharField(model_attr='primary_contact', null=True, stored=True, indexed=False)
     country = indexes.CharField(faceted=True, null=True, stored=True)
-    location = indexes.LocationField(null=True, stored=True)
+    location = indexes.LocationField(null=True, faceted=True, stored=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
     pub_date = indexes.DateTimeField(model_attr='created_on')
     suggestions = indexes.CharField()

@@ -2,6 +2,7 @@
 
 import sys
 import time
+from optparse import make_option
 
 from geopy import geocoders
 
@@ -15,10 +16,18 @@ from portal import models
 class Command(BaseCommand):
     """Set lat/long fields on contacts with a street address,
     currently just using Google's geocoder."""
-    def handle(self, *args, **kwargs):
+    option_list = BaseCommand.option_list + (
+        make_option('--geocoder',
+            dest='geocoder',
+            default="yahoo",
+            choices=["yahoo", "google"],
+            help='Geocoder to use'),
+        )
+
+    def handle(self, *args, **options):
         """Run geocode."""
         appid = getattr(settings, "YAHOO_APP_ID", None)
-        if 0 and appid is not None:
+        if not "google" in options["geocoder"] and appid is not None:
             self.geocoder = geocoders.Yahoo(appid)
             sys.stderr.write("Geocoding with Yahoo world...\n")
         else:
@@ -48,7 +57,7 @@ class Command(BaseCommand):
                 point.save()
                 sys.stderr.write("Set lat/lon: %s, %s\n\n" % (lat, lon))
                 # delay to keep Google rate limit happy (hopefully)
-                time.sleep(0.25)
+                time.sleep(0.05)
 
 
         

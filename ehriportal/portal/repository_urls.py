@@ -53,7 +53,6 @@ urlpatterns = patterns('',
         facetclasses=FACETS,
         template_name="repository_search.html"), name='repo_search'),
     url(r'^map/?$', views.PortalSearchListView.as_view(
-        model=models.Repository,
         facetclasses=FACETS,
         form_class=forms.MapSearchForm,
         template_name="repository_map.html"), name='repo_map'),

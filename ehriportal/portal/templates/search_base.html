@@ -33,11 +33,13 @@
                     </div>
                 </div>
                 <div class="span9 columns">
+                    {% block searchform %}
                     <input type="text" name="q" id="id_q" value="{{form.q.value|default_if_none:""}}" class="span5" />
-                        <input type="submit" value="Search">
+                    {% endblock %}
+                    <input type="submit" value="Search">
                     {% include "_selected_facets.html" %}
-                    <h3>
-                        {% if paginator.count %}
+                    <h3 id="result-summary">
+                    {% if paginator.count %}
                         {% with paginator.count|pluralize as pluralcount %}
                         {{paginator.count}} {% trans "Result"|add:pluralcount %}
                         {% endwith %}

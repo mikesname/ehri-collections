@@ -1,9 +1,26 @@
 """Portal search forms."""
 
+import string
 from django import forms
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.gis import geos
 
 from haystack.forms import EmptySearchQuerySet
+
+from portal import models
+
+
+def parse_point(pointstr):
+    print "PARSING", pointstr
+    """Parse a GEOS point from a two-float string."""
+    try:
+        y, x = string.split(pointstr, ",")
+    except IndexError:
+        return None
+    try:
+        return geos.Point(float(x), float(y))
+    except ValueError:
+        return None
 
 
 class PortalSearchForm(forms.Form):
@@ -21,9 +38,27 @@ class PortalSearchForm(forms.Form):
 
 
 class MapSearchForm(PortalSearchForm):
-    def no_query_found(self):
-        """Show no results for a map search."""
-        return EmptySearchQuerySet()
+    type = forms.ChoiceField(label=_('Type'), choices=(("Repository", "Repository"),
+            ("Collection", "Collection")))
+    ne = forms.CharField(required=False, label=_('North East'),
+            widget=forms.HiddenInput())
+    sw = forms.CharField(required=False, label=_('South West'),
+            widget=forms.HiddenInput())
+
+    #def no_query_found(self):
+    #    """Show no results for a map search."""
+    #    return EmptySearchQuerySet()
+
+    def filter(self, sqs):
+        """Filter a search set with geo-bounds."""
+        model = getattr(models, self.cleaned_data["type"])
+        sqs = sqs.models(model)
+        if self.cleaned_data["ne"] and self.cleaned_data["sw"]:
+            botlft = parse_point(self.cleaned_data["sw"])
+            toprgt = parse_point(self.cleaned_data["ne"])
+            if botlft and toprgt:
+                sqs = sqs.within("location", botlft, toprgt)
+        return super(MapSearchForm, self).filter(sqs)
 
 
 class FacetListSearchForm(PortalSearchForm):

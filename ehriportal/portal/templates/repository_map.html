@@ -1,6 +1,7 @@
 {% extends 'search_base.html' %}
 
 {% load highlight %}
+{% load staticfiles %}
 {% load i18n %}
 {% load ifsetting_tag %}
 {% load pagination_tags %}
@@ -8,22 +9,32 @@
 
 {% block body_class %}repositories{% endblock %}
 
+{% block facets %}
+    <div id="repository-list"></div>
+{% endblock %}
+
+{% block searchform %}
+{{form.q}} {{form.type}}
+{% endblock %}
+
 {% block body %}
     <div id="map_canvas" style="width:100%;height:600px;">
     </div>
-
+<script type="text/javascript" src="{% static "js/underscore-min.js" %}"></script>
+<script type="text/javascript" src="{% static "js/backbone-min.js" %}"></script>
 <script type="text/javascript"
     src="http://maps.googleapis.com/maps/api/js?key=AIzaSyC7RVUST3aa1HyStY8UPQp71bxFoYWvtfM&sensor=false">
 </script>
 <script type="text/javascript">
     function initialize() {
+        var ele = document.getElementById("map_canvas");
+        $(ele).height($(window).height() - $(ele).position().top + 10);
         var myOptions = {
             center: new google.maps.LatLng(56, 24),
             zoom: 4,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
-        return new google.maps.Map(document.getElementById("map_canvas"),
-            myOptions);
+        return new google.maps.Map(ele, myOptions);
     }
 
     function getParameterByName(url, name) {
@@ -36,6 +47,50 @@
         else
             return decodeURIComponent(results[1].replace(/\+/g, " "));
     }
+
+    function setSearchData(data, clear) {
+        console.log("" + data.object_list.length + " Results");
+        if (clear)
+            clearSearchData();
+        $.each(data.object_list, function(i, repo) {
+            if (repo.location) {
+                console.log("Adding repo", repo.name, repo.location);
+                $("#repository-list").append("<h4>" + repo.name + "</h4>");
+                gmarkers.push(new google.maps.Marker({
+                    position: new google.maps.LatLng(repo.location[1],
+                                  repo.location[0]),
+                    map: gmap,
+                    title: repo.name,
+                }));    
+            } else {
+                console.log("NO LOCATION for ", repo.name);
+            }
+        });
+    }
+
+    function clearSearchData() {
+        $.each(gmarkers, function(i, m) { m.setMap(null);});
+        $("#repository-list").html("");
+    }
+
+    function search(query, type, sw, ne, page) {
+        // fetch the data
+        $.ajax({
+            url: window.location.pathname,
+            data: {q: query, type: type, format: "json", ne: ne, sw: sw, page: page},
+            dataType: "json",
+            error: function() {
+                console.error(arguments);
+            },
+            success: function(data) {
+                console.log(data);
+                setSearchData(data, (!page || page==1));
+                if (data.has_next)
+                    search(query, type, sw, ne, data.next_page_number);
+            },
+        });
+    }
+
     var gmap, gmarkers = [];
     $(function() {
         gmap = initialize();
@@ -45,38 +100,30 @@
             $("#search-form").submit();
         };
 
+        //$("#map_canvas").bind("mousedown.dragmap", function(event) {
+        //    var mapele = this;
+        //    var boundsstart = gmap.getBounds();
+        //    $(this).bind("mouseup.dragmap", function(uevent) {
+        //        var boundsend = gmap.getBounds();
+        //        if (boundsstart != boundsend) {
+        //            $("#search-form").submit();
+        //            $(mapele).unbind("mouseup.dragmap");
+        //        }
+        //    });
+        //});
+
         $("#search-form").submit(function(event) {
-            var val = $("#id_q").val();
-            console.log("Submit!", val);
+            var val = $("#id_q").val(),
+                type = $("#id_type").val(),
+                ne =  gmap.getBounds().getNorthEast().toUrlValue(),
+                sw = gmap.getBounds().getSouthWest().toUrlValue();
+
             // fix the browser URL
             window.history.pushState({q:val}, window.title, 
                 window.location.pathname + "?" + $(this).serialize());
-            // fetch the data
-            $.ajax({
-                url: window.location.href,
-                data: {format: "json"},
-                dataType: "json",
-                error: function() {
-                    console.error(arguments);
-                },
-                success: function(data) {
-                    console.log("" + data.object_list.length + " Results");
-                    $.each(gmarkers, function(i, m) { m.setMap(null);});
-                    $.each(data.object_list, function(i, repo) {
-                        if (repo.location) {
-                            console.log("Adding repo", repo.name, repo.location);
-                            gmarkers.push(new google.maps.Marker({
-                                position: new google.maps.LatLng(repo.location[1],
-                                              repo.location[0]),
-                                map: gmap,
-                                title: repo.name,
-                            }));    
-                        } else {
-                            console.log("NO LOCATION for ", repo.name);
-                        }
-                    });
-                },
-            });
+
+            search(val, type, sw, ne);
+
 
             event.preventDefault();        
         });
