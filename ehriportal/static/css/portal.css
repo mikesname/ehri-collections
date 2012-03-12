@@ -121,3 +121,9 @@ a:hover {
     margin: 10px;
     box-shadow:         2px 2px 15px rgba(50, 50, 50, 0.3);
 }
+
+/* Don't mess up google map controls */
+
+#map_canvas img {
+    max-width: none;
+}
