@@ -127,3 +127,7 @@ a:hover {
 #map_canvas img {
     max-width: none;
 }
+
+.repo-marker {
+    background-color: green;
+}

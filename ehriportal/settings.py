@@ -186,6 +186,9 @@ INSTALLED_APPS = [
     # translation
     #"modeltranslation",
 
+    # JS url handling
+    "django_js_utils",
+
     # db migrations
     "south",
 

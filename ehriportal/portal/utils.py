@@ -61,5 +61,6 @@ class HaystackPaginationEncoder(json.JSONEncoder):
                     serializedpage[attr] = v()
                 elif isinstance(v, (str, int)):
                     serializedpage[attr] = v
+                serializedpage["total"] = obj.paginator.count
             return serializedpage        
         return json.JSONEncoder.default(self, obj) 

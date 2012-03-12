@@ -45,9 +45,9 @@ class MapSearchForm(PortalSearchForm):
     sw = forms.CharField(required=False, label=_('South West'),
             widget=forms.HiddenInput())
 
-    #def no_query_found(self):
-    #    """Show no results for a map search."""
-    #    return EmptySearchQuerySet()
+    def no_query_found(self):
+        """Show no results for a map search."""
+        return EmptySearchQuerySet()
 
     def filter(self, sqs):
         """Filter a search set with geo-bounds."""

@@ -19,16 +19,12 @@
                         <div class="search-sidebar-heading">
                             {% block page_heading %}{% endblock %}
                         </div>                        
-                        {% if paginator.count %}
                             <h2>Search</h2>
 
                             {% block facets %}
                             <!-- facets go here -->
                                  &nbsp;
                             {% endblock %}
-                        {% else %}
-                            &nbsp;
-                        {% endif %}
                         {% endblock %}
                     </div>
                 </div>
@@ -48,7 +44,7 @@
                         {% endif %}
                     {% else %}
                         {% if form.q.value %}
-                        {% trans "Nothing found for" %} <i>{{form.q.value}}</i>{% if suggestion %}.&nbsp;{% trans "Did you mean" %} <a               
+                        {% trans "Nothing found for" %} <i id="result-query">{{form.q.value}}</i>{% if suggestion %}.&nbsp;{% trans "Did you mean" %} <a               
                                 href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?{% endif %}
                         {% endif %}
                     {% endif %}
