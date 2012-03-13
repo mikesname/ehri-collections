@@ -55,10 +55,10 @@ class PortalSearchListView(ListView):
         extra = super(PortalSearchListView, self).get_context_data(*args, **kwargs)
         extra["facet_classes"] = self.facetclasses
         extra["form"] = self.form
-        if getattr(settings, 'HAYSTACK_INCLUDE_SPELLING', False) and \
-                self.form.is_valid():
-            extra["suggestion"] = self.searchqueryset\
-                    .spelling_suggestion(self.form.cleaned_data['q'])
+        # FIXME: Find out why spelling suggestions aren't handled properly
+        extra["suggestion"] = re.sub("[\W-]", "", self.searchqueryset\
+                    .spelling_suggestion() or "")
+        print "Spelling", extra["suggestion"]
         extra["querystring"] = self.request.META.get("QUERY_STRING", "")
         return extra
 
