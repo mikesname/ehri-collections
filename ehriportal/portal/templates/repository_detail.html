@@ -10,13 +10,13 @@
 
 {% block body %}
 
+<h1>{{object.name}}</h1>
+<p>
 <div class="row">
     <div class="span3 columns">
         {% include "_repository_info.html" %}
     </div>
-
     <div class="span9 columns">
-        <h1>{{object.name}}</h1>
 
         {% if object.general_context %}
             {{object.general_context|markdown}}
@@ -39,5 +39,6 @@
         {% endwith %}
     </div>
 </div>
+</p>
 {% endblock %}
 

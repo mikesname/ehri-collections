@@ -1,34 +1,38 @@
 {% load staticfiles %}
+{% if object.logo %}
 <div class="repo-logo">
     <a href="{{object.get_absolute_url}}">
         {% if object.logo %}
-        <img width="200px" src="{{object.logo.url }}" />
+        <img width="220px" src="{{object.logo.url }}" />
         {% else %}
-        <img width="200px" height="200px" src="{% static "img/repo_placeholder.png" %}" />
+        <img width="220px" height="220px" src="{% static "img/repo_placeholder.png" %}" />
         {% endif %}
     </a>
 </div>
+{% endif %}
 
 {% if object.images|length %}
-<div class="repo-images carousel carousel-static">
-    <!-- Carousel items -->
+<div class="repo-images">
     {% for img in object.images %}
-    <div id="repo-images" class="carousel-inner">
+    <div id="repo-images">
         <div class="item active">
-            <img title="{{img.caption|default_if_none:""}}" width="200px" src="{{img.image.url_300x300}}" />  
+            <img title="{{img.caption|default_if_none:""}}" width="220px" src="{{img.image.url_300x300}}" />  
     </div>
     {% endfor %}
   </div>
 </div>
 {% endif %}
-<address>
-{% for contact in object.contacts.all %}
-    {{contact.format|linebreaks}}
-    <br />
-    Tel: {{contact.telephone}}
-    <br />
-    Fax: {{contact.fax}}
-    <br />
-    Email: {{contact.email}}
-{% endfor %}
+<address class="well">
+    <h3>Contact details</h3>
+    <p>
+    {% for contact in object.contacts.all %}
+        {{contact.format|linebreaks}}
+        <br />
+        Tel: {{contact.telephone}}
+        <br />
+        Fax: {{contact.fax}}
+        <br />
+        {{contact.email|urlize}}
+    {% endfor %}
+    </p>
 </address>
