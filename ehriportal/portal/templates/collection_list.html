@@ -16,8 +16,8 @@
 {% endblock %}
 
 {% block body %}
+    <h1>{{repository.name}}</h1>
     {% if repository %}
-        <h2>{{repository.name}}</h2>
         <h3>{% trans "Collections" %}</h3>
     {% else %}
         <h2>{% trans "Collections" %}</h2>
