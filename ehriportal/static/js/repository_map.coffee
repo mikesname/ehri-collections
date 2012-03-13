@@ -1,5 +1,6 @@
 #
-# Coffeescript attempt
+# Coffeescript attempt.  This code is gross but will
+# hopefully get better...
 #
 
 initialize = ->
@@ -26,26 +27,8 @@ setSearchData = (data, clear) ->
   clearSearchData()  if clear
 
 clearSearchData = ->
-    #$.each gmarkers, (i, m) ->
-        #m.setMap null
   m.setMap null for m in gmarkers
   $("#result-list").html ""
-
-search = (query, type, page) ->
-  $.ajax
-    url: window.location.pathname
-    data:
-      q: query
-      type: type
-      format: "json"
-      page: page
-
-    dataType: "json"
-    error: ->
-      console.error arguments
-
-    success: (data) ->
-      result.setFromData data
 
 fitBoundsWithMinimumZoom = (map, bounds, minzoom=10) ->
   zc = google.maps.event.addListener(gmap, "zoom_changed", ->
@@ -57,10 +40,10 @@ fitBoundsWithMinimumZoom = (map, bounds, minzoom=10) ->
   map.fitBounds bounds
   google.maps.event.removeListener zc
 
-Repository = Backbone.Model.extend({})
 
 SearchResult = Backbone.Model.extend(
   defaults:
+    query: ""
     has_other_pages: false
     has_previous: false
     has_next: false
@@ -68,7 +51,7 @@ SearchResult = Backbone.Model.extend(
     total: 0
     object_list: []
 
-  setFromData: (data) ->
+  setFromData: (query, data) ->
     @set
       page: data.page
       total: data.total
@@ -76,6 +59,23 @@ SearchResult = Backbone.Model.extend(
       has_previous: data.has_previous
       has_other_pages: data.has_other_pages
       object_list: data.object_list
+      query: query
+
+  search: (query, type, page) ->
+    $.ajax
+      url: window.location.pathname
+      data:
+        q: query
+        type: type
+        format: "json"
+        page: page
+
+      dataType: "json"
+      error: ->
+        console.error arguments
+
+      success: (data) =>
+        @setFromData query, data
 )
 
 SearchListView = Backbone.View.extend(
@@ -86,7 +86,7 @@ SearchListView = Backbone.View.extend(
     url = dutils.urls.resolve("repo_detail",
       slug: repo.slug
     )
-    $("#result-list").append "<h4><a class='repo-link' href='" + url + "'>" + repo.name + "</a></h4>"
+    @$el.append "<h4><a class='repo-link' href='" + url + "'>" + repo.name + "</a></h4>"
     gmarkers.push new google.maps.Marker(
       position: new google.maps.LatLng(repo.location[1], repo.location[0])
       map: gmap
@@ -96,13 +96,27 @@ SearchListView = Backbone.View.extend(
 
   render: ->
     list = (repo for repo in @model.get("object_list") when repo.location?)
+    query = @model.get("query")
     clearSearchData()  unless @model.get "has_previous"
-    @_renderObject repo for repo in list
-    console.log "List", list
+    console.log "rendering"
+
     if list.length
+      @_renderObject repo for repo in list
       bounds = new google.maps.LatLngBounds()
       bounds.extend m.position for m in gmarkers
       fitBoundsWithMinimumZoom gmap, bounds
+)
+
+SummaryView = Backbone.View.extend(
+  initialize: ->
+    @model.bind "change", @render, this
+
+  render: ->
+    count = @model.get "total"
+    query = @model.get "query"
+    summary = if not count then "Nothing found for <i>#{query}</i>" else
+        "#{count} Result#{if count != 1 then "s" else ""} for <i>#{query}</i>"
+    @$el.html(summary)
 )
 
 gmap = undefined
@@ -113,7 +127,8 @@ listview = undefined
 jQuery ->
   gmap = initialize()
   result = new SearchResult()
-  listview = new SearchListView(model: result)
+  listview = new SearchListView(model: result, el: "#result-list")
+  sumview = new SummaryView(model: result, el: "#result-summary")
 
   window.onpopstate = (event) ->
     $("#id_q").val getParameterByName window.location.search, "q"
@@ -125,6 +140,6 @@ jQuery ->
     window.history.pushState
       q: val
     , window.title, window.location.pathname + "?" + $(this).serialize()
-    search val, type
+    result.search val, type
     event.preventDefault()
 
