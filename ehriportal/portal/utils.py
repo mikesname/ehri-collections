@@ -40,6 +40,8 @@ class HaystackPaginationEncoder(json.JSONEncoder):
         # handle dates
         if isinstance(obj, geos.Point):
             return (obj.x, obj.y)
+        elif isinstance(obj, datetime.date):
+            return obj.strftime('%Y-%m-%d')
         elif isinstance(obj, datetime.datetime):
             return obj.strftime('%Y-%m-%dT%H:%M:%S')
         # handle searchresult objects
