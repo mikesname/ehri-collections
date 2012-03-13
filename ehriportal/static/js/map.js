@@ -93,6 +93,18 @@
           return this.setFromData(query, data);
         }, this)
       });
+    },
+    totalWithLocations: function() {
+      var repo, _i, _len, _ref, _results;
+      _ref = this.get("object_list");
+      _results = [];
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        repo = _ref[_i];
+        if (repo.location != null) {
+          _results.push(repo);
+        }
+      }
+      return _results;
     }
   });
   SearchListView = Backbone.View.extend({
@@ -114,18 +126,7 @@
     },
     render: function() {
       var bounds, list, m, query, repo, _i, _j, _len, _len2;
-      list = (function() {
-        var _i, _len, _ref, _results;
-        _ref = this.model.get("object_list");
-        _results = [];
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          repo = _ref[_i];
-          if (repo.location != null) {
-            _results.push(repo);
-          }
-        }
-        return _results;
-      }).call(this);
+      list = this.model.totalWithLocations();
       query = this.model.get("query");
       if (!this.model.get("has_previous")) {
         clearSearchData();
@@ -151,9 +152,13 @@
     },
     render: function() {
       var count, query, summary;
-      count = this.model.get("total");
+      count = this.model.totalWithLocations().length;
       query = this.model.get("query");
-      summary = !count ? "Nothing found for <i>" + query + "</i>" : "" + count + " Result" + (count !== 1 ? "s" : "") + " for <i>" + query + "</i>";
+      if (query === "") {
+        summary = "";
+      } else {
+        summary = !count ? "Nothing found for <i>" + query + "</i>" : "" + count + " Result" + (count !== 1 ? "s" : "") + " for <i>" + query + "</i>";
+      }
       return this.$el.html(summary);
     }
   });

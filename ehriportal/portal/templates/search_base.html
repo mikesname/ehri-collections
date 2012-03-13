@@ -34,6 +34,7 @@
                     {% endblock %}
                     <input type="submit" value="Search">
                     {% include "_selected_facets.html" %}
+                    {% block summary %}
                     <h3 id="result-summary">
                     {% if paginator.count %}
                         {% with paginator.count|pluralize as pluralcount %}
@@ -49,6 +50,7 @@
                         {% endif %}
                     {% endif %}
                     </h3>
+                    {% endblock summary %}
                     {% block body %}
                     {% if paginator.count %}
 

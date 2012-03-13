@@ -76,6 +76,9 @@ SearchResult = Backbone.Model.extend(
 
       success: (data) =>
         @setFromData query, data
+
+  totalWithLocations: ->
+    (repo for repo in @get("object_list") when repo.location?)
 )
 
 SearchListView = Backbone.View.extend(
@@ -95,7 +98,7 @@ SearchListView = Backbone.View.extend(
     )
 
   render: ->
-    list = (repo for repo in @model.get("object_list") when repo.location?)
+    list = @model.totalWithLocations()
     query = @model.get("query")
     clearSearchData()  unless @model.get "has_previous"
     console.log "rendering"
@@ -112,10 +115,13 @@ SummaryView = Backbone.View.extend(
     @model.bind "change", @render, this
 
   render: ->
-    count = @model.get "total"
+    count = @model.totalWithLocations().length
     query = @model.get "query"
-    summary = if not count then "Nothing found for <i>#{query}</i>" else
-        "#{count} Result#{if count != 1 then "s" else ""} for <i>#{query}</i>"
+    if query == ""
+      summary = ""
+    else
+      summary = if not count then "Nothing found for <i>#{query}</i>" else
+          "#{count} Result#{if count != 1 then "s" else ""} for <i>#{query}</i>"
     @$el.html(summary)
 )
 

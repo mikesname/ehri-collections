@@ -26,6 +26,7 @@ urlpatterns = patterns("",
     url(r"^repositories/", include("portal.repository_urls")),
     url(r"^collections/", include("portal.collection_urls")),
     url(r"^suggestions/", include("suggestions.urls")),
+    url(r"^map/", include("portal.urls")),
 )
 
 

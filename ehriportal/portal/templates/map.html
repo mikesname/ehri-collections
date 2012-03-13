@@ -5,13 +5,15 @@
 {% load i18n %}
 {% load ifsetting_tag %}
 {% load pagination_tags %}
-{% block head_title %}{% trans "Repositories" %}{% endblock %}
+{% block head_title %}{% trans "EHRI Map" %}{% endblock %}
 
-{% block body_class %}repositories{% endblock %}
+{% block body_class %}map{% endblock %}
 
 {% block facets %}
     <div id="result-list"></div>
 {% endblock %}
+
+{% block summary %}<h3 id="result-summary"></h3>{% endblock %}
 
 {% block searchform %}
 {{form.q}} {{form.type}}
@@ -27,6 +29,6 @@
 <script type="text/javascript"
     src="http://maps.googleapis.com/maps/api/js?key=AIzaSyC7RVUST3aa1HyStY8UPQp71bxFoYWvtfM&sensor=false">
 </script>
-<script type="text/javascript" src="{% static "js/repository_map.js" %}"></script>
+<script type="text/javascript" src="{% static "js/map.js" %}"></script>
 
 {% endblock %}
