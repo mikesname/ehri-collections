@@ -23,5 +23,5 @@ ADMIN_MEDIA_PREFIX = posixpath.join(STATIC_URL, "admin/")
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
+GEOS_LIBRARY_PATH = '/usr/local/lib/libgeos_c.so'
 
