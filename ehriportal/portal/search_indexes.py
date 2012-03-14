@@ -86,7 +86,7 @@ class CollectionIndex(indexes.SearchIndex, indexes.Indexable):
     #ngram = indexes.EdgeNgramField(use_template=True, template_name="search/indexes/portal/collection_text.txt",
     #        stored=False)
     pub_date = indexes.DateTimeField(model_attr='created_on')
-    suggestions = indexes.CharField()
+    suggestions = indexes.FacetCharField()
 
     def get_model(self):
         return models.Collection
