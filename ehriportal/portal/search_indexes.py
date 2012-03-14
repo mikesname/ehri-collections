@@ -33,7 +33,7 @@ class RepositoryIndex(indexes.SearchIndex, indexes.Indexable):
     location = indexes.LocationField(null=True, faceted=True, stored=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
     pub_date = indexes.DateTimeField(model_attr='created_on')
-    suggestions = indexes.FacetCharField()
+    suggestions = indexes.CharField()
 
     def get_model(self):
         return models.Repository
@@ -86,7 +86,7 @@ class CollectionIndex(indexes.SearchIndex, indexes.Indexable):
     #ngram = indexes.EdgeNgramField(use_template=True, template_name="search/indexes/portal/collection_text.txt",
     #        stored=False)
     pub_date = indexes.DateTimeField(model_attr='created_on')
-    suggestions = indexes.FacetCharField()
+    suggestions = indexes.CharField()
 
     def get_model(self):
         return models.Collection
