@@ -85,7 +85,7 @@ class QueryFacetClass(FacetClass):
         if not counts.get("queries"):
             return
         for facet in self.facets:
-            count = counts["queries"].get("%s:%s" % (
+            count = counts["queries"].get("%s_exact:%s" % (
                     self.name, facet.querystr()))
             facet.count = count
             facet._selected = current

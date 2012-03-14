@@ -58,7 +58,6 @@ class PortalSearchListView(ListView):
         # FIXME: Find out why spelling suggestions aren't handled properly
         extra["suggestion"] = re.sub("[\W-]", "", self.searchqueryset\
                     .spelling_suggestion() or "")
-        print "Spelling", extra["suggestion"]
         extra["querystring"] = self.request.META.get("QUERY_STRING", "")
         return extra
 

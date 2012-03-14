@@ -11,7 +11,7 @@ from portal.haystack_util import QueryFacet, FacetClass, QueryFacetClass
 
 FACETS = [
     QueryFacetClass(
-        "years_exact",
+        "years",
         "Date",
         paramname="date",
         sort=FacetClass.FACET_SORT_NAME,
