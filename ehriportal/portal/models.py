@@ -61,9 +61,6 @@ class Resource(models.Model):
     ENTITY_TYPES=()
     LOD = ()
 
-    identifier = models.CharField(max_length=255, unique=True)
-    name = models.CharField(max_length=255)
-    slug = AutoSlugField(populate_from="name", unique=True)
     type = models.CharField(max_length=255)
     lod = models.CharField(max_length=255, choices=LOD, blank=True, null=True)
     type_of_entity = models.CharField(max_length=255,
@@ -192,6 +189,9 @@ class Repository(Resource):
         ("sources", "TODO: Help text"),
     )
 
+    name = models.CharField(max_length=255)
+    slug = AutoSlugField(populate_from="name", unique=True)
+    tidentifier = models.CharField(max_length=255, null=True)
     logo = ImageWithThumbsField(null=True, blank=True,
             upload_to=lambda inst, fn: os.path.join(inst.slug,
                 "%s_logo%s" % (inst.slug,
@@ -300,6 +300,9 @@ class Collection(Resource):
         ("sources", "TODO: Help text"),
     )
 
+    name = models.CharField(max_length=255)
+    slug = AutoSlugField(populate_from="name", unique=True)
+    tidentifier = models.CharField(max_length=255, null=True)
     repository = models.ForeignKey(Repository)
 
     tags = TaggableManager()
