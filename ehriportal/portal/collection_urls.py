@@ -51,7 +51,8 @@ FACETS = [
 
 infolist = dict(
         queryset=models.Collection.objects.all(),
-        paginate_by=20
+        paginate_by=20,
+        template_name="collection_list.html",
 )
 
 viewdict = dict(

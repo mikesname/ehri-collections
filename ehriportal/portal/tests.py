@@ -6,11 +6,17 @@ Replace this with more appropriate tests for your application.
 """
 
 from django.test import TestCase
+from django.core.urlresolvers import reverse
 
 
-class SimpleTest(TestCase):
-    def test_basic_addition(self):
-        """
-        Tests that 1 + 1 always equals 2.
-        """
-        self.assertEqual(1 + 1, 2)
+class PortalTest(TestCase):
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_collection_list(self):
+        """Test list of collections."""
+        response = self.client.get(reverse("collection_list"))
+        self.assertEqual(response.status_code, 200)
