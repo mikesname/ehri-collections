@@ -58,13 +58,7 @@ class Resource(models.Model):
     __metaclass__ = ResourceType
     translatable_fields = ()
 
-    ENTITY_TYPES=()
-    LOD = ()
-
     type = models.CharField(max_length=255)
-    lod = models.CharField(max_length=255, choices=LOD, blank=True, null=True)
-    type_of_entity = models.CharField(max_length=255,
-            choices=ENTITY_TYPES, blank=True, null=True)
     created_on = models.DateTimeField(editable=False)
     updated_on = models.DateTimeField(editable=False, null=True, blank=True)
 
@@ -163,7 +157,7 @@ class Place(models.Model):
 class Repository(Resource):
     """Repository."""
     ENTITY_TYPES=()
-    LOD = ()
+    LODS = ()
 
     translatable_fields = (
         ("access_conditions", "TODO: Help text"),
@@ -191,7 +185,10 @@ class Repository(Resource):
 
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from="name", unique=True)
-    tidentifier = models.CharField(max_length=255, null=True)
+    identifier = models.CharField(max_length=255)
+    lod = models.CharField(max_length=255, choices=LODS, blank=True, null=True)
+    type_of_entity = models.CharField(max_length=255,
+            choices=ENTITY_TYPES, blank=True, null=True)
     logo = ImageWithThumbsField(null=True, blank=True,
             upload_to=lambda inst, fn: os.path.join(inst.slug,
                 "%s_logo%s" % (inst.slug,
@@ -302,7 +299,10 @@ class Collection(Resource):
 
     name = models.CharField(max_length=255)
     slug = AutoSlugField(populate_from="name", unique=True)
-    tidentifier = models.CharField(max_length=255, null=True)
+    identifier = models.CharField(max_length=255)
+    lod = models.CharField(max_length=255, choices=LODS, blank=True, null=True)
+    type_of_entity = models.CharField(max_length=255,
+            choices=ENTITY_TYPES, blank=True, null=True)
     repository = models.ForeignKey(Repository)
 
     tags = TaggableManager()
