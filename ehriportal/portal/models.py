@@ -120,10 +120,8 @@ class Resource(models.Model):
         qset.delete()
 
     def __repr__(self):
-        return u"<%s: %s>" % (self.type, self.slug)
+        return u"<%s: %d>" % (self.type, self.pk)
 
-    def __unicode__(self):
-        return self.name
 
 class ResourceImage(models.Model):
     """Images associated with resources."""
@@ -152,6 +150,11 @@ class Place(models.Model):
     resource = models.ForeignKey(Resource)
     point = models.PointField()
     objects = models.GeoManager()
+
+
+class RepositoryManager(models.Manager):
+    def get_by_natural_key(self, slug):
+        return self.get(slug=slug)
 
 
 class Repository(Resource):
@@ -195,9 +198,13 @@ class Repository(Resource):
                     os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
 
     tags = TaggableManager()
+    objects = RepositoryManager()
 
     class Meta:
         verbose_name_plural = "repositories"
+
+    def natural_key(self):
+        return (self.slug,)
 
     @property
     def primary_contact(self):
@@ -214,12 +221,15 @@ class Repository(Resource):
             return
         return utils.get_country_from_code(contact.country_code)
 
-    def __unicode__(self):
-        return self.name
-
     @models.permalink
     def get_absolute_url(self):
         return ('repo_detail', [self.slug])
+
+    def __repr__(self):
+        return "<%s: %s>" % (self.__class__.__name__, self.slug)
+
+    def __unicode__(self):
+        return self.name
 
 
 class Contact(models.Model):
@@ -266,6 +276,11 @@ class Contact(models.Model):
         return "\n".join(elems).replace(", ", "\n")
 
 
+class CollectionManager(models.Manager):
+    def get_by_natural_key(self, slug):
+        return self.get(slug=slug)
+
+
 class Collection(Resource):
     """Model representing an archival description."""
     LODS = (
@@ -306,9 +321,13 @@ class Collection(Resource):
     repository = models.ForeignKey(Repository)
 
     tags = TaggableManager()
+    objects = CollectionManager()
 
     class Meta:
         verbose_name_plural = "collections"
+
+    def natural_key(self):
+        return (self.slug,)
 
     @property
     def languages_of_description(self):
@@ -368,6 +387,12 @@ class Collection(Resource):
     @models.permalink
     def get_absolute_url(self):
         return ('collection_detail', [self.slug])
+
+    def __repr__(self):
+        return "<%s: %s>" % (self.__class__.__name__, self.slug)
+
+    def __unicode__(self):
+        return self.name
 
 
 class FuzzyDate(models.Model):

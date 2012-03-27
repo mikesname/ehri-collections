@@ -8,8 +8,10 @@ Replace this with more appropriate tests for your application.
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 
+from portal import models
 
 class PortalTest(TestCase):
+    fixtures = ["resource.json", "repository.json", "collection.json"]
     def setUp(self):
         pass
 
@@ -23,7 +25,7 @@ class PortalTest(TestCase):
 
     def test_collection_detail(self):
         """Test collection detail view."""
-        response = self.client.get(reverse("collection_list", {
-            "slug": "test-item-1",
-        })
+        response = self.client.get(reverse("repo_collections", kwargs={
+            "slug": "wiener-library",
+        }))
         self.assertEqual(response.status_code, 200)

@@ -1,0 +1,35 @@
+[
+  {
+    "pk": 1, 
+    "model": "portal.repository", 
+    "fields": {
+      "collecting_policies": "", 
+      "internal_structures": "", 
+      "mandates": "", 
+      "finding_aids": "", 
+      "type_of_entity": "", 
+      "sources": "", 
+      "logo": "wiener-library_logo_1.jpg", 
+      "dates_of_existence": "", 
+      "lod": "", 
+      "disabled_access": "", 
+      "holdings": "", 
+      "reproduction_services": "", 
+      "buildings": "", 
+      "rules": "", 
+      "functions": "", 
+      "access_conditions": "", 
+      "maintenance_notes": "", 
+      "slug": "wiener-library", 
+      "opening_times": "", 
+      "identifier": "ehri1691UK", 
+      "name": "Wiener Library", 
+      "geocultural_context": "", 
+      "research_services": "", 
+      "legal_status": "", 
+      "places": "", 
+      "general_context": "", 
+      "history": ""
+    }
+  }
+]
