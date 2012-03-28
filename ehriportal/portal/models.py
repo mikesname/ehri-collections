@@ -395,6 +395,69 @@ class Collection(Resource):
         return self.name
 
 
+class AuthorityManager(models.Manager):
+    def get_by_natural_key(self, slug):
+        return self.get(slug=slug)
+
+
+class Authority(Resource):
+    """Model representing an archival authority."""
+    LODS = (
+        ("full", "Full"),
+        ("partial", "Partial"),
+        ("minimal", "Minimal"),
+    )
+    ENTITY_TYPES = (
+        ("corporate_body", "Corporate Body"),
+        ("family", "Family"),
+        ("person", "Person"),
+    )
+
+    translatable_fields = (
+        ("dates_of_existence", "TODO: Help text"),
+        ("functions", "TODO: Help text"),
+        ("general_context", "TODO: Help text"),
+        ("history", "TODO: Help text"),
+        ("institution_responsible_identifier", "TODO: Help text"),
+        ("internal_structures", "TODO: Help text"),
+        ("legal_status", "TODO: Help text"),
+        ("mandates", "TODO: Help text"),
+        ("places", "TODO: Help text"),
+        ("revision_history", "TODO: Help text"),
+        ("sources", "TODO: Help text"),
+    )
+
+    name = models.CharField(max_length=255)
+    slug = AutoSlugField(populate_from="name", unique=True)
+    identifier = models.CharField(max_length=255)
+    lod = models.CharField(max_length=255, choices=LODS, blank=True, null=True)
+    type_of_entity = models.CharField(max_length=255,
+            choices=ENTITY_TYPES, blank=True, null=True)
+
+    tags = TaggableManager()
+    objects = AuthorityManager()
+
+    class Meta:
+        verbose_name_plural = "authorities"
+
+    def natural_key(self):
+        return (self.slug,)
+
+    @property
+    def languages_of_description(self):
+        return self.get_property("languages_of_description")
+
+    @models.permalink
+    def get_absolute_url(self):
+        return ('authority_detail', [self.slug])
+
+    def __repr__(self):
+        return "<%s: %s>" % (self.__class__.__name__, self.slug)
+
+    def __unicode__(self):
+        return self.name
+
+
 class FuzzyDate(models.Model):
     """Model representing an approximate historical
     date or a date range."""
