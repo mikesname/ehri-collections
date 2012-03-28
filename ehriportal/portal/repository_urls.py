@@ -1,5 +1,4 @@
 from django.conf.urls.defaults import *
-from django.forms import ModelForm
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 from django.views.generic.list_detail import object_detail, object_list
@@ -20,17 +19,13 @@ FACETS = [
 
 listinfo = dict(
         queryset=models.Repository.objects.all().order_by("name"),
-        paginate_by=20
+        paginate_by=20,
+        template_name="repository_list.html"
 )
 
 viewinfo = dict(
         queryset=models.Repository.objects.all(),
 )
-
-class RepoEditForm(ModelForm):
-    class Meta:
-        model = models.Repository
-
 
 class ListCollectionsView(ListView):
     paginate_by = 20
@@ -64,7 +59,8 @@ urlpatterns = patterns('',
             template_name="repository_detail.html"
         ), name='repo_detail'),
     url(r'^(?P<slug>[-\w]+)/edit/?$', update_object, dict(
-            form_class=RepoEditForm
+            form_class=forms.RepoEditForm,
+            template_name="repository_form.html",
         ), name='repo_edit'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
             ListCollectionsView.as_view(

@@ -70,4 +70,14 @@ class FacetListSearchForm(PortalSearchForm):
             choices=(("count",_("Count")), ("name", _("Name"))))
 
 
+class CollectionEditForm(forms.ModelForm):
+    class Meta:
+        model = models.Collection
+
+
+class RepoEditForm(forms.ModelForm):
+    class Meta:
+        model = models.Repository
+
+
 

@@ -3,6 +3,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.conf.urls.defaults import *
 from django.views.generic.list_detail import object_detail, object_list
+from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required
 from haystack.query import SearchQuerySet
 
@@ -59,6 +60,7 @@ viewdict = dict(
         queryset=models.Collection.objects.all()
 )
 
+
 urlpatterns = patterns('',
     url(r'^search/?$', views.PortalSearchListView.as_view(
         model=models.Collection,
@@ -72,6 +74,10 @@ urlpatterns = patterns('',
         facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', object_list, infolist, name='collection_list'),
+    url(r'^(?P<slug>[-\w]+)/edit/?$', update_object, dict(
+            form_class=forms.CollectionEditForm,
+            template_name="collection_form.html",
+        ), name='collection_edit'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
             queryset=models.Collection.objects.all(),
             template_name="collection_detail.html"
