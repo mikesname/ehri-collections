@@ -197,7 +197,7 @@ class Repository(Resource):
                 "%s_logo%s" % (inst.slug,
                     os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
 
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
     objects = RepositoryManager()
 
     class Meta:
@@ -320,7 +320,7 @@ class Collection(Resource):
             choices=ENTITY_TYPES, blank=True, null=True)
     repository = models.ForeignKey(Repository)
 
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
     objects = CollectionManager()
 
     class Meta:
@@ -434,7 +434,7 @@ class Authority(Resource):
     type_of_entity = models.CharField(max_length=255,
             choices=ENTITY_TYPES, blank=True, null=True)
 
-    tags = TaggableManager()
+    tags = TaggableManager(blank=True)
     objects = AuthorityManager()
 
     class Meta:
