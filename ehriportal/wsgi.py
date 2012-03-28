@@ -13,7 +13,7 @@ execfile(activate_this, dict(__file__=activate_this))
 
 sys.stderr.write("WSGI Python Path (Collections): %s\n" % sys.path)
 
-from django.core.handlers.wsgi import WSGIHandler
+from django.core.wsgi import get_wsgi_application
 
 import pinax.env
 
@@ -23,4 +23,4 @@ pinax.env.setup_environ(__file__)
 os.environ['DJANGO_SETTINGS_MODULE'] = '%s.settings' % PROJECT_NAME
 
 # set application for WSGI processing
-application = WSGIHandler()
+application = get_wsgi_application()

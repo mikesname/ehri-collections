@@ -133,7 +133,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     
     "pinax.apps.account.context_processors.account",
     
-    "notification.context_processors.notification",
+    #"notification.context_processors.notification",
     "announcements.context_processors.site_wide_announcements",
     "suggestions.context_processors.suggestions_form",
 ]
@@ -156,7 +156,7 @@ INSTALLED_APPS = [
     "pinax_theme_bootstrap",
     
     # external
-    "notification", # must be first
+    #"notification", # must be first
     "staticfiles",
     "compressor",
     "debug_toolbar",
