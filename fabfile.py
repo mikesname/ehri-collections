@@ -37,6 +37,9 @@ def setup():
     # PIL requirements
     sudo('yum install -y libjpeg-devel')
     sudo('yum install -y libpng-devel')
+    # NB: Requires libgeos >= 3.0, so this doesn't
+    # work.  
+    sudo('yum install -y geos-devel')
     sudo('easy_install pip')
     sudo('pip install virtualenv')
 
@@ -88,7 +91,7 @@ def rollback():
 def upload_tar_from_git():
     "Create an archive from the current Git master branch and upload it"
     require("path", "release")
-    local('git archive --format=tar master | gzip > %(release)s.tar.gz' % env)
+    local('git archive --format=tar mapping | gzip > %(release)s.tar.gz' % env)
     run('mkdir %(path)s/releases/%(release)s' % env)
     put('%(release)s.tar.gz' % env, '%(path)s/packages/' % env)
     with cd("%(path)s/releases/%(release)s" % env):
@@ -132,6 +135,7 @@ def collectstatic():
     "Save static files to serve location."
     with virtualenv():
         with cd("%(path)s/releases/%(release)s/%(project_name)s" % env):
+            run('python manage.py js_urls')
             run('python manage.py collectstatic --noinput')
 
 def update_solr_schema():
