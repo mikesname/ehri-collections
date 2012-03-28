@@ -5,3 +5,4 @@
 *.pyc
 */dev.db
 site_media
+*/test.sqlite
