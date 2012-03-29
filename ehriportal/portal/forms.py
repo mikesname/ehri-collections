@@ -74,6 +74,40 @@ class CollectionEditForm(forms.ModelForm):
     class Meta:
         model = models.Collection
 
+    @property
+    def sections(self):
+        return (
+            ("Identity", (
+
+            )),
+            ("Context", (
+
+            )),
+            ("Content & Structure", (
+
+            )),
+            ("Conditions of Access & User", (
+
+            )),
+            ("Allied Materials", (
+
+            )),
+            ("Notes", (
+
+            )),
+            ("Access", (
+
+            )),
+            ("Control", (
+
+            )),
+            ("Rights", (
+
+            )),
+            ("Administration", (
+
+            )),
+        )
 
 class RepoEditForm(forms.ModelForm):
     class Meta:
