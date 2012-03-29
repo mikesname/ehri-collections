@@ -15,6 +15,8 @@ from autoslug import AutoSlugField
 from portal import utils
 from portal.thumbs import ImageWithThumbsField
 
+import reversion
+
 from south.modelsinspector import add_introspection_rules
 
 # get South to play nice with ImageWithThumbsField
@@ -71,6 +73,11 @@ class Resource(models.Model):
             self.type = self.__class__.__name__
         super(Resource, self).save(*args, **kwargs)
 
+    def get_instance(self):
+        """Get the superclass instance to which this resource
+        entry belongs."""
+        return globals()[self.type].objects.get(pk=self.pk)
+
     @property
     def other_names(self):
         """Get a list of other names."""
@@ -122,6 +129,9 @@ class Resource(models.Model):
     def __repr__(self):
         return u"<%s: %d>" % (self.type, self.pk)
 
+reversion.register(Resource, follow=[
+        "property_set", "place_set", "othername_set", "resourceimage_set"])
+
 
 class ResourceImage(models.Model):
     """Images associated with resources."""
@@ -132,10 +142,14 @@ class ResourceImage(models.Model):
                     os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
     caption = models.CharField(max_length=255, null=True, blank=True)
 
+reversion.register(ResourceImage)
+
 
 class OtherName(models.Model):
     name = models.CharField(max_length=255)
     resource = models.ForeignKey(Resource)
+
+reversion.register(OtherName)
 
 
 class Property(models.Model):
@@ -144,12 +158,16 @@ class Property(models.Model):
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
 
+reversion.register(Property)
+
 
 class Place(models.Model):
     """A point on the earth associated with a resource."""
     resource = models.ForeignKey(Resource)
     point = models.PointField()
     objects = models.GeoManager()
+
+reversion.register(Place)
 
 
 class RepositoryManager(models.Manager):
@@ -231,6 +249,8 @@ class Repository(Resource):
     def __unicode__(self):
         return self.name
 
+reversion.register(Repository, follow=["resource_ptr", "contact_set"])
+
 
 class Contact(models.Model):
     """Contact class."""
@@ -275,6 +295,8 @@ class Contact(models.Model):
         ] if e is not None]
         return "\n".join(elems).replace(", ", "\n")
 
+reversion.register(Contact)
+
 
 class CollectionManager(models.Manager):
     def get_by_natural_key(self, slug):
@@ -287,7 +309,6 @@ class Collection(Resource):
         ("fonds", "Fonds"),
         ("collection", "Collection"),
     )
-    ENTITY_TYPES = ()
 
     translatable_fields = (
         ("access_conditions", "TODO: Help text"),
@@ -316,8 +337,6 @@ class Collection(Resource):
     slug = AutoSlugField(populate_from="name", unique=True)
     identifier = models.CharField(max_length=255)
     lod = models.CharField(max_length=255, choices=LODS, blank=True, null=True)
-    type_of_entity = models.CharField(max_length=255,
-            choices=ENTITY_TYPES, blank=True, null=True)
     repository = models.ForeignKey(Repository)
 
     tags = TaggableManager(blank=True)
@@ -338,7 +357,7 @@ class Collection(Resource):
         """Shortcut for getting the earliest date to which
         this collection relates."""
         try:
-            fdate = self.dates.all().order_by("start_date")[0]
+            fdate = self.date_set.all().order_by("start_date")[0]
         except IndexError:
             return
         return fdate.start_date
@@ -348,7 +367,7 @@ class Collection(Resource):
         """Shortcut for getting the lastest date to which
         this collection relates."""
         try:
-            edate = self.dates.all().order_by("-end_date", "-start_date")[0]
+            edate = self.date_set.all().order_by("-end_date", "-start_date")[0]
         except IndexError:
             return
         if edate.end_date:
@@ -393,6 +412,8 @@ class Collection(Resource):
 
     def __unicode__(self):
         return self.name
+
+reversion.register(Collection, follow=["resource_ptr", "date_set"])
 
 
 class AuthorityManager(models.Manager):
@@ -457,6 +478,9 @@ class Authority(Resource):
     def __unicode__(self):
         return self.name
 
+reversion.register(Authority, follow=[
+        "resource_ptr", "property_set", "place_set"])
+
 
 class FuzzyDate(models.Model):
     """Model representing an approximate historical
@@ -466,7 +490,7 @@ class FuzzyDate(models.Model):
             ("month", "Month"),
             ("day", "Day"),
     )
-    collection = models.ForeignKey(Collection, related_name="dates")
+    collection = models.ForeignKey(Collection, related_name="date_set")
     start_date = models.DateField()
     start_time = models.TimeField(null=True)    
     end_date = models.DateField(null=True)
@@ -509,4 +533,5 @@ class FuzzyDate(models.Model):
             out += "-%d" % self.end_date.year
         return out
 
+reversion.register(FuzzyDate)
 
