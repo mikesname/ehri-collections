@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import sys
 
 try:
@@ -17,4 +18,5 @@ pinax.env.setup_environ(__file__)
 
 
 if __name__ == "__main__":
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ehriportal.settings")
     execute_from_command_line()
