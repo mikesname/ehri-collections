@@ -6,10 +6,12 @@ import json
 
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import ListView
+from django.forms.models import inlineformset_factory
 from django import forms
 from django.conf import settings
 from django.http import HttpResponse, Http404
 from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404, render
 
 from haystack.query import SearchQuerySet
 from portal import models, forms, utils
@@ -116,3 +118,18 @@ class PaginatedFacetView(PortalSearchListView):
                     self.request.META.get("QUERY_STRING",""))
         return extra
 
+
+def edit_collection(request, slug):
+    """Edit a collection using a formset."""
+
+    collection = get_object_or_404(models.Collection, slug=slug)
+    form = forms.CollectionEditForm(instance=collection)
+    formsets = {}
+    formsets["dates"] = inlineformset_factory(models.Collection, models.FuzzyDate, extra=1)(
+                instance=collection)
+    formsets["other_names"] = inlineformset_factory(models.Collection, models.OtherName, extra=1)(
+                instance=collection)
+
+    context = dict(form=form, formsets=formsets)
+    template = "collection_form.html"
+    return render(request, template, context)

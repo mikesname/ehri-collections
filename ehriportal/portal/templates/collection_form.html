@@ -1,26 +1,38 @@
-{% extends "subnav_base.html" %}
+{% extends "site_base.html" %}
 
 {% load i18n %}
 {% load ifsetting_tag %}
 {% load markup %}
+{% load portal_tags %}
 
-{% block head_title %}{% trans "Repositories" %}{% endblock %}
+{% block head_title %}{% trans "Edit" %} - {{object.name}}{% endblock %}
 
-
-{% block subnav %}
-    {% include "_repository_info.html" %}
-{% endblock %}
 
 {% block body %}
 <h1>{{object.name}}</h1>
-<table class="zebra-striped">
-    <form method="post" class="entity-form" id="collection-edit-form">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a class="btn" href="{{object.get_absolute_url}}">Cancel</a>
-        </div>
-    </form>
-</table>
+<form method="post" class="entity-form" id="collection-edit-form">
+    {% csrf_token %}
+    {% for section in form.sections %}
+        <fieldset>
+            <legend>{{section.0}} area</legend>
+            {% for field in section.1 %}
+                {% if formsets|hasitem:field %}
+                    {{formsets|getitem:field }}
+                {% else %}
+                    {% with form|getitem:field as item %}
+                    <div class="control-group">
+                        <label for="id_{{item.name}}">{{item.label}}</label>
+                        {{item}}
+                    </div>
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}    
+        </fieldset>
+    {% endfor %}
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a class="btn" href="{{object.get_absolute_url}}">Cancel</a>
+    </div>
+</form>
 {% endblock %}

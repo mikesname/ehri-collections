@@ -77,6 +77,11 @@ class FacetListSearchForm(PortalSearchForm):
 
 #CollectionEditForm = forms.models.modelformset_factory(models.Collection)
 
+from django.forms.models import inlineformset_factory
+
+CollectionEditFormSet = inlineformset_factory(models.Collection, models.FuzzyDate, extra=1)
+
+
 class CollectionEditForm(forms.ModelForm):
     class Meta:
         model = models.Collection
@@ -84,38 +89,43 @@ class CollectionEditForm(forms.ModelForm):
     @property
     def sections(self):
         return (
-            ("Identity", (
+           ("Identity", [
                 "identifier",
                 "name",
+                "other_names",
+                "dates",
+                "lod",
+                "extent_and_medium",
+            ]),
+            ("Context", [
+                "repository",
+                "archival_history",
+                "acquisition",
+            ]),
+            ("Content & Structure", [
 
-            )),
-            ("Context", (
+            ]),
+            ("Conditions of Access & User", [
 
-            )),
-            ("Content & Structure", (
+            ]),
+            ("Allied Materials", [
 
-            )),
-            ("Conditions of Access & User", (
+            ]),
+            ("Notes", [
 
-            )),
-            ("Allied Materials", (
+            ]),
+            ("Access", [
 
-            )),
-            ("Notes", (
+            ]),
+            ("Control", [
 
-            )),
-            ("Access", (
+            ]),
+            ("Rights", [
 
-            )),
-            ("Control", (
+            ]),
+            ("Administration", [
 
-            )),
-            ("Rights", (
-
-            )),
-            ("Administration", (
-
-            )),
+            ]),
         )
 
 class RepoEditForm(forms.ModelForm):

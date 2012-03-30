@@ -74,10 +74,11 @@ urlpatterns = patterns('',
         facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', object_list, infolist, name='collection_list'),
-    url(r'^(?P<slug>[-\w]+)/edit/?$', update_object, dict(
-            form_class=forms.CollectionEditForm,
-            template_name="collection_form.html",
-        ), name='collection_edit'),
+    #url(r'^(?P<slug>[-\w]+)/edit/?$', update_object, dict(
+    #        form_class=forms.CollectionEditForm,
+    #        template_name="collection_form.html",
+    #    ), name='collection_edit'),
+    url(r'^(?P<slug>[-\w]+)/edit/?$', views.edit_collection, name='collection_edit'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
             queryset=models.Collection.objects.all(),
             template_name="collection_detail.html"
