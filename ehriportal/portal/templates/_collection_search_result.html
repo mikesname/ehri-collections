@@ -1,5 +1,6 @@
 {% load highlight %}
 <h4>
+    <i class="icon-file"></i>
     <a title="{{result.name}}" href="{% url collection_detail slug=result.slug %}">
         {{ result.name|truncatewords:9 }}</a>&nbsp;
     <span class="result-date">{{result.date_range|default_if_none:""}}</span>
