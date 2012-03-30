@@ -1,0 +1,28 @@
+{% extends 'search_base.html' %}
+
+{% load portal_tags %}
+{% load i18n %}
+{% load ifsetting_tag %}
+{% load pagination_tags %}
+{% block head_title %}{% trans "Search" %}{% endblock %}
+
+{% block body_class %}{% endblock %}
+
+
+{% block facets %}
+    {% include "_facet_list.html" %}
+{% endblock %}
+
+{% block resultlist %}
+{% for result in page_obj.object_list %}
+        {% if result.model_name == "collection" %}
+            {% include "_collection_search_result.html" %}
+        {% elif result.model_name == "repository" %}
+            {% include "_repository_search_result.html" %}
+        {% elif result.model_name == "authority" %}
+            {% include "_authority_search_result.html" %}
+        {% endif %}
+    {% empty %}
+        <p>No results found.</p>
+    {% endfor %}
+{% endblock %}

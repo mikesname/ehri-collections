@@ -36,6 +36,11 @@ class PortalSearchForm(forms.Form):
     def no_query_found(self):
         return self.sqs
 
+class PortalAllSearchForm(PortalSearchForm):
+    def no_query_found(self):
+        return EmptySearchQuerySet()
+
+
 
 class MapSearchForm(PortalSearchForm):
     type = forms.ChoiceField(label=_('Type'), choices=(("Repository", "Repository"),
@@ -70,6 +75,8 @@ class FacetListSearchForm(PortalSearchForm):
             choices=(("count",_("Count")), ("name", _("Name"))))
 
 
+#CollectionEditForm = forms.models.modelformset_factory(models.Collection)
+
 class CollectionEditForm(forms.ModelForm):
     class Meta:
         model = models.Collection
@@ -78,6 +85,8 @@ class CollectionEditForm(forms.ModelForm):
     def sections(self):
         return (
             ("Identity", (
+                "identifier",
+                "name",
 
             )),
             ("Context", (

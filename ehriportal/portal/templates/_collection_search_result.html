@@ -1,0 +1,17 @@
+{% load highlight %}
+<h4>
+    <a title="{{result.name}}" href="{% url collection_detail slug=result.slug %}">
+        {{ result.name|truncatewords:9 }}</a>&nbsp;
+    <span class="result-date">{{result.date_range|default_if_none:""}}</span>
+    <span class="collection-repo">
+        <a href="{{result.repository_uri}}">{{result.repository}}</a>
+    </span>
+</h4>                
+<p>
+{% if form.q.value %}
+    {% highlight result.description with form.q.value max_length 200 %}
+{% else %}
+    {{ result.description|truncatewords:25 }}
+{% endif %}
+</p>
+

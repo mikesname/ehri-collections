@@ -1,0 +1,19 @@
+{% load highlight %}
+<h4>
+    <a title="{{result.name}}" href="{% url repo_detail slug=result.slug %}">
+        {{ result.name|truncatewords:10 }}
+    </a>
+    <span class="repository-country">
+        <a href="{% url repo_search %}?selected_facets=country_exact:{{result.country|urlencode}}">
+            {{ result.country|truncatewords:2 }}
+        </a>
+    </span>
+</h4>                
+<p>
+{% if result.description %}
+    {% highlight result.description with form.q.value max_length 200 %}
+{% else %}
+    No description available.
+{% endif %}
+</p>
+
