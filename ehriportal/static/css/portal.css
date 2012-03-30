@@ -131,3 +131,16 @@ a:hover {
 .repo-marker {
     background-color: green;
 }
+
+a.openid-button {
+    margin: 20px;
+}
+
+a.openid-button:hover {
+    text-decoration: none;
+}
+
+.openid-buttons {
+    padding: 20px 0;
+    vertical-align: middle;
+}

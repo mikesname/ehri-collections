@@ -24,6 +24,12 @@ $(function($) {
         $(this).parent().next("dl").toggle(200);
     });
 
+    // OpenID buttons
+    $("a.openid-button").click(function(event) {
+        event.preventDefault();
+        $("input[name='openid_url']").val(this.href).closest("form").submit();
+    });
+
 
     var slider = $('.slide-out-div').tabSlideOut({
         tabHandle: '.handle',                              

@@ -266,6 +266,14 @@ THUMBNAIL_SIZES = (
         (300,300),
 )
 
+# OpenID discovery URLs
+OPENID_PROVIDERS = (
+        ("google", "https://www.google.com/accounts/o8/id"),
+        ("yahoo", "https://me.yahoo.com"),
+        ("flickr", "https://login.yahoo.com"),
+        ("myopenid", "https://www.myopenid.com"),
+)
+
 # if production settings exists (as it will on the server)
 # import it and override things defined here, like DEBUG
 try:
