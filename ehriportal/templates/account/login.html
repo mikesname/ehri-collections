@@ -47,15 +47,8 @@
                 <fieldset>
                     <legend>{% trans "Or sign in with your OpenID" %}</legend>
                     {% csrf_token %}
-                    <div class="control-group">
-                        <label class="control-label" for="id_username">OpenID Identifier</label>
-                        <div class="controls">
-                            <input class="openid" type="text" name="openid_url" />
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <input type="submit" value="{% trans "Log in" %}" class="btn btn-primary" />
-                    </div>
+
+                    {% include "account/_openid_form.html" %}
                 </fieldset>
             </form>
             {% endifsetting %}

@@ -105,6 +105,8 @@ MIDDLEWARE_CLASSES = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.middleware.transaction.TransactionMiddleware",
+    "reversion.middleware.RevisionMiddleware",
     "django_openid.consumer.SessionConsumer",
     "django.contrib.messages.middleware.MessageMiddleware",
     "pinax.apps.account.middleware.LocaleMiddleware",
@@ -192,6 +194,9 @@ INSTALLED_APPS = [
     # db migrations
     "south",
 
+    # history/audit log
+    "reversion",
+
     # our apps
     "portal",
     "suggestions",
@@ -259,6 +264,14 @@ MODELTRANSLATION_TRANSLATION_REGISTRY = "ehriportal.translation"
 THUMBNAIL_SIZES = (
         (100,100), 
         (300,300),
+)
+
+# OpenID discovery URLs
+OPENID_PROVIDERS = (
+        ("google", "https://www.google.com/accounts/o8/id"),
+        ("yahoo", "https://me.yahoo.com"),
+        ("flickr", "https://login.yahoo.com"),
+        ("myopenid", "https://www.myopenid.com"),
 )
 
 # if production settings exists (as it will on the server)

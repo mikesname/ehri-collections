@@ -1,0 +1,29 @@
+{% load i18n %}
+{% load staticfiles %}
+<div class="openid-buttons">
+    <a class="openid-button" href="https://www.google.com/accounts/o8/id">
+        <img src="{% static "img/google.png" %}">
+    </a>
+    <a class="openid-button" href="https://me.yahoo.com">
+        <img src="{% static "img/yahoo.png" %}" />
+    </a>                    
+    <a class="openid-button" data-url="https://login.yahoo.com">
+        <img src="{% static "img/flickr.png" %}" />
+    </a>
+    <a class="openid-button" href="https://www.myopenid.com">
+        <img src="{% static "img/myopenid.png" %}" />
+    </a>
+</div>
+<input type="hidden" name="openid_url" />
+<!--
+<div class="hidden control-group">
+    <label class="control-label" for="id_username">OpenID Identifier</label>
+    <div class="controls">
+        <input class="openid" type="text" name="openid_url" />
+    </div>
+</div>
+<div class="form-actions">
+    <input type="submit" value="{% trans "Log in" %}" class="btn btn-primary" />
+</div>
+-->
+
