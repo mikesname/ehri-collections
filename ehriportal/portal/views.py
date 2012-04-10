@@ -125,10 +125,10 @@ def edit_collection(request, slug):
     collection = get_object_or_404(models.Collection, slug=slug)
     form = forms.CollectionEditForm(instance=collection)
     formsets = {}
-    formsets["dates"] = inlineformset_factory(models.Collection, models.FuzzyDate, extra=1)(
-                instance=collection)
-    formsets["other_names"] = inlineformset_factory(models.Collection, models.OtherName, extra=1)(
-                instance=collection)
+    formsets["dates"] = inlineformset_factory(
+            models.Collection, models.FuzzyDate, extra=1)(instance=collection)
+    formsets["other_names"] = inlineformset_factory(
+            models.Collection, models.OtherName, extra=1)(instance=collection)
 
     context = dict(form=form, formsets=formsets)
     template = "collection_form.html"

@@ -89,7 +89,7 @@ class CollectionEditForm(forms.ModelForm):
     @property
     def sections(self):
         return (
-           ("Identity", [
+           ("identity", "Identity", [
                 "identifier",
                 "name",
                 "other_names",
@@ -97,33 +97,42 @@ class CollectionEditForm(forms.ModelForm):
                 "lod",
                 "extent_and_medium",
             ]),
-            ("Context", [
+            ("context", "Context", [
                 "repository",
                 "archival_history",
                 "acquisition",
             ]),
-            ("Content & Structure", [
+            ("content_structure", "Content", [
+                "scope_and_content",
+                "appraisal",
+                "accruals",
+                "arrangement",
+            ]),
+            ("conditions_access", "Conditions", [
+                "access_conditions",
+                "reproduction_conditions",
+                "physical_characteristics",
+                "finding_aids",
+            ]),
+            ("allied_materials", "Allied Materials", [
+                "location_of_originals",
+                "location_of_copies",
+                "related_units_of_description",
+            ]),
+            ("notes", "Notes", [
 
             ]),
-            ("Conditions of Access & User", [
+            ("access", "Access", [
 
             ]),
-            ("Allied Materials", [
+            ("control", "Control", [
+                "rules",
+                "sources",
+            ]),
+            ("rights", "Rights", [
 
             ]),
-            ("Notes", [
-
-            ]),
-            ("Access", [
-
-            ]),
-            ("Control", [
-
-            ]),
-            ("Rights", [
-
-            ]),
-            ("Administration", [
+            ("administration", "Administration", [
 
             ]),
         )
@@ -131,6 +140,5 @@ class CollectionEditForm(forms.ModelForm):
 class RepoEditForm(forms.ModelForm):
     class Meta:
         model = models.Repository
-
 
 

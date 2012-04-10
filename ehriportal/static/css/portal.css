@@ -144,3 +144,8 @@ a.openid-button:hover {
     padding: 20px 0;
     vertical-align: middle;
 }
+
+/* forms */
+.entity-field textarea {
+    height: 3em;
+}
