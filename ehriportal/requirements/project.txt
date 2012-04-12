@@ -5,7 +5,7 @@
 
 # Put project-specific requirements here.
 # See http://pip-installer.org/requirement-format.html for more information.
-MySQL-python
+psycopg2
 PIL
 python-dateutil
 babel
