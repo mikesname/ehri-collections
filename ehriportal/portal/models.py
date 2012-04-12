@@ -47,8 +47,8 @@ class ResourceType(ModelBase):
          # Abstract class: abstract attribute should not be inherited.
         if attrs.pop("abstract", None) or not attrs.get("autoregister", True):
             return new(cls, name, bases, attrs)
-        for fname, help in attrs.get("translatable_fields", []):
-            attrs[fname] = models.TextField(null=True, blank=True, help_text=help)
+        for fname, vname, help in attrs.get("translatable_fields", []):
+            attrs[fname] = models.TextField(vname, null=True, blank=True, help_text=help)
         return new(cls, name, bases, attrs)
 
     def __repr__(cls):
@@ -146,7 +146,7 @@ reversion.register(ResourceImage)
 
 
 class OtherName(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField("Alternate name", max_length=255)
     resource = models.ForeignKey(Resource)
 
 reversion.register(OtherName)
@@ -181,36 +181,36 @@ class Repository(Resource):
     LODS = ()
 
     translatable_fields = (
-        ("access_conditions", "TODO: Help text"),
-        ("buildings", "TODO: Help text"),
-        ("collecting_policies", "TODO: Help text"),
-        ("dates_of_existence", "TODO: Help text"),
-        ("disabled_access", "TODO: Help text"),
-        ("finding_aids", "TODO: Help text"),
-        ("functions", "TODO: Help text"),
-        ("general_context", "TODO: Help text"),
-        ("geocultural_context", "TODO: Help text"),
-        ("history", "TODO: Help text"),
-        ("holdings", "TODO: Help text"),
-        ("internal_structures", "TODO: Help text"),
-        ("legal_status", "TODO: Help text"),
-        ("maintenance_notes", "TODO: Help text"),
-        ("mandates", "TODO: Help text"),
-        ("opening_times", "TODO: Help text"),
-        ("places", "TODO: Help text"),
-        ("reproduction_services", "TODO: Help text"),
-        ("research_services", "TODO: Help text"),
-        ("rules", "TODO: Help text"),
-        ("sources", "TODO: Help text"),
+        ("access_conditions", "Access Conditions", "TODO: Help text"),
+        ("buildings", "Buildings", "TODO: Help text"),
+        ("collecting_policies", "Collecting Policies", "TODO: Help text"),
+        ("dates_of_existence", "Dates of Existence", "TODO: Help text"),
+        ("disabled_access", "Disabled Access", "TODO: Help text"),
+        ("finding_aids", "Finding Aids", "TODO: Help text"),
+        ("functions", "Functions", "TODO: Help text"),
+        ("general_context", "General Context", "TODO: Help text"),
+        ("geocultural_context", "Geocultural Context", "TODO: Help text"),
+        ("history", "History", "TODO: Help text"),
+        ("holdings", "Holdings", "TODO: Help text"),
+        ("internal_structures", "Internal Structures", "TODO: Help text"),
+        ("legal_status", "Legal Status", "TODO: Help text"),
+        ("maintenance_notes", "Maintenance Notes", "TODO: Help text"),
+        ("mandates", "Mandates", "TODO: Help text"),
+        ("opening_times", "Opening Times", "TODO: Help text"),
+        ("places", "Places", "TODO: Help text"),
+        ("reproduction_services", "Reproduction Services", "TODO: Help text"),
+        ("research_services", "Research Services", "TODO: Help text"),
+        ("rules", "Rules", "TODO: Help text"),
+        ("sources", "Sources", "TODO: Help text"),
     )
 
-    name = models.CharField(max_length=255)
+    name = models.CharField("Authorized Form of Name", max_length=255)
     slug = AutoSlugField(populate_from="name", unique=True)
     identifier = models.CharField(max_length=255)
-    lod = models.CharField(max_length=255, choices=LODS, blank=True, null=True)
-    type_of_entity = models.CharField(max_length=255,
+    lod = models.CharField("Level of Description", max_length=255, choices=LODS, blank=True, null=True)
+    type_of_entity = models.CharField("Type of Entity", max_length=255,
             choices=ENTITY_TYPES, blank=True, null=True)
-    logo = ImageWithThumbsField(null=True, blank=True,
+    logo = ImageWithThumbsField("Logo", null=True, blank=True,
             upload_to=lambda inst, fn: os.path.join(inst.slug,
                 "%s_logo%s" % (inst.slug,
                     os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
@@ -257,7 +257,8 @@ class Contact(models.Model):
     CONTACT_TYPES = ()
 
     primary = models.BooleanField()
-    repository = models.ForeignKey(Repository, related_name="contacts")
+    repository = models.ForeignKey(
+            Repository, verbose_name="Contact addresses", related_name="contacts")
     contact_person = models.CharField(max_length=255, null=True, blank=True)
     street_address = models.TextField(null=True, blank=True)
     website = models.URLField(null=True, blank=True)
@@ -311,32 +312,33 @@ class Collection(Resource):
     )
 
     translatable_fields = (
-        ("access_conditions", "TODO: Help text"),
-        ("accruals", "TODO: Help text"),
-        ("acquisition", "TODO: Help text"),
-        ("alternate_title", "TODO: Help text"),
-        ("appraisal", "TODO: Help text"),
-        ("archival_history", "TODO: Help text"),
-        ("arrangement", "TODO: Help text"),
-        ("edition", "TODO: Help text"),
-        ("extent_and_medium", "TODO: Help text"),
-        ("finding_aids", "TODO: Help text"),
-        ("institution_responsible_identifier", "TODO: Help text"),
-        ("location_of_copies", "TODO: Help text"),
-        ("location_of_originals", "TODO: Help text"),
-        ("physical_characteristics", "TODO: Help text"),
-        ("related_units_of_description", "TODO: Help text"),
-        ("reproduction_conditions", "TODO: Help text"),
-        ("revision_history", "TODO: Help text"),
-        ("rules", "TODO: Help text"),
-        ("scope_and_content", "TODO: Help text"),
-        ("sources", "TODO: Help text"),
+        ("access_conditions", "Access Conditions", "TODO: Help text"),
+        ("accruals", "Accruals", "TODO: Help text"),
+        ("acquisition", "Immediate source of acquisition or transfer", "TODO: Help text"),
+        ("alternate_title", "Alternate Title", "TODO: Help text"),
+        ("appraisal", "Appraisal", "TODO: Help text"),
+        ("archival_history", "Archival History", "TODO: Help text"),
+        ("arrangement", "Arrangement", "TODO: Help text"),
+        ("edition", "Edition", "TODO: Help text"),
+        ("extent_and_medium", "Extent and Medium", "TODO: Help text"),
+        ("finding_aids", "Finding Aids", "TODO: Help text"),
+        ("institution_responsible_identifier", "Institution Responsible Identifier", "TODO: Help text"),
+        ("location_of_copies", "Location of Copies", "TODO: Help text"),
+        ("location_of_originals", "Location of Originals", "TODO: Help text"),
+        ("physical_characteristics", "Physical Characteristics", "TODO: Help text"),
+        ("related_units_of_description", "Related Units of Description", "TODO: Help text"),
+        ("reproduction_conditions", "Reproduction Conditions", "TODO: Help text"),
+        ("revision_history", "Revision History", "TODO: Help text"),
+        ("rules", "Rules", "TODO: Help text"),
+        ("scope_and_content", "Scope and Content", "TODO: Help text"),
+        ("sources", "Sources", "TODO: Help text"),
     )
 
-    name = models.CharField(max_length=255)
+    name = models.CharField("Title", max_length=255)
     slug = AutoSlugField(populate_from="name", unique=True)
     identifier = models.CharField(max_length=255)
-    lod = models.CharField(max_length=255, choices=LODS, blank=True, null=True)
+    lod = models.CharField("Level of Description", max_length=255,
+                choices=LODS, blank=True, null=True)
     repository = models.ForeignKey(Repository)
 
     tags = TaggableManager(blank=True)
@@ -435,24 +437,24 @@ class Authority(Resource):
     )
 
     translatable_fields = (
-        ("dates_of_existence", "TODO: Help text"),
-        ("functions", "TODO: Help text"),
-        ("general_context", "TODO: Help text"),
-        ("history", "TODO: Help text"),
-        ("institution_responsible_identifier", "TODO: Help text"),
-        ("internal_structures", "TODO: Help text"),
-        ("legal_status", "TODO: Help text"),
-        ("mandates", "TODO: Help text"),
-        ("places", "TODO: Help text"),
-        ("revision_history", "TODO: Help text"),
-        ("sources", "TODO: Help text"),
+        ("dates_of_existence", "Dates of Existence", "TODO: Help text"),
+        ("functions", "Functions", "TODO: Help text"),
+        ("general_context", "General Context", "TODO: Help text"),
+        ("history", "History", "TODO: Help text"),
+        ("institution_responsible_identifier", "Institution Responsible Identifier", "TODO: Help text"),
+        ("internal_structures", "Internal Structures", "TODO: Help text"),
+        ("legal_status", "Legal Status", "TODO: Help text"),
+        ("mandates", "Mandates", "TODO: Help text"),
+        ("places", "Places", "TODO: Help text"),
+        ("revision_history", "Revision History", "TODO: Help text"),
+        ("sources", "Sources", "TODO: Help text"),
     )
 
-    name = models.CharField(max_length=255)
+    name = models.CharField("Authorized Form of Name", max_length=255)
     slug = AutoSlugField(populate_from="name", unique=True)
     identifier = models.CharField(max_length=255)
-    lod = models.CharField(max_length=255, choices=LODS, blank=True, null=True)
-    type_of_entity = models.CharField(max_length=255,
+    lod = models.CharField("Level of Description", max_length=255, choices=LODS, blank=True, null=True)
+    type_of_entity = models.CharField("Type of Entity", max_length=255,
             choices=ENTITY_TYPES, blank=True, null=True)
 
     tags = TaggableManager(blank=True)

@@ -12,35 +12,88 @@
 <h1>{{object.name}}</h1>
 <form method="post" class="entity-form" id="collection-edit-form">
     {% csrf_token %}
-    <ul class="nav nav-tabs">
-    {% for section in form.sections %}
-        <li class="{% if forloop.first %}{{"active"}}{% endif %}">
-            <a href="#{{section.0}}_tab" data-toggle="pill" >{{section.1}}</a>
-        </li>
-    {% endfor %}
-    </ul>
+    <fieldset>
+        <legend>Identity Area</legend>
+        {% include "_form_field.html" with field=form.identifier %}
+        {% include "_form_field.html" with field=form.name %}
 
-    <div class="tab-content">
-    {% for section in form.sections %}
-    <div class="tab-pane {% if forloop.first %}{{"active"}}{% endif %}" id="{{section.0}}_tab">
-            <fieldset>
-                <legend>{{section.1}} area</legend>
-                {% for field in section.2 %}
-                    {% if formsets|hasitem:field %}
-                        {{formsets|getitem:field }}
-                    {% else %}
-                        {% with form|getitem:field as item %}
-                        <div class="control-group entity-field">
-                            <label for="id_{{item.name}}">{{item.label}}</label>
-                            {{item}}
-                        </div>
-                        {% endwith %}
-                    {% endif %}
-                {% endfor %}    
-            </fieldset>
-        </div>
-    {% endfor %}
-    </div>
+        {{othernames.management_form}}
+        <label>Alternate Names</label>
+        {% for onform in othernames %}
+            <div class="control-group form-inline">
+                {{onform.name}}
+                {{onform.DELETE.label_tag}}
+                {{onform.DELETE}}
+            </div>
+        {% endfor %}
+
+        {{dates.management_form}}
+        <label>Dates</label>
+        {% for dateform in dates %}
+            <div class="control-group form-inline date-field">
+                {{dateform.start_date}}
+                {{dateform.end_date}}
+                {{dateform.DELETE.label_tag}}
+                {{dateform.DELETE}}
+            </div>
+        {% endfor %}
+
+        {% include "_form_field.html" with field=form.lod %}
+        {% include "_form_field.html" with field=form.extent_and_medium %}
+    </fieldset>
+    <fieldset>
+        <legend>Context Area</legend>
+        {% include "_form_field.html" with field=form.repository %}
+        {% include "_form_field.html" with field=form.archival_history %}
+        {% include "_form_field.html" with field=form.acquisition %}
+    </fieldset>
+
+    <fieldset>
+        <legend>Content &amp; Structure Area</legend>
+        {% include "_form_field.html" with field=form.scope_and_content %}
+        {% include "_form_field.html" with field=form.appraisal %}
+        {% include "_form_field.html" with field=form.accruals %}
+        {% include "_form_field.html" with field=form.system_of_arrangement %}
+    </fieldset>
+
+    <fieldset>
+        <legend>Conditions of Access &amp; Use Area</legend>
+        {% include "_form_field.html" with field=form.access_conditions %}
+        {% include "_form_field.html" with field=form.reproduction_conditions %}
+        
+        {{langprops.management_form}}
+        <label>Language(s)</label>
+        {% for langform in langprops %}
+            <div class="control-group form-inline">
+                {{langform.value}}
+                {{langform.DELETE.label_tag}}
+                {{langform.DELETE}}
+            </div>
+        {% endfor %}
+
+        {{scriptprops.management_form}}
+        <label>Script(s)</label>
+        {% for scriptform in scriptprops %}
+            <div class="control-group form-inline">
+                {{scriptform.value}}
+                {{scriptform.DELETE.label_tag}}
+                {{scriptform.DELETE}}
+            </div>
+        {% endfor %}
+
+        {% include "_form_field.html" with field=form.physical_characteristics %}
+        {% include "_form_field.html" with field=form.finding_aids %}
+    </fieldset>
+
+    <fieldset>
+        <legend>Allied Material Area</legend>
+        {% include "_form_field.html" with field=form.location_of_originals %}
+        {% include "_form_field.html" with field=form.location_of_copies %}
+        {% include "_form_field.html" with field=form.related_units_of_description %}
+        {% include "_form_field.html" with field=form.publication_notes %}
+    </fieldset>
+
+
 
     <div class="form-actions">
         <button type="submit" class="btn btn-primary">Save Changes</button>

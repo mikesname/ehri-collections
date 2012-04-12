@@ -75,11 +75,14 @@ class FacetListSearchForm(PortalSearchForm):
             choices=(("count",_("Count")), ("name", _("Name"))))
 
 
-#CollectionEditForm = forms.models.modelformset_factory(models.Collection)
-
-from django.forms.models import inlineformset_factory
-
-CollectionEditFormSet = inlineformset_factory(models.Collection, models.FuzzyDate, extra=1)
+class FuzzyDateForm(forms.ModelForm):
+    class Meta:
+        model = models.FuzzyDate
+        fields = ("start_date", "end_date",)
+        widgets = {
+                "start_date": forms.TextInput(attrs={'placeholder': 'Start Date'}),
+                "end_date": forms.TextInput(attrs={'placeholder': 'End Date'}),
+        }
 
 
 class CollectionEditForm(forms.ModelForm):
