@@ -4,6 +4,7 @@ import string
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis import geos
+from django.forms.models import inlineformset_factory
 
 from haystack.forms import EmptySearchQuerySet
 
@@ -143,5 +144,19 @@ class CollectionEditForm(forms.ModelForm):
 class RepoEditForm(forms.ModelForm):
     class Meta:
         model = models.Repository
+
+DateFormSet = inlineformset_factory(models.Collection, models.FuzzyDate,
+        form=FuzzyDateForm, extra=1)
+
+OtherNameFormSet = inlineformset_factory(models.Collection, models.OtherName,
+        extra=1)
+
+LangPropFormSet = inlineformset_factory(
+        models.Collection, models.Property, fields=("value",),
+        extra=1)
+
+ScriptPropFormSet = inlineformset_factory(
+        models.Collection, models.Property, fields=("value",),
+        extra=1)
 
 

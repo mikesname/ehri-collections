@@ -6,7 +6,6 @@ import json
 
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import ListView
-from django.forms.models import inlineformset_factory
 from django import forms
 from django.conf import settings
 from django.http import HttpResponse, Http404
@@ -121,22 +120,36 @@ class PaginatedFacetView(PortalSearchListView):
 
 def edit_collection(request, slug):
     """Edit a collection using a formset."""
-
     collection = get_object_or_404(models.Collection, slug=slug)
     form = forms.CollectionEditForm(instance=collection)
-    dates = inlineformset_factory(
-            models.Collection, models.FuzzyDate, form=forms.FuzzyDateForm,
-            extra=1,
-            fields=("start_date", "end_date"))(instance=collection)
-    othernames = inlineformset_factory(
-            models.Collection, models.OtherName, extra=1)(instance=collection)
-    langprops = inlineformset_factory(
-            models.Collection, models.Property, fields=("value",),
-            extra=1)(instance=collection, queryset=models.Property.objects.filter(name="language"))
-    scriptprops = inlineformset_factory(
-            models.Collection, models.Property, fields=("value",),
-            extra=1)(instance=collection, queryset=models.Property.objects.filter(name="script"))
+    dates = forms.DateFormSet(instance=collection)
+    othernames = forms.OtherNameFormSet(instance=collection)
+    langprops = forms.LangPropFormSet(instance=collection,
+                queryset=models.Property.objects.filter(name="language"))
+    scriptprops = forms.ScriptPropFormSet(instance=collection,
+                queryset=models.Property.objects.filter(name="script"))
 
+    if request.method == "POST":
+        form = forms.CollectionEditForm(request.POST, request.FILES, instance=collection)
+        dates = forms.DateFormSet(request.POST, request.FILES, instance=collection)
+        othernames = forms.OtherNameFormSet(request.POST, request.FILES, instance=collection)
+        langprops = forms.LangPropFormSet(request.POST, request.FILES, instance=collection)
+        scriptprops = forms.ScriptPropFormSet(request.POST, request.FILES, instance=collection)
+
+        if form.is_valid() and dates.is_valid() and othernames.is_valid() \
+                and langprops.is_valid() and scriptprops.is_valid():
+            form.save()
+            dates.save()
+            othernames.save()
+            langprops.save()
+            scriptprops.save()
+            return HttpResponseRedirect(collection.get_absolute_url())
+        else:
+            print form.errors
+            print dates.errors
+            print othernames.errors
+            print langprops.errors
+            print scriptprops.errors
     context = dict(form=form, dates=dates, othernames=othernames,
             langprops=langprops, scriptprops=scriptprops)
     template = "collection_form.html"

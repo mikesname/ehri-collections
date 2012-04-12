@@ -21,6 +21,7 @@
         <label>Alternate Names</label>
         {% for onform in othernames %}
             <div class="control-group form-inline">
+                {{onform.id}}
                 {{onform.name}}
                 {{onform.DELETE.label_tag}}
                 {{onform.DELETE}}
@@ -31,6 +32,7 @@
         <label>Dates</label>
         {% for dateform in dates %}
             <div class="control-group form-inline date-field">
+                {{dateform.id}}
                 {{dateform.start_date}}
                 {{dateform.end_date}}
                 {{dateform.DELETE.label_tag}}
@@ -65,6 +67,7 @@
         <label>Language(s)</label>
         {% for langform in langprops %}
             <div class="control-group form-inline">
+                {{langform.id}}
                 {{langform.value}}
                 {{langform.DELETE.label_tag}}
                 {{langform.DELETE}}
@@ -75,6 +78,7 @@
         <label>Script(s)</label>
         {% for scriptform in scriptprops %}
             <div class="control-group form-inline">
+                {{scriptform.id}}
                 {{scriptform.value}}
                 {{scriptform.DELETE.label_tag}}
                 {{scriptform.DELETE}}
