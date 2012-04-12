@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.views.generic import ListView
 from django import forms
 from django.conf import settings
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render
 
