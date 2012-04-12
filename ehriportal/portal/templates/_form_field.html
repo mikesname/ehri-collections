@@ -1,7 +1,10 @@
-<div class="control-group entity-field">
+<div class="control-group entity-field {% if field.errors %}error{% endif %}">
     {{field.label_tag}}
-    <div class="control">
+    <div class="controls">
         {{field}}
+        {% if field.errors %}
+            <span class="help-inline">{{field.errors}}</span>
+        {% endif %}
     </div>
 </div>
 

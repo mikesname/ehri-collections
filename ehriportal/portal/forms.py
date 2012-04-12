@@ -81,12 +81,13 @@ class FuzzyDateForm(forms.ModelForm):
         model = models.FuzzyDate
         fields = ("start_date", "end_date",)
         widgets = {
-                "start_date": forms.TextInput(attrs={'placeholder': 'Start Date'}),
-                "end_date": forms.TextInput(attrs={'placeholder': 'End Date'}),
+                "start_date": forms.TextInput(attrs={'class':'input-small', 'placeholder': 'Start Date'}),
+                "end_date": forms.TextInput(attrs={'class':'input-small', 'placeholder': 'End Date'}),
         }
 
 
 class CollectionEditForm(forms.ModelForm):
+    required_css_class = "required"
     class Meta:
         model = models.Collection
 
