@@ -60,7 +60,7 @@ class Resource(models.Model):
     __metaclass__ = ResourceType
     translatable_fields = ()
 
-    type = models.CharField(max_length=255)
+    type = models.CharField(editable=False, max_length=255)
     created_on = models.DateTimeField(editable=False)
     updated_on = models.DateTimeField(editable=False, null=True, blank=True)
 
@@ -494,9 +494,9 @@ class FuzzyDate(models.Model):
     )
     collection = models.ForeignKey(Collection, related_name="date_set")
     start_date = models.DateField()
-    start_time = models.TimeField(null=True)    
-    end_date = models.DateField(null=True)
-    end_time = models.TimeField(null=True)
+    start_time = models.TimeField(blank=True, null=True)    
+    end_date = models.DateField(blank=True, null=True)
+    end_time = models.TimeField(blank=True, null=True)
     precision = models.CharField(max_length=20, choices=CHOICES)
     circa = models.BooleanField(default=False)
 
