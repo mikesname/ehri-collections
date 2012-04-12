@@ -6,8 +6,10 @@ Piston handlers for notable resources.
 from piston.handler import BaseHandler
 from portal import models
 
+
 class ResourceHandler(BaseHandler):
     model = models.Resource
+
 
 class RepositoryHandler(BaseHandler):
     model = models.Repository
