@@ -25,6 +25,9 @@
                 {{f.name}}
                 {{f.DELETE.label_tag}}
                 {{f.DELETE}}
+                {% if f.errors %}
+                    <span class="help-inline">{{f.errors}}</span>
+                {% endif %}
             </div>
         {% endfor %}
 
@@ -74,6 +77,9 @@
                 {{f.value}}
                 {{f.DELETE.label_tag}}
                 {{f.DELETE}}
+                {% if f.errors %}
+                    <span class="help-inline">{{f.errors}}</span>
+                {% endif %}
             </div>
         {% endfor %}
 
@@ -85,6 +91,9 @@
                 {{f.value}}
                 {{f.DELETE.label_tag}}
                 {{f.DELETE}}
+                {% if f.errors %}
+                    <span class="help-inline">{{f.errors}}</span>
+                {% endif %}
             </div>
         {% endfor %}
 
@@ -99,8 +108,6 @@
         {% include "_form_field.html" with field=form.related_units_of_description %}
         {% include "_form_field.html" with field=form.publication_notes %}
     </fieldset>
-
-
 
     <div class="form-actions">
         <button type="submit" class="btn btn-primary">Save Changes</button>
