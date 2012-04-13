@@ -133,8 +133,8 @@ def edit_collection(request, slug):
         form = forms.CollectionEditForm(request.POST, request.FILES, instance=collection)
         dates = forms.DateFormSet(request.POST, request.FILES, instance=collection)
         othernames = forms.OtherNameFormSet(request.POST, request.FILES, instance=collection)
-        langprops = forms.LangPropFormSet(request.POST, request.FILES, instance=collection)
-        scriptprops = forms.ScriptPropFormSet(request.POST, request.FILES, instance=collection)
+        langprops = forms.LangPropFormSet(request.POST, request.FILES, instance=collection, prefix="langprop")
+        scriptprops = forms.ScriptPropFormSet(request.POST, request.FILES, instance=collection, prefix="scriptprop")
 
         if form.is_valid() and dates.is_valid() and othernames.is_valid() \
                 and langprops.is_valid() and scriptprops.is_valid():

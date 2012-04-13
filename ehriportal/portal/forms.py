@@ -153,11 +153,11 @@ OtherNameFormSet = inlineformset_factory(models.Collection, models.OtherName,
         extra=1)
 
 LangPropFormSet = inlineformset_factory(
-        models.Collection, models.Property, fields=("value",),
+        models.Collection, models.Property,
         extra=1)
 
 ScriptPropFormSet = inlineformset_factory(
-        models.Collection, models.Property, fields=("value",),
+        models.Collection, models.Property,
         extra=1)
 
 

@@ -7,111 +7,124 @@
 
 {% block head_title %}{% trans "Edit" %} - {{object.name}}{% endblock %}
 
-
 {% block body %}
 <h1>{{object.name}}</h1>
-<form method="post" class="entity-form" id="collection-edit-form">
-    {% csrf_token %}
-    <fieldset>
-        <legend>Identity Area</legend>
-        {% include "_form_field.html" with field=form.identifier %}
-        {% include "_form_field.html" with field=form.name %}
+<div class="row">
+    <div class="span12">
+        <form method="post" class="entity-form form-horizontal" id="collection-edit-form">
+            {% csrf_token %}
+            <fieldset>
+                <legend>Identity Area</legend>
+                {% include "_form_field.html" with field=form.identifier %}
+                {% include "_form_field.html" with field=form.name %}
 
-        {{othernames.management_form}}
-        <label>Alternate Names</label>
-        {% for f in othernames %}
-            <div class="control-group form-inline {% if f.errors %}error{% endif %}">
-                {{f.id}}
-                {{f.name}}
-                {{f.DELETE.label_tag}}
-                {{f.DELETE}}
-                {% if f.errors %}
-                    <span class="help-inline">{{f.errors}}</span>
-                {% endif %}
+                {{othernames.management_form}}
+                {% for f in othernames %}
+                    <div class="control-group form-inline {% if f.errors %}error{% endif %}">
+                        <label for="id_{{f.prefix}}-{{f.name.name}}">Alternate Name</label>
+                        <div class="controls">
+                            {{f.id}}
+                            {{f.name}}
+                            {{f.DELETE}}
+                            {{f.DELETE.label}}
+                            {% if f.errors %}
+                                <span class="help-inline">{{f.errors}}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {{dates.management_form}}
+                {% for f in dates %}
+                    <div class="control-group form-inline date-field {% if f.errors %}error{% endif %}">
+                        <label for="id_{{f.prefix}}-{{f.start_date.name}}">Date</label>
+                        <div class="controls">
+                            {{f.id}}
+                            {{f.start_date}}
+                            {{f.end_date}}
+                            {{f.DELETE}}
+                            {{f.DELETE.label}}
+                            {% if f.errors %}
+                                <span class="help-inline">{{f.errors}}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% include "_form_field.html" with field=form.lod %}
+                {% include "_form_field.html" with field=form.extent_and_medium %}
+            </fieldset>
+            <fieldset>
+                <legend>Context Area</legend>
+                {% include "_form_field.html" with field=form.repository %}
+                {% include "_form_field.html" with field=form.archival_history %}
+                {% include "_form_field.html" with field=form.acquisition %}
+            </fieldset>
+
+            <fieldset>
+                <legend>Content &amp; Structure Area</legend>
+                {% include "_form_field.html" with field=form.scope_and_content %}
+                {% include "_form_field.html" with field=form.appraisal %}
+                {% include "_form_field.html" with field=form.accruals %}
+                {% include "_form_field.html" with field=form.system_of_arrangement %}
+            </fieldset>
+
+            <fieldset>
+                <legend>Conditions of Access &amp; Use Area</legend>
+                {% include "_form_field.html" with field=form.access_conditions %}
+                {% include "_form_field.html" with field=form.reproduction_conditions %}
+                
+                {{langprops.management_form}}
+                {% for f in langprops %}
+                    <div class="control-group form-inline {% if f.errors %}error{% endif %}">
+                        <label for="id_{{f.prefix}}-{{f.value.name}}">Language</label>
+                        <div class="controls">
+                            {{f.id}}
+                            {{f.name}}
+                            {{f.value}}
+                            {{f.DELETE}}
+                            {{f.DELETE.label}}
+                            {% if f.errors %}
+                                <span class="help-inline">{{f.errors}}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {{scriptprops.management_form}}
+                {% for f in scriptprops %}
+                    <div class="control-group form-inline {% if f.errors %}error{% endif %}">
+                        <label for="id_{{f.prefix}}-{{f.value.name}}">Script</label>
+                        <div class="controls">
+                            {{f.id}}
+                            {{f.name}}
+                            {{f.value}}
+                            {{f.DELETE}}
+                            {{f.DELETE.label}}
+                            {% if f.errors %}
+                                <span class="help-inline">{{f.errors}}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+                {% include "_form_field.html" with field=form.physical_characteristics %}
+                {% include "_form_field.html" with field=form.finding_aids %}
+            </fieldset>
+
+            <fieldset>
+                <legend>Allied Material Area</legend>
+                {% include "_form_field.html" with field=form.location_of_originals %}
+                {% include "_form_field.html" with field=form.location_of_copies %}
+                {% include "_form_field.html" with field=form.related_units_of_description %}
+                {% include "_form_field.html" with field=form.publication_notes %}
+            </fieldset>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a class="btn" href="{{object.get_absolute_url}}">Cancel</a>
             </div>
-        {% endfor %}
-
-        {{dates.management_form}}
-        <label>Dates</label>
-        {% for f in dates %}
-            <div class="control-group form-inline date-field {% if f.errors %}error{% endif %}">
-                {{f.id}}
-                {{f.start_date}}
-                {{f.end_date}}
-                {{f.DELETE.label_tag}}
-                {{f.DELETE}}
-                {% if f.errors %}
-                    <span class="help-inline">{{f.errors}}</span>
-                {% endif %}
-            </div>
-        {% endfor %}
-
-        {% include "_form_field.html" with field=form.lod %}
-        {% include "_form_field.html" with field=form.extent_and_medium %}
-    </fieldset>
-    <fieldset>
-        <legend>Context Area</legend>
-        {% include "_form_field.html" with field=form.repository %}
-        {% include "_form_field.html" with field=form.archival_history %}
-        {% include "_form_field.html" with field=form.acquisition %}
-    </fieldset>
-
-    <fieldset>
-        <legend>Content &amp; Structure Area</legend>
-        {% include "_form_field.html" with field=form.scope_and_content %}
-        {% include "_form_field.html" with field=form.appraisal %}
-        {% include "_form_field.html" with field=form.accruals %}
-        {% include "_form_field.html" with field=form.system_of_arrangement %}
-    </fieldset>
-
-    <fieldset>
-        <legend>Conditions of Access &amp; Use Area</legend>
-        {% include "_form_field.html" with field=form.access_conditions %}
-        {% include "_form_field.html" with field=form.reproduction_conditions %}
-        
-        {{langprops.management_form}}
-        <label>Language(s)</label>
-        {% for f in langprops %}
-            <div class="control-group form-inline {% if f.errors %}error{% endif %}">
-                {{f.id}}
-                {{f.value}}
-                {{f.DELETE.label_tag}}
-                {{f.DELETE}}
-                {% if f.errors %}
-                    <span class="help-inline">{{f.errors}}</span>
-                {% endif %}
-            </div>
-        {% endfor %}
-
-        {{scriptprops.management_form}}
-        <label>Script(s)</label>
-        {% for f in scriptprops %}
-            <div class="control-group form-inline {% if f.errors %}error{% endif %}">
-                {{f.id}}
-                {{f.value}}
-                {{f.DELETE.label_tag}}
-                {{f.DELETE}}
-                {% if f.errors %}
-                    <span class="help-inline">{{f.errors}}</span>
-                {% endif %}
-            </div>
-        {% endfor %}
-
-        {% include "_form_field.html" with field=form.physical_characteristics %}
-        {% include "_form_field.html" with field=form.finding_aids %}
-    </fieldset>
-
-    <fieldset>
-        <legend>Allied Material Area</legend>
-        {% include "_form_field.html" with field=form.location_of_originals %}
-        {% include "_form_field.html" with field=form.location_of_copies %}
-        {% include "_form_field.html" with field=form.related_units_of_description %}
-        {% include "_form_field.html" with field=form.publication_notes %}
-    </fieldset>
-
-    <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-        <a class="btn" href="{{object.get_absolute_url}}">Cancel</a>
+        </form>
     </div>
-</form>
+</div>
 {% endblock %}
