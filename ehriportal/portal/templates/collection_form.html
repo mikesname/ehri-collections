@@ -19,24 +19,27 @@
 
         {{othernames.management_form}}
         <label>Alternate Names</label>
-        {% for onform in othernames %}
-            <div class="control-group form-inline">
-                {{onform.id}}
-                {{onform.name}}
-                {{onform.DELETE.label_tag}}
-                {{onform.DELETE}}
+        {% for f in othernames %}
+            <div class="control-group form-inline {% if f.errors %}error{% endif %}">
+                {{f.id}}
+                {{f.name}}
+                {{f.DELETE.label_tag}}
+                {{f.DELETE}}
             </div>
         {% endfor %}
 
         {{dates.management_form}}
         <label>Dates</label>
-        {% for dateform in dates %}
-            <div class="control-group form-inline date-field">
-                {{dateform.id}}
-                {{dateform.start_date}}
-                {{dateform.end_date}}
-                {{dateform.DELETE.label_tag}}
-                {{dateform.DELETE}}
+        {% for f in dates %}
+            <div class="control-group form-inline date-field {% if f.errors %}error{% endif %}">
+                {{f.id}}
+                {{f.start_date}}
+                {{f.end_date}}
+                {{f.DELETE.label_tag}}
+                {{f.DELETE}}
+                {% if f.errors %}
+                    <span class="help-inline">{{f.errors}}</span>
+                {% endif %}
             </div>
         {% endfor %}
 
@@ -65,23 +68,23 @@
         
         {{langprops.management_form}}
         <label>Language(s)</label>
-        {% for langform in langprops %}
-            <div class="control-group form-inline">
-                {{langform.id}}
-                {{langform.value}}
-                {{langform.DELETE.label_tag}}
-                {{langform.DELETE}}
+        {% for f in langprops %}
+            <div class="control-group form-inline {% if f.errors %}error{% endif %}">
+                {{f.id}}
+                {{f.value}}
+                {{f.DELETE.label_tag}}
+                {{f.DELETE}}
             </div>
         {% endfor %}
 
         {{scriptprops.management_form}}
         <label>Script(s)</label>
-        {% for scriptform in scriptprops %}
-            <div class="control-group form-inline">
-                {{scriptform.id}}
-                {{scriptform.value}}
-                {{scriptform.DELETE.label_tag}}
-                {{scriptform.DELETE}}
+        {% for f in scriptprops %}
+            <div class="control-group form-inline {% if f.errors %}error{% endif %}">
+                {{f.id}}
+                {{f.value}}
+                {{f.DELETE.label_tag}}
+                {{f.DELETE}}
             </div>
         {% endfor %}
 
