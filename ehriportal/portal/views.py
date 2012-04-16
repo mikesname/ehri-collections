@@ -127,7 +127,6 @@ def edit_collection(request, slug):
 
     properties = ["language", "script", "language_of_description", 
             "script_of_description"]
-
     propforms = {}
     for propname in properties:
         propforms[propname] = forms.propertyformset_factory(models.Collection,
@@ -143,7 +142,6 @@ def edit_collection(request, slug):
         for propname in properties:
             propforms[propname] = forms.propertyformset_factory(models.Collection,
                     propname)(request.POST, request.FILES, instance=collection, prefix=propname)
-
         if form.is_valid() and dates.is_valid() and othernames.is_valid() \
                 and False not in [pf.is_valid() for pf in propforms.values()]:
             form.save()
