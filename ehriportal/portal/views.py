@@ -131,8 +131,11 @@ def edit_collection(request, slug):
     for propname in properties:
         propforms[propname] = forms.propertyformset_factory(models.Collection,
                 propname)(instance=collection, prefix=propname)
-
     if request.method == "POST":
+        #import pprint
+        #pp = pprint.PrettyPrinter(indent=2)
+        #pp.pprint(request.POST)
+
         form = forms.CollectionEditForm(
                 request.POST, request.FILES, instance=collection)
         dates = forms.DateFormSet(
@@ -149,6 +152,9 @@ def edit_collection(request, slug):
             othernames.save()
             [pf.save() for pf in propforms.values()]
             return HttpResponseRedirect(collection.get_absolute_url())
+        else:
+            print form.errors
+            print dates.errors
     context = dict(form=form, dates=dates, othernames=othernames,
             propforms=propforms)
     template = "collection_form.html"
