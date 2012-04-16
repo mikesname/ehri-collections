@@ -3,6 +3,7 @@
 import json
 import datetime
 from types import MethodType  
+from incf.countryutils import transformations
 import babel
 
 from haystack.query import SearchQuerySet
@@ -11,6 +12,12 @@ from django.contrib.gis import geos
 from haystack.models import SearchResult
 from haystack.query import SearchQuerySet
 
+# Hacky dictionary of official country/languages names
+# we want to substitute for friendlier versions... 
+# A more permenant solution is needed to this.
+SUBNAMES = {
+    "United Kingdom of Great Britain & Northern Ireland": "United Kingdom",
+}
 
 def language_name_from_code(code, locale="en"):
     """Get lang display name."""
@@ -18,16 +25,13 @@ def language_name_from_code(code, locale="en"):
     return babel.Locale(locale).languages.get(code, "")
 
 
-def get_country_name_from_code(code, locale="en"):
-    """Get the country name from a 2 letter code
-    defined in ISO 3166."""
-    return babel.Locale(locale).territories.get(code.upper())
-
-
-def get_script_name_from_code(code, locale="en"):
-    """Get the script name from a 4 letter code
-    defined in ISO 15924."""
-    return babel.Locale(locale).scripts.get(code)
+def get_country_from_code(code):
+    """Get the country code from a coutry name."""
+    try:
+        name = transformations.cc_to_cn(code)
+        return SUBNAMES.get(name, name)
+    except KeyError:
+        pass
 
 
 class HaystackPaginationEncoder(json.JSONEncoder):
