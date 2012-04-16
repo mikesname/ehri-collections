@@ -102,6 +102,28 @@ class PortalTest(TestCase):
         c = models.Collection.objects.get(slug=slug)
         self.assertIn("de", c.languages)
         
+    def test_collection_edit_add_alt_name(self):
+        """Test updating a collection."""
+        slug = "caro-jella-letter-from-theresienstadt"
+        c = models.Collection.objects.get(slug=slug)
+        self.assertNotIn("Alt Test", c.other_names)
+        params = {
+            "identifier": "Test",
+            "name": "Test",
+            "repository": c.repository.pk
+        }
+        params.update(self._get_collection_formset_metadata())
+        params.update({
+            "othername_set-0-name": "Alt Test",
+        })
+
+        response = self.client.post(reverse("collection_edit", kwargs={
+            "slug": slug,
+        }), params)
+        self.assertEqual(response.status_code, 302)
+        c = models.Collection.objects.get(slug=slug)
+        self.assertIn("Alt Test", c.other_names)
+        
     def _get_collection_formset_metadata(self):
         meta = {}
         for field in ["date_set", "othername_set",
@@ -111,3 +133,4 @@ class PortalTest(TestCase):
             meta["%s-MAX_NUM_FORMS" % field] = 1
             meta["%s-TOTAL_FORMS" % field] = 1
         return meta
+
