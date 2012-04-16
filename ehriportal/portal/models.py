@@ -55,16 +55,6 @@ class ResourceType(ModelBase):
         return "<class %s>" % cls.__name__
 
 
-class Language(models.Model):
-    """ISO 639 2-letter language codes."""
-    code = models.CharField(max_length=2, primary_key=True)
-
-
-class Script(models.Model):
-    """ISO 15924 4-letter script codes."""
-    code = models.CharField(max_length=4, primary_key=True)
- 
-
 class Resource(models.Model):
     """Archival resource."""
     __metaclass__ = ResourceType
@@ -104,9 +94,19 @@ class Resource(models.Model):
         return [(p.name, p.value) for p in self.property_set.all()]
 
     @property
+    def languages(self):
+        """Short cut for fetching language properties."""
+        return self.get_property("language")
+
+    @property
     def tag_list(self):
         """Short cut for listing all tags."""
         return self.tags.all()
+
+    @property
+    def scripts(self):
+        """Short cut for fetching language properties."""
+        return self.get_property("script")
 
     def get_property(self, propname):
         """Fetch a list of properties with the given name."""
@@ -237,7 +237,7 @@ class Repository(Resource):
         contact = self.primary_contact
         if contact is None:
             return
-        return utils.get_country_name_from_code(contact.country_code)
+        return utils.get_country_from_code(contact.country_code)
 
     @models.permalink
     def get_absolute_url(self):
@@ -292,7 +292,7 @@ class Contact(models.Model):
             self.postal_code,
             self.city,
             self.region,
-            utils.get_country_name_from_code(self.country_code)
+            utils.get_country_from_code(self.country_code)
         ] if e is not None]
         return "\n".join(elems).replace(", ", "\n")
 
@@ -341,13 +341,6 @@ class Collection(Resource):
                 choices=LODS, blank=True, null=True)
     repository = models.ForeignKey(Repository)
 
-    languages = models.ManyToManyField(Language)
-    scripts = models.ManyToManyField(Script)
-    languages_of_description = models.ManyToManyField(
-            Language, related_name="collection_descriptions")
-    scripts_of_description = models.ManyToManyField(
-            Script, related_name="collection_descriptions")
-
     tags = TaggableManager(blank=True)
     objects = CollectionManager()
 
@@ -358,22 +351,8 @@ class Collection(Resource):
         return (self.slug,)
 
     @property
-    def script_list(self):
-        """List of script codes."""
-        return [scr.code for scr in self.scripts.objects.all()]
-
-    @property
-    def language_list(self):
-        """List of language codes."""
-        return [lang.code for lang in self.languages.objects.all()]
-
-    @property
-    def language_of_description_list(self):
-        return [lang.code for lang in self.language_of_description_list.objects.all()]
-
-    @property
-    def script_of_description_list(self):
-        return [scr.code for scr in self.scripts_of_description.objects.all()]
+    def languages_of_description(self):
+        return self.get_property("languages_of_description")
 
     @property
     def start_date(self):
@@ -555,7 +534,6 @@ class FuzzyDate(models.Model):
         if self.end_date:
             out += "-%d" % self.end_date.year
         return out
-
 
 reversion.register(FuzzyDate)
 
