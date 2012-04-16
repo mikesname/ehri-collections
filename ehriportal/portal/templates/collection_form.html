@@ -73,41 +73,8 @@
                 <legend>Conditions of Access &amp; Use Area</legend>
                 {% include "_form_field.html" with field=form.access_conditions %}
                 {% include "_form_field.html" with field=form.reproduction_conditions %}
-                
-                {{langprops.management_form}}
-                {% for f in langprops %}
-                    <div class="control-group form-inline {% if f.errors %}error{% endif %}">
-                        <label for="id_{{f.prefix}}-{{f.value.name}}">Language</label>
-                        <div class="controls">
-                            {{f.id}}
-                            {{f.name}}
-                            {{f.value}}
-                            {{f.DELETE}}
-                            {{f.DELETE.label}}
-                            {% if f.errors %}
-                                <span class="help-inline">{{f.errors}}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                {% endfor %}
-
-                {{scriptprops.management_form}}
-                {% for f in scriptprops %}
-                    <div class="control-group form-inline {% if f.errors %}error{% endif %}">
-                        <label for="id_{{f.prefix}}-{{f.value.name}}">Script</label>
-                        <div class="controls">
-                            {{f.id}}
-                            {{f.name}}
-                            {{f.value}}
-                            {{f.DELETE}}
-                            {{f.DELETE.label}}
-                            {% if f.errors %}
-                                <span class="help-inline">{{f.errors}}</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                {% endfor %}
-
+                {% include "_property_form_field.html" with propform=propforms.language name="Language of Materials" %}
+                {% include "_property_form_field.html" with propform=propforms.script name="Script of Materials" %}
                 {% include "_form_field.html" with field=form.physical_characteristics %}
                 {% include "_form_field.html" with field=form.finding_aids %}
             </fieldset>
@@ -118,6 +85,16 @@
                 {% include "_form_field.html" with field=form.location_of_copies %}
                 {% include "_form_field.html" with field=form.related_units_of_description %}
                 {% include "_form_field.html" with field=form.publication_notes %}
+            </fieldset>
+
+            <fieldset>
+                <legend>Control Area</legend>
+                {% include "_form_field.html" with field=form.description_identifier %}
+                {% include "_form_field.html" with field=form.institution_identifier %}
+                {% include "_form_field.html" with field=form.rules %}
+                {% include "_property_form_field.html" with propform=propforms.language_of_description name="Language of Description" %}
+                {% include "_property_form_field.html" with propform=propforms.script_of_description name="Script of Description" %}
+                {% include "_form_field.html" with field=form.sources %}
             </fieldset>
 
             <div class="form-actions">

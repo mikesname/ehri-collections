@@ -152,13 +152,43 @@ class OtherName(models.Model):
 reversion.register(OtherName)
 
 
+class PropertyManager(models.Manager):
+    """Manager that handles specific property types, like
+    language and script, which are specificied at construction."""
+    def __init__(self, *args, **kwargs):
+        self.name = kwargs.pop("filter_name", None)
+        super(PropertyManager, self).__init__(*args, **kwargs)
+
+    def get_query_set(self, *args, **kwargs):
+        qs = super(PropertyManager, self).get_query_set(*args, **kwargs)
+        if self.name is not None:
+            qs = qs.filter(name=self.name)
+        return qs
+
+
 class Property(models.Model):
     """Generic property for resources."""
     resource = models.ForeignKey(Resource)
     name = models.CharField(max_length=255)
     value = models.CharField(max_length=255)
 
+    objects = PropertyManager()
+
 reversion.register(Property)
+
+
+def propertyproxy_factory(propname):
+    """Get a class that represents a property of 
+    a specific given name, i.e. script or language."""
+    def save_func(self, *args, **kwargs):
+        self.name = propname
+        Property.save(self, *args, **kwargs)
+    class Meta_cls:
+        proxy = True
+    return type("Property_%s" % propname, (Property,),
+            dict(save=save_func, Meta=Meta_cls,
+                __module__=Property.__module__,
+                objects=PropertyManager(filter_name=propname)))
 
 
 class Place(models.Model):

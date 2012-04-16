@@ -1,0 +1,16 @@
+{{propform.management_form}}
+{% for f in propform %}
+    <div class="control-group form-inline {% if f.errors %}error{% endif %}">
+        <label for="id_{{f.prefix}}-{{f.value.name}}">{{name}}</label>
+        <div class="controls">
+            {{f.id}}
+            {{f.value}}
+            {{f.DELETE}}
+            {{f.DELETE.label}}
+            {% if f.errors %}
+                <span class="help-inline">{{f.errors}}</span>
+            {% endif %}
+        </div>
+    </div>
+{% endfor %}
+

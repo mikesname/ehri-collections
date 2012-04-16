@@ -91,73 +91,23 @@ class CollectionEditForm(forms.ModelForm):
     class Meta:
         model = models.Collection
 
-    @property
-    def sections(self):
-        return (
-           ("identity", "Identity", [
-                "identifier",
-                "name",
-                "other_names",
-                "dates",
-                "lod",
-                "extent_and_medium",
-            ]),
-            ("context", "Context", [
-                "repository",
-                "archival_history",
-                "acquisition",
-            ]),
-            ("content_structure", "Content", [
-                "scope_and_content",
-                "appraisal",
-                "accruals",
-                "arrangement",
-            ]),
-            ("conditions_access", "Conditions", [
-                "access_conditions",
-                "reproduction_conditions",
-                "physical_characteristics",
-                "finding_aids",
-            ]),
-            ("allied_materials", "Allied Materials", [
-                "location_of_originals",
-                "location_of_copies",
-                "related_units_of_description",
-            ]),
-            ("notes", "Notes", [
-
-            ]),
-            ("access", "Access", [
-
-            ]),
-            ("control", "Control", [
-                "rules",
-                "sources",
-            ]),
-            ("rights", "Rights", [
-
-            ]),
-            ("administration", "Administration", [
-
-            ]),
-        )
 
 class RepoEditForm(forms.ModelForm):
     class Meta:
         model = models.Repository
 
+
+def propertyformset_factory(topclass, propname):
+    propcls = models.propertyproxy_factory(propname)
+    return inlineformset_factory(
+            topclass, propcls, fields=("value",), extra=1)
+
+
 DateFormSet = inlineformset_factory(models.Collection, models.FuzzyDate,
         form=FuzzyDateForm, extra=1)
 
+
 OtherNameFormSet = inlineformset_factory(models.Collection, models.OtherName,
-        extra=1)
-
-LangPropFormSet = inlineformset_factory(
-        models.Collection, models.Property,
-        extra=1)
-
-ScriptPropFormSet = inlineformset_factory(
-        models.Collection, models.Property,
         extra=1)
 
 

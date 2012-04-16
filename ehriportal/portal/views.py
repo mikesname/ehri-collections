@@ -124,33 +124,34 @@ def edit_collection(request, slug):
     form = forms.CollectionEditForm(instance=collection)
     dates = forms.DateFormSet(instance=collection)
     othernames = forms.OtherNameFormSet(instance=collection)
-    langprops = forms.LangPropFormSet(instance=collection,
-                queryset=models.Property.objects.filter(name="language"))
-    scriptprops = forms.ScriptPropFormSet(instance=collection,
-                queryset=models.Property.objects.filter(name="script"))
+
+    properties = ["language", "script", "language_of_description", 
+            "script_of_description"]
+
+    propforms = {}
+    for propname in properties:
+        propforms[propname] = forms.propertyformset_factory(models.Collection,
+                propname)(instance=collection, prefix=propname)
 
     if request.method == "POST":
-        form = forms.CollectionEditForm(request.POST, request.FILES, instance=collection)
-        dates = forms.DateFormSet(request.POST, request.FILES, instance=collection)
-        othernames = forms.OtherNameFormSet(request.POST, request.FILES, instance=collection)
-        langprops = forms.LangPropFormSet(request.POST, request.FILES, instance=collection, prefix="langprop")
-        scriptprops = forms.ScriptPropFormSet(request.POST, request.FILES, instance=collection, prefix="scriptprop")
+        form = forms.CollectionEditForm(
+                request.POST, request.FILES, instance=collection)
+        dates = forms.DateFormSet(
+                request.POST, request.FILES, instance=collection)
+        othernames = forms.OtherNameFormSet(
+                request.POST, request.FILES, instance=collection)
+        for propname in properties:
+            propforms[propname] = forms.propertyformset_factory(models.Collection,
+                    propname)(request.POST, request.FILES, instance=collection, prefix=propname)
 
         if form.is_valid() and dates.is_valid() and othernames.is_valid() \
-                and langprops.is_valid() and scriptprops.is_valid():
+                and False not in [pf.is_valid() for pf in propforms.values()]:
             form.save()
             dates.save()
             othernames.save()
-            langprops.save()
-            scriptprops.save()
+            [pf.save() for pf in propforms.values()]
             return HttpResponseRedirect(collection.get_absolute_url())
-        else:
-            print form.errors
-            print dates.errors
-            print othernames.errors
-            print langprops.errors
-            print scriptprops.errors
     context = dict(form=form, dates=dates, othernames=othernames,
-            langprops=langprops, scriptprops=scriptprops)
+            propforms=propforms)
     template = "collection_form.html"
     return render(request, template, context)
