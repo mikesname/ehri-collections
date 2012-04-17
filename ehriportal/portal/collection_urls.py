@@ -2,6 +2,7 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.conf.urls.defaults import *
+from django.core.urlresolvers import reverse_lazy
 from django.views.generic.list_detail import object_detail, object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required
@@ -79,6 +80,7 @@ urlpatterns = patterns('',
     #        template_name="collection_form.html",
     #    ), name='collection_edit'),
     url(r'^edit/(?P<slug>[-\w]+)/?$', views.CollectionEditView.as_view(), name='collection_edit'),
+    url(r'^delete/(?P<slug>[-\w]+)/?$', views.CollectionDeleteView.as_view(), name='collection_delete'),
     url(r'^create/?$', views.CollectionEditView.as_view(), name='collection_create'),
     url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
             queryset=models.Collection.objects.all(),

@@ -6,12 +6,12 @@ import json
 
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import ListView
+from django.views.generic.edit import DeleteView, UpdateView
 from django import forms
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, Http404
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404, render
-from django.views.generic.edit import UpdateView
 
 from haystack.query import SearchQuerySet
 from portal import models, forms, utils
@@ -177,4 +177,7 @@ class CollectionEditView(UpdateView):
         return context
 
 
-
+class CollectionDeleteView(DeleteView):
+    template_name = "collection_confirm_delete.html"
+    success_url = reverse_lazy("collection_search")
+    model = models.Collection

@@ -120,9 +120,11 @@
                     </tr>
                 {% endif %}
                 {% if user.is_staff %}
+                    <tr><td colspan="2"><strong>{% trans "Administration Actions" %}</strong></td></tr>
                     <tr>
                         <td colspan="2">
                             <a class="btn" href="{% url collection_edit slug=object.slug %}">Edit</a>
+                            <a class="btn btn-danger" href="{% url collection_delete slug=object.slug %}">Delete</a>
                         </td>
                     </tr>
                 {% endif %}
