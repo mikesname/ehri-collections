@@ -322,7 +322,7 @@ class Contact(models.Model):
             self.postal_code,
             self.city,
             self.region,
-            utils.get_country_from_code(self.country_code)
+            utils.get_country_name_from_code(self.country_code)
         ] if e is not None]
         return "\n".join(elems).replace(", ", "\n")
 
