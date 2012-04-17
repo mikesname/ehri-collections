@@ -267,7 +267,7 @@ class Repository(Resource):
         contact = self.primary_contact
         if contact is None:
             return
-        return utils.get_country_from_code(contact.country_code)
+        return utils.get_country_name_from_code(contact.country_code)
 
     @models.permalink
     def get_absolute_url(self):
