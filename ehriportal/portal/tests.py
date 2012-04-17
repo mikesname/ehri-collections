@@ -171,4 +171,22 @@ class PortalCollectionTest(TestCase):
         self.assertEqual(response.status_code, 200)
         c = models.Collection.objects.get(slug=self.slug)
         self.assertNotIn("Alt Test", c.other_names)
+
+    def test_collection_delete_confirm(self):
+        """Test deleting a collection - first step."""
+        response = self.client.get(reverse("collection_delete", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 200)
+        
+    def test_collection_delete(self):
+        """Test deleting a collection - second step."""
+        ccount = models.Collection.objects.count()
+        response = self.client.post(reverse("collection_delete", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 302)
+        ccount2 = models.Collection.objects.count()
+        self.assertEqual(ccount, ccount2 + 1)
+        
         
