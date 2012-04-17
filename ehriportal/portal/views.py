@@ -11,6 +11,7 @@ from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, render
+from django.views.generic.edit import UpdateView
 
 from haystack.query import SearchQuerySet
 from portal import models, forms, utils
@@ -118,44 +119,62 @@ class PaginatedFacetView(PortalSearchListView):
         return extra
 
 
-def edit_collection(request, slug):
-    """Edit a collection using a formset."""
-    collection = get_object_or_404(models.Collection, slug=slug)
-    form = forms.CollectionEditForm(instance=collection)
-    dates = forms.DateFormSet(instance=collection)
-    othernames = forms.OtherNameFormSet(instance=collection)
-
+class CollectionEditView(UpdateView):
+    """Generic form implementation for creating or updating a
+    collection object."""
+    form_class = forms.CollectionEditForm
+    model = models.Collection
+    template_name = "collection_form.html"
     properties = ["language", "script", "language_of_description", 
             "script_of_description"]
-    propforms = {}
-    for propname in properties:
-        propforms[propname] = forms.propertyformset_factory(models.Collection,
-                propname)(instance=collection, prefix=propname)
-    if request.method == "POST":
-        #import pprint
-        #pp = pprint.PrettyPrinter(indent=2)
-        #pp.pprint(request.POST)
 
-        form = forms.CollectionEditForm(
-                request.POST, request.FILES, instance=collection)
-        dates = forms.DateFormSet(
-                request.POST, request.FILES, instance=collection)
-        othernames = forms.OtherNameFormSet(
-                request.POST, request.FILES, instance=collection)
-        for propname in properties:
-            propforms[propname] = forms.propertyformset_factory(models.Collection,
-                    propname)(request.POST, request.FILES, instance=collection, prefix=propname)
-        if form.is_valid() and dates.is_valid() and othernames.is_valid() \
-                and False not in [pf.is_valid() for pf in propforms.values()]:
-            form.save()
+    def get_object(self):
+        if self.kwargs.get("slug"):
+            return get_object_or_404(self.model, slug=self.kwargs.get("slug"))
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        dates = context["dates"]
+        othernames = context["othernames"]
+        propforms = context["propforms"]
+        if dates.is_valid() and othernames.is_valid() and \
+                False not in [pf.is_valid() for pf in propforms.values()]:
+            self.object = form.save()
+            dates.instance = self.object
             dates.save()
+            othernames.instance = self.object
             othernames.save()
-            [pf.save() for pf in propforms.values()]
-            return HttpResponseRedirect(collection.get_absolute_url())
+            for pf in propforms.values():
+                pf.instance = self.object
+                pf.save()
+            return HttpResponseRedirect(self.object.get_absolute_url())
+        return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_context_data(self, **kwargs):
+        context = super(CollectionEditView, self).get_context_data(**kwargs)
+        if self.request.method == "POST":
+            context["dates"] = forms.DateFormSet(
+                    self.request.POST, self.request.FILES, instance=self.object)
+            context["othernames"] = forms.OtherNameFormSet(
+                    self.request.POST, self.request.FILES, instance=self.object)
+            context["propforms"] = {}
+            for propname in self.properties:
+                context["propforms"][propname] = forms.propertyformset_factory(
+                        models.Collection, propname)(
+                                self.request.POST, self.request.FILES,
+                                    instance=self.object, prefix=propname)
         else:
-            print form.errors
-            print dates.errors
-    context = dict(form=form, dates=dates, othernames=othernames,
-            propforms=propforms)
-    template = "collection_form.html"
-    return render(request, template, context)
+            context["dates"] = forms.DateFormSet(instance=self.object)
+            context["othernames"] = forms.OtherNameFormSet(instance=self.object)
+            context["propforms"] = {}
+            for propname in self.properties:
+                context["propforms"][propname] = forms.propertyformset_factory(
+                        models.Collection, propname)(
+                                instance=self.object, prefix=propname)
+        return context
+
+
+
