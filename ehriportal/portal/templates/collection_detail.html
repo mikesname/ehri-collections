@@ -44,19 +44,19 @@
                 </a>
             </div>
             <table class="table table-striped">
-                {% if object.dates.count %}    
+                {% if object.date_set.count %}    
                     <tr>
                         <td>
                             <strong>{% trans "Dates" %}</strong>
                         </td>
                         <td>
-                            {% for date in object.dates.all %}
+                            {% for date in object.date_set.all %}
                                 {% if forloop.count0 > 0 %}{{", "}}{% endif %}{{date}}
                             {% endfor %}
                         </td>
                     </tr>
                 {% endif %}
-                {% if object.finding_aids|length %}    
+                {% if object.languages %}    
                     <tr>
                         <td colspan="2">
                             <strong>{% trans "Languages:" %}</strong>
@@ -67,9 +67,14 @@
                         </td>
                     </tr>
                 {% endif %}
+                {% if object.location_of_originals %}
+                    <tr>
+                        <td><strong>{% trans "Location (Origins):" %}</strong></td><td>{{object.location_of_originals}}</td>
+                    </tr>
+                {% endif %}
                 {% if object.location_of_copies %}
                     <tr>
-                        <td><strong>{% trans "Location:" %}</strong></td><td>{{object.location_of_copies}}</td>
+                        <td><strong>{% trans "Location (Copies):" %}</strong></td><td>{{object.location_of_copies}}</td>
                     </tr>
                 {% endif %}
                 {% if object.extent_and_medium %}
