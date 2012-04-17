@@ -265,7 +265,7 @@ class Repository(Resource):
     @property
     def country(self):
         contact = self.primary_contact
-        if contact is None:
+        if contact is None or contact.country_code is None:
             return
         return utils.get_country_name_from_code(contact.country_code)
 
@@ -322,7 +322,8 @@ class Contact(models.Model):
             self.postal_code,
             self.city,
             self.region,
-            utils.get_country_name_from_code(self.country_code)
+            utils.get_country_name_from_code(self.country_code) \
+                    if self.country_code else None
         ] if e is not None]
         return "\n".join(elems).replace(", ", "\n")
 
