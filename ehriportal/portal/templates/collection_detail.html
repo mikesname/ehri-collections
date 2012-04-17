@@ -118,7 +118,14 @@
                             {{object.arrangement}}
                         </td>
                     </tr>
-                {% endif %}                
+                {% endif %}
+                {% if user.is_staff %}
+                    <tr>
+                        <td colspan="2">
+                            <a class="btn" href="{% url collection_edit slug=object.slug %}">Edit</a>
+                        </td>
+                    </tr>
+                {% endif %}
             </table>
         </div>
     </div>
