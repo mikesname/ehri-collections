@@ -149,3 +149,7 @@ a.openid-button:hover {
 .entity-field textarea {
     height: 3em;
 }
+
+.inlinemulti li:hover {
+    list-style-image: url(../img/delete.png);
+}

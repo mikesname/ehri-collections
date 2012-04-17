@@ -18,10 +18,33 @@
 <script type="text/javascript">
     jQuery(document).ready(function($) {
 
-    function prepareField(index, prefix) {
-        $("#id_" + prefix + "-" + index + "-DELETE")
-            .hide().next("label").hide();
-    }
+    // remove existing inline elements when clicked
+    $(document).on("click", ".inlineitem", function(event) {
+        $(this).find("input[type='checkbox']")
+            .prop("checked", true)
+            .end()
+            .hide(200);
+    });
+
+    // add new inline elements when enter or tab pressed in their input
+    $(document).on("keydown", ".inlinemulti > input:visible", function(event) {
+        if ($.trim($(this).val()) != "" && (event.keyCode == 9 || event.keyCode == 13)) {
+            if (this.id.match(/id_([^\d]+)-(\d+)-[^\d]+/)) {
+                event.preventDefault();
+                var prefix = RegExp.$1, index = parseInt(RegExp.$2);
+                addNewAfter(index, prefix);
+                setReadOnly(index, prefix);
+            }
+        }
+    });
+
+    // hide the delete checkboxes
+    $("input[id$='-DELETE']").add("label[for$='-DELETE']").hide();
+
+    // add a placeholder to the visible fields.
+    $(".inlinemulti > input[type='text]:visible").each(function(i, elem) {
+        $(elem).attr("placeholder", "Add New " + $(elem).closest("label").text());
+    });
 
     function setReadOnly(index, prefix) {
         var div = $("#id_form-" + prefix + "-" + index),
@@ -29,27 +52,8 @@
             inputs = idfield.nextUntil("input[type='checkbox']"),
             check = inputs.next("input[type='checkbox']"),
             valstr = inputs.map(function(i, e) { return $(e).val();}).toArray().join(" - ");
-        inputs.hide().last().after($("<ul><li class='inlineitem'>" + valstr + "</li></ul>"));
-        // hide all but the first label
-        if (index > 0) {
-            $("label[for='" + inputs.first().attr("id") + "']").text("");
-        }
-        div.click(function(event) {
-            check.prop("checked", true).blur();
-            $(this).hide(200);
-        });
-    }
-
-    function initNewControl(index, prefix) {
-        var idfield = $("#id_" + prefix + "-" + index + "-id"),
-            inputs = idfield.nextUntil("input[type='checkbox']");
-        inputs.bind("keydown", function(event) {
-            if ($.trim($(this).val()) != "" && (event.keyCode == 9 || event.keyCode == 13)) {
-                event.preventDefault();
-                addNewAfter(index, prefix);
-                setReadOnly(index, prefix);
-            }
-        });
+        inputs.hide().last().after($("<ul><li>" + valstr + "</li></ul>"));
+        div.addClass("inlineitem");
     }
 
     function addNewAfter(index, prefix) {
@@ -70,22 +74,17 @@
                 }
             });
         });
+        var name = $("#id_formset-" + prefix).find("label").first().text();
+        newdiv.find("inputs[type='text']").attr("placeholder", "Add New " + name);
         $("#id_" + prefix + "-TOTAL_FORMS").val(totalforms + 1);
         div.after(newdiv).find("input[type='text']").first().focus();
-        initNewControl(newindex, prefix);
     }
             
     $(".dynamic-formset").each(function(i, elem) {
         var prefix = $(this).data("prefix"),
-            totalforms = parseInt($("#id_" + prefix + "-TOTAL_FORMS").val()),
             initialforms = parseInt($("#id_" + prefix + "-INITIAL_FORMS").val());
-        for (var i = 0; i < totalforms; i++) {
-            prepareField(i, prefix);
-            if (i < initialforms) {
-                setReadOnly(i, prefix);
-            } else {
-                initNewControl(i, prefix);        
-            }
+        for (var i = 0; i < initialforms; i++) {
+            setReadOnly(i, prefix);
         }
      });
     });
@@ -104,7 +103,7 @@
                     {% for f in othernames %}
                         <div class="control-group form-inline {% if f.errors %}error{% endif %}"
                                 id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
-                            <label for="id_{{f.prefix}}-{{f.name.name}}">Alternate Name</label>
+                            <label for="id_{{f.prefix}}-{{f.name.name}}">{% if forloop.first %}Alternate Name{% endif %}</label>
                             <div class="controls inlinemulti">
                                 {{f.id}}
                                 {{f.name}}
@@ -123,7 +122,7 @@
                     {% for f in dates %}
                         <div class="control-group form-inline date-field {% if f.errors %}error{% endif %}"
                                 id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
-                            <label for="id_{{f.prefix}}-{{f.start_date.name}}">Date</label>
+                            <label for="id_{{f.prefix}}-{{f.start_date.name}}">{% if forloop.first %}Date{% endif %}</label>
                             <div class="controls inlinemulti" data-prefix="{{f.prefix}}">
                                 {{f.id}}
                                 {{f.start_date}}

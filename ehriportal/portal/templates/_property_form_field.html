@@ -3,7 +3,7 @@
     {% for f in propform %}
         <div class="control-group form-inline {% if f.errors %}error{% endif %}"
                 id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
-            <label for="id_{{f.prefix}}-{{f.value.name}}">{{name}}</label>
+            <label for="id_{{f.prefix}}-{{f.value.name}}">{% if forloop.first %}{{name}}{% endif %}</label>
             <div class="controls inlinemulti">
                 {{f.id}}
                 {{f.value}}
