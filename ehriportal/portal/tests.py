@@ -56,6 +56,32 @@ class PortalTest(TestCase):
         }))
         self.assertEqual(response.status_code, 200)
 
+    def test_collection_create_get(self):
+        """Test collection create view."""
+        response = self.client.get(reverse("collection_create"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_collection_create_post(self):
+        """Test creating a collection."""
+        repo = models.Repository.objects.all()[0]
+        testname = "Test Create"
+        self.assertEqual(models.Collection.objects.filter(
+                name=testname).count(), 0)
+        params = {
+            "identifier": "GB Test 0001",
+            "name": testname,
+            "repository": repo.pk,
+            "language-0-value": "en",
+        }
+        params.update(self._get_collection_formset_metadata())
+        response = self.client.post(reverse("collection_create"), params)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(models.Collection.objects.filter(
+                name=testname).count(), 1)
+        c = models.Collection.objects.filter(name=testname)[0]
+        self.assertIn("en", c.languages)
+        self.assertEqual(testname, c.name)
+        
     def test_collection_edit_get(self):
         """Test collection edit view."""
         response = self.client.get(reverse("collection_edit", kwargs={
@@ -88,13 +114,10 @@ class PortalTest(TestCase):
         params = {
             "identifier": "Test",
             "name": "Test",
-            "repository": c.repository.pk
+            "repository": c.repository.pk,
+            "language-0-value": "de",
         }
         params.update(self._get_collection_formset_metadata())
-        params.update({
-            "language-0-value": "de",
-        })
-
         response = self.client.post(reverse("collection_edit", kwargs={
             "slug": slug,
         }), params)
@@ -110,13 +133,10 @@ class PortalTest(TestCase):
         params = {
             "identifier": "Test",
             "name": "Test",
-            "repository": c.repository.pk
+            "repository": c.repository.pk,
+            "othername_set-0-name": "Alt Test",
         }
         params.update(self._get_collection_formset_metadata())
-        params.update({
-            "othername_set-0-name": "Alt Test",
-        })
-
         response = self.client.post(reverse("collection_edit", kwargs={
             "slug": slug,
         }), params)
