@@ -5,10 +5,91 @@
 {% load markup %}
 {% load portal_tags %}
 
-{% block head_title %}{% trans "Edit" %} - {{object.name}}{% endblock %}
+{% block head_title %}
+    {% if object %}
+        {% trans "Edit Collection" %} - {{object.name}}
+    {% else %}
+        {% trans "Create Collection" %}
+    {% endif %}
+{% endblock %}
 
 {% block body %}
 <h1>{{object.name}}</h1>
+<script type="text/javascript">
+    jQuery(document).ready(function($) {
+
+    function prepareField(index, prefix) {
+        $("#id_" + prefix + "-" + index + "-DELETE")
+            .hide().next("label").hide();
+    }
+
+    function setReadOnly(index, prefix) {
+        var div = $("#id_form-" + prefix + "-" + index),
+            idfield = $("#id_" + prefix + "-" + index + "-id"),
+            inputs = idfield.nextUntil("input[type='checkbox']"),
+            check = inputs.next("input[type='checkbox']"),
+            valstr = inputs.map(function(i, e) { return $(e).val();}).toArray().join(" - ");
+        inputs.hide().last().after($("<ul><li class='inlineitem'>" + valstr + "</li></ul>"));
+        // hide all but the first label
+        if (index > 0) {
+            $("label[for='" + inputs.first().attr("id") + "']").text("");
+        }
+        div.click(function(event) {
+            check.prop("checked", true).blur();
+            $(this).hide(200);
+        });
+    }
+
+    function initNewControl(index, prefix) {
+        var idfield = $("#id_" + prefix + "-" + index + "-id"),
+            inputs = idfield.nextUntil("input[type='checkbox']");
+        inputs.bind("keydown", function(event) {
+            if ($.trim($(this).val()) != "" && (event.keyCode == 9 || event.keyCode == 13)) {
+                event.preventDefault();
+                addNewAfter(index, prefix);
+                setReadOnly(index, prefix);
+            }
+        });
+    }
+
+    function addNewAfter(index, prefix) {
+        var totalforms = parseInt($("#id_" + prefix + "-TOTAL_FORMS").val()),
+            initialforms = parseInt($("#id_" + prefix + "-INITIAL_FORMS").val()),
+            div = $("#id_form-" + prefix + "-" + index),
+            newdiv = div.clone(),
+            newindex = index + 1;
+        newdiv
+            .attr("id", "id_form-" + prefix + "-" + newindex)
+            .data("prefix", prefix + "-" + newindex)
+            .find("input").val(null);
+        newdiv.find("label, input").each(function(i, elem) {
+            $.each(["id", "name", "for"], function(i, attr) {
+                if ($(elem).attr(attr)) {
+                    $(elem).attr(attr, $(elem).attr(attr).replace(
+                            prefix + "-" + index, prefix + "-" + newindex));
+                }
+            });
+        });
+        $("#id_" + prefix + "-TOTAL_FORMS").val(totalforms + 1);
+        div.after(newdiv).find("input[type='text']").first().focus();
+        initNewControl(newindex, prefix);
+    }
+            
+    $(".dynamic-formset").each(function(i, elem) {
+        var prefix = $(this).data("prefix"),
+            totalforms = parseInt($("#id_" + prefix + "-TOTAL_FORMS").val()),
+            initialforms = parseInt($("#id_" + prefix + "-INITIAL_FORMS").val());
+        for (var i = 0; i < totalforms; i++) {
+            prepareField(i, prefix);
+            if (i < initialforms) {
+                setReadOnly(i, prefix);
+            } else {
+                initNewControl(i, prefix);        
+            }
+        }
+     });
+    });
+</script>
 <div class="row">
     <div class="span12">
         <form method="post" class="entity-form form-horizontal" id="collection-edit-form">
@@ -18,38 +99,44 @@
                 {% include "_form_field.html" with field=form.identifier %}
                 {% include "_form_field.html" with field=form.name %}
 
-                {{othernames.management_form}}
-                {% for f in othernames %}
-                    <div class="control-group form-inline {% if f.errors %}error{% endif %}">
-                        <label for="id_{{f.prefix}}-{{f.name.name}}">Alternate Name</label>
-                        <div class="controls">
-                            {{f.id}}
-                            {{f.name}}
-                            {{f.DELETE}}
-                            {{f.DELETE.label}}
-                            {% if f.errors %}
-                                <span class="help-inline">{{f.errors}}</span>
-                            {% endif %}
+                <div class="dynamic-formset" id="id_formset-{{othernames.prefix}}" data-prefix="{{othernames.prefix}}">
+                    {{othernames.management_form}}
+                    {% for f in othernames %}
+                        <div class="control-group form-inline {% if f.errors %}error{% endif %}"
+                                id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
+                            <label for="id_{{f.prefix}}-{{f.name.name}}">Alternate Name</label>
+                            <div class="controls inlinemulti">
+                                {{f.id}}
+                                {{f.name}}
+                                {{f.DELETE}}
+                                {{f.DELETE.label_tag}}
+                                {% if f.errors %}
+                                    <span class="help-inline">{{f.errors}}</span>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
 
-                {{dates.management_form}}
-                {% for f in dates %}
-                    <div class="control-group form-inline date-field {% if f.errors %}error{% endif %}">
-                        <label for="id_{{f.prefix}}-{{f.start_date.name}}">Date</label>
-                        <div class="controls">
-                            {{f.id}}
-                            {{f.start_date}}
-                            {{f.end_date}}
-                            {{f.DELETE}}
-                            {{f.DELETE.label}}
-                            {% if f.errors %}
-                                <span class="help-inline">{{f.errors}}</span>
-                            {% endif %}
+                <div class="dynamic-formset" id="id_formset-{{dates.prefix}}" data-prefix="{{dates.prefix}}">
+                    {{dates.management_form}}
+                    {% for f in dates %}
+                        <div class="control-group form-inline date-field {% if f.errors %}error{% endif %}"
+                                id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
+                            <label for="id_{{f.prefix}}-{{f.start_date.name}}">Date</label>
+                            <div class="controls inlinemulti" data-prefix="{{f.prefix}}">
+                                {{f.id}}
+                                {{f.start_date}}
+                                {{f.end_date}}
+                                {{f.DELETE}}
+                                {{f.DELETE.label_tag}}
+                                {% if f.errors %}
+                                    <span class="help-inline">{{f.errors}}</span>
+                                {% endif %}
+                            </div>
                         </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
 
                 {% include "_form_field.html" with field=form.lod %}
                 {% include "_form_field.html" with field=form.extent_and_medium %}

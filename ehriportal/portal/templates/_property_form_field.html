@@ -1,16 +1,18 @@
-{{propform.management_form}}
-{% for f in propform %}
-    <div class="control-group form-inline {% if f.errors %}error{% endif %}">
-        <label for="id_{{f.prefix}}-{{f.value.name}}">{{name}}</label>
-        <div class="controls">
-            {{f.id}}
-            {{f.value}}
-            {{f.DELETE}}
-            {{f.DELETE.label}}
-            {% if f.errors %}
-                <span class="help-inline">{{f.errors}}</span>
-            {% endif %}
+<div class="dynamic-formset" id="id_formset-{{propform.prefix}}" data-prefix="{{propform.prefix}}">
+    {{propform.management_form}}
+    {% for f in propform %}
+        <div class="control-group form-inline {% if f.errors %}error{% endif %}"
+                id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
+            <label for="id_{{f.prefix}}-{{f.value.name}}">{{name}}</label>
+            <div class="controls inlinemulti">
+                {{f.id}}
+                {{f.value}}
+                {{f.DELETE}}
+                {{f.DELETE.label_tag}}
+                {% if f.errors %}
+                    <span class="help-inline">{{f.errors}}</span>
+                {% endif %}
+            </div>
         </div>
-    </div>
-{% endfor %}
-
+    {% endfor %}
+</div>
