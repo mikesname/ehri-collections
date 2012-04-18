@@ -153,3 +153,10 @@ a.openid-button:hover {
 .inlinemulti li:hover {
     list-style-image: url(../img/delete.png);
 }
+
+.inlinemulti ul {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
