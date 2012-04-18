@@ -75,20 +75,22 @@ urlpatterns = patterns('',
         facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', object_list, infolist, name='collection_list'),
-    url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
-            queryset=models.Collection.objects.all(),
-            template_name="collection_detail.html"
-        ), name='collection_detail'),
 
     # Crud Actions
+    url(r'^create/?$', 
+            user_passes_test(permissions.is_staff)(
+                views.CollectionEditView.as_view()), name='collection_create'),
     url(r'^edit/(?P<slug>[-\w]+)/?$',
             user_passes_test(permissions.is_staff)(
                 views.CollectionEditView.as_view()), name='collection_edit'),
     url(r'^delete/(?P<slug>[-\w]+)/?$', 
             user_passes_test(permissions.is_staff)(
                 views.CollectionDeleteView.as_view()), name='collection_delete'),
-    url(r'^create/?$', 
-            user_passes_test(permissions.is_staff)(
-                views.CollectionEditView.as_view()), name='collection_create'),
+
+    # This URL has to go last because it matches everything...
+    url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
+            queryset=models.Collection.objects.all(),
+            template_name="collection_detail.html"
+        ), name='collection_detail'),
 )
 
