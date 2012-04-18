@@ -7,6 +7,7 @@ Replace this with more appropriate tests for your application.
 
 from django.test import TestCase
 from django.core.urlresolvers import reverse
+from django.contrib.auth.models import User
 
 from portal import models
 
@@ -48,6 +49,10 @@ class PortalRepositoryTest(TestCase):
 class PortalCollectionTest(TestCase):
     fixtures = ["resource.json", "repository.json", "collection.json"]
     def setUp(self):
+        user = User.objects.create_user("test", password="testpass")
+        user.is_staff = True
+        user.save()
+        self.client.login(username="test", password="testpass")
         self.slug = "caro-jella-letter-from-theresienstadt"
         self.testdata = {
 
@@ -73,6 +78,18 @@ class PortalCollectionTest(TestCase):
             "slug": self.slug,
         }))
         self.assertEqual(response.status_code, 200)
+
+    def test_collection_edit_without_credentials(self):
+        """Try accessing the edit page without being a member of staff."""
+        self.client.logout()
+        user = User.objects.create_user("random", password="password")
+        user.is_staff = False
+        user.save()
+        self.client.login(username=user.username, password="password")
+        response = self.client.get(reverse("collection_edit", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 302)
 
     def test_collection_create_get(self):
         """Test collection create view."""
