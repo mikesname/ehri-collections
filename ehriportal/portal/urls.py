@@ -28,6 +28,10 @@ FACETS = [
         paramname="langdesc"
     ),
     FacetClass(
+        "type_of_entity",
+        "Authority Type",
+    ),
+    FacetClass(
         "languages",
         "Language",
         paramname="lang"

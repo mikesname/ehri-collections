@@ -1,0 +1,24 @@
+[
+  {
+    "pk": 5, 
+    "model": "portal.authority", 
+    "fields": {
+      "institution_responsible_identifier": "", 
+      "dates_of_existence": "1979-2012", 
+      "general_context": "", 
+      "name": "Smith, John", 
+      "lod": null, 
+      "mandates": "", 
+      "functions": "", 
+      "type_of_entity": "person", 
+      "sources": "", 
+      "internal_structures": "", 
+      "legal_status": "", 
+      "places": "", 
+      "revision_history": "", 
+      "identifier": "GB-John-Smith", 
+      "slug": "smith-john", 
+      "history": ""
+    }
+  }
+]

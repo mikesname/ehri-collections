@@ -68,6 +68,7 @@
             </fieldset>
             <fieldset>
                 <legend>Context Area</legend>
+                {% include "_form_field.html" with field=form.creator %}
                 {% include "_form_field.html" with field=form.repository %}
                 {% include "_form_field.html" with field=form.archival_history %}
                 {% include "_form_field.html" with field=form.acquisition %}

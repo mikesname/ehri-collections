@@ -63,6 +63,30 @@ class RepositoryIndex(indexes.SearchIndex, indexes.Indexable):
         return self.get_model().objects.filter(created_on__lte=datetime.datetime.now())
 
 
+class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
+    name = indexes.CharField(model_attr='name', default=True, boost=1.1)
+    slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)
+    history = indexes.CharField(model_attr='history', null=True, stored=True)
+    general_context = indexes.CharField(model_attr='general_context', null=True)
+    other_names = indexes.MultiValueField(model_attr='other_names')
+    type_of_entity = indexes.CharField(model_attr='type_of_entity', faceted=True, stored=True)
+    text = indexes.CharField(document=True, use_template=True, stored=False)
+    pub_date = indexes.DateTimeField(model_attr='created_on')
+    suggestions = indexes.CharField()
+
+    def get_model(self):
+        return models.Authority
+
+    def prepare(self, obj):
+        prepared_data = super(AuthorityIndex, self).prepare(obj)
+        prepared_data['suggestions'] = prepared_data['text']
+        return prepared_data
+
+    def index_queryset(self):
+        """Used when the entire index for model is updated."""
+        return self.get_model().objects.filter(created_on__lte=datetime.datetime.now())
+
+
 class CollectionIndex(indexes.SearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name', default=True, boost=1.1)
     slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)

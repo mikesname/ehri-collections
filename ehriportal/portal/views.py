@@ -214,7 +214,6 @@ class RepositoryEditView(UpdateView):
         return self.form_invalid(form)
 
     def form_invalid(self, form):
-        print form.errors
         return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
@@ -245,4 +244,62 @@ class RepositoryDeleteView(DeleteView):
     template_name = "repository_confirm_delete.html"
     success_url = reverse_lazy("repo_search")
     model = models.Repository
+
+
+class AuthorityEditView(UpdateView):
+    """Generic form implementation for creating or updating a
+    authority object."""
+    form_class = forms.AuthorityEditForm
+    model = models.Authority
+    template_name = "authority_form.html"
+    properties = ["language", "script"]
+
+    def get_object(self):
+        if self.kwargs.get("slug"):
+            return get_object_or_404(self.model, slug=self.kwargs.get("slug"))
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        othernames = context["othernames"]
+        propforms = context["propforms"]
+        if othernames.is_valid() and \
+                False not in [pf.is_valid() for pf in propforms.values()]:
+            self.object = form.save()
+            othernames.instance = self.object
+            othernames.save()
+            for pf in propforms.values():
+                pf.instance = self.object
+                pf.save()
+            return HttpResponseRedirect(self.object.get_absolute_url())
+        return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_context_data(self, **kwargs):
+        context = super(AuthorityEditView, self).get_context_data(**kwargs)
+        if self.request.method == "POST":
+            context["othernames"] = forms.OtherNameFormSet(
+                    self.request.POST, self.request.FILES, instance=self.object)
+            context["propforms"] = {}
+            for propname in self.properties:
+                context["propforms"][propname] = forms.propertyformset_factory(
+                        self.model, propname)(
+                                self.request.POST, self.request.FILES,
+                                    instance=self.object, prefix=propname)
+        else:
+            context["othernames"] = forms.OtherNameFormSet(instance=self.object)
+            context["propforms"] = {}
+            for propname in self.properties:
+                context["propforms"][propname] = forms.propertyformset_factory(
+                        self.model, propname)(
+                                instance=self.object, prefix=propname)
+        return context
+
+
+class AuthorityDeleteView(DeleteView):
+    template_name = "repository_confirm_delete.html"
+    success_url = reverse_lazy("repo_search")
+    model = models.Authority
+
 

@@ -370,6 +370,7 @@ class Collection(Resource):
     identifier = models.CharField(max_length=255)
     lod = models.CharField("Level of Description", max_length=255,
                 choices=LODS, blank=True, null=True)
+    creator = models.ForeignKey("Authority", null=True, blank=True)
     repository = models.ForeignKey(Repository)
 
     tags = TaggableManager(blank=True)

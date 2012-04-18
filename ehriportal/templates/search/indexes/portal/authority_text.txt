@@ -1,0 +1,16 @@
+{{ object.name|default_if_none:"" }}
+{{ object.lod|default_if_none:"" }}
+{{ object.type_of_entity|default_if_none:"" }}
+{{ object.dates_of_existence|default_if_none:"" }}
+{{ object.functions|default_if_none:"" }}
+{{ object.general_context|default_if_none:"" }}
+{{ object.geocultural_context|default_if_none:"" }}
+{{ object.history|default_if_none:"" }}
+{{ object.internal_structures|default_if_none:"" }}
+{{ object.legal_status|default_if_none:"" }}
+{{ object.maintenance_notes|default_if_none:"" }}
+{{ object.mandates|default_if_none:"" }}
+{{ object.places|default_if_none:"" }}
+{{ object.rules|default_if_none:"" }}
+{{ object.sources|default_if_none:"" }}
+

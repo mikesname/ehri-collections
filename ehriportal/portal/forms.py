@@ -96,6 +96,11 @@ class RepositoryEditForm(forms.ModelForm):
         model = models.Repository
 
 
+class AuthorityEditForm(forms.ModelForm):
+    class Meta:
+        model = models.Authority
+
+
 def propertyformset_factory(topclass, propname):
     propcls = models.propertyproxy_factory(propname)
     return inlineformset_factory(

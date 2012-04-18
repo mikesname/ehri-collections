@@ -34,5 +34,14 @@
       "created_on": "2012-02-02 12:32:28", 
       "type": "Collection"
     }
+  },
+  {
+    "pk": 5, 
+    "model": "portal.resource", 
+    "fields": {
+      "updated_on": "2012-02-02 12:32:28", 
+      "created_on": "2012-02-02 12:32:28", 
+      "type": "Authority"
+    }
   }
 ]

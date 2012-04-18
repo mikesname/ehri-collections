@@ -331,7 +331,7 @@ class PortalAuthorityTest(TestCase):
         self.testdata = {
 
         }
-        for field in ["date_set"]:
+        for field in ["othername_set", "script", "language"]:
             self.testdata["%s-INITIAL_FORMS" % field] = 0 
             self.testdata["%s-MAX_NUM_FORMS" % field] = 1
             self.testdata["%s-TOTAL_FORMS" % field] = 1
