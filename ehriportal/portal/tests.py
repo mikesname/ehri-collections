@@ -319,4 +319,154 @@ class PortalCollectionTest(TestCase):
         ccount2 = models.Collection.objects.count()
         self.assertEqual(ccount, ccount2 + 1)
         
+       
+class PortalAuthorityTest(TestCase):
+    fixtures = ["resource.json", "authority.json"]
+    def setUp(self):
+        user = User.objects.create_user("test", password="testpass")
+        user.is_staff = True
+        user.save()
+        self.client.login(username="test", password="testpass")
+        self.slug = "smith-john"
+        self.testdata = {
+
+        }
+        for field in ["date_set"]:
+            self.testdata["%s-INITIAL_FORMS" % field] = 0 
+            self.testdata["%s-MAX_NUM_FORMS" % field] = 1
+            self.testdata["%s-TOTAL_FORMS" % field] = 1
+
+    def tearDown(self):
+        pass
+
+    def test_authority_list(self):
+        """Test list of authorities."""
+        response = self.client.get(reverse("authority_list"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_authority_collections(self):
+        """Test authority's list of collections."""
+        response = self.client.get(reverse("authority_collections", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 200)
+
+    def test_authority_detail(self):
+        """Test repo detail view."""
+        response = self.client.get(reverse("authority_detail", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 200)
         
+    def test_authority_create_get(self):
+        """Test authority create view."""
+        response = self.client.get(reverse("authority_create"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_authority_create_post(self):
+        """Test creating a authority."""
+        testname = "Test Create"
+        self.assertEqual(models.Authority.objects.filter(
+                name=testname).count(), 0)
+        self.testdata.update({
+            "identifier": "GB Test 0001",
+            "name": testname,
+            "language-0-value": "en",
+        })
+        response = self.client.post(reverse("authority_create"), self.testdata)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(models.Authority.objects.filter(
+                name=testname).count(), 1)
+        r = models.Authority.objects.filter(name=testname)[0]
+        self.assertIn("en", r.languages)
+        self.assertEqual(testname, r.name)
+        
+    def test_authority_edit(self):
+        """Test repo edit view."""
+        response = self.client.get(reverse("authority_edit", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 200)
+
+    def test_authority_edit_post(self):
+        """Test updating a authority."""
+        c = models.Authority.objects.get(slug=self.slug)
+        self.testdata.update({
+            "identifier": "Test",
+            "name": "Test",
+            "language-0-value": "de",
+        })
+        response = self.client.post(reverse("authority_edit", kwargs={
+            "slug": self.slug,
+        }), self.testdata)
+        self.assertEqual(response.status_code, 302)
+        c = models.Authority.objects.get(slug=self.slug)
+        self.assertEqual(c.name, "Test")
+        
+    def test_authority_edit_add_langprop(self):
+        """Test updating a authority."""
+        c = models.Authority.objects.get(slug=self.slug)
+        self.assertNotIn("de", c.languages)
+        self.testdata.update({
+            "identifier": "Test",
+            "name": "Test",
+            "language-0-value": "de",
+        })
+        response = self.client.post(reverse("authority_edit", kwargs={
+            "slug": self.slug,
+        }), self.testdata)
+        self.assertEqual(response.status_code, 302)
+        c = models.Authority.objects.get(slug=self.slug)
+        self.assertIn("de", c.languages)
+        
+    def test_authority_edit_add_alt_name(self):
+        """Test updating a authority."""
+        c = models.Authority.objects.get(slug=self.slug)
+        self.assertNotIn("Alt Test", c.other_names)
+        self.testdata.update({
+            "identifier": "Test",
+            "name": "Test",
+            "othername_set-0-name": "Alt Test",
+        })
+        response = self.client.post(reverse("authority_edit", kwargs={
+            "slug": self.slug,
+        }), self.testdata)
+        self.assertEqual(response.status_code, 302)
+        c = models.Authority.objects.get(slug=self.slug)
+        self.assertIn("Alt Test", c.other_names)
+        
+    def test_authority_edit_with_error(self):
+        """Test updating a authority."""
+        c = models.Authority.objects.get(slug=self.slug)
+        self.assertNotIn("Alt Test", c.other_names)
+        self.testdata.update({
+            "identifier": "",
+            "name": "Test",
+            "othername_set-0-name": "Alt Test",
+        })
+        response = self.client.post(reverse("authority_edit", kwargs={
+            "slug": self.slug,
+        }), self.testdata)
+        self.assertEqual(response.status_code, 200)
+        c = models.Authority.objects.get(slug=self.slug)
+        self.assertNotIn("Alt Test", c.other_names)
+
+    def test_authority_delete_confirm(self):
+        """Test deleting a authority - first step."""
+        response = self.client.get(reverse("authority_delete", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 200)
+        
+    def test_authority_delete(self):
+        """Test deleting a authority - second step."""
+        ccount = models.Authority.objects.count()
+        response = self.client.post(reverse("authority_delete", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 302)
+        ccount2 = models.Authority.objects.count()
+        self.assertEqual(ccount, ccount2 + 1)
+        
+
+
