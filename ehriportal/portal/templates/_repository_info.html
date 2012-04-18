@@ -26,7 +26,7 @@
 <address class="well">
     <h3>{% trans "Contact details" %}</h3>
     <p>
-    {% for contact in object.contacts.all %}
+    {% for contact in object.contact_set.all %}
         {{contact.format|linebreaks}}
         <br />
         Tel: {{contact.telephone}}
