@@ -54,11 +54,6 @@ urlpatterns = patterns('',
         facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', object_list, listinfo, name='repo_list'),
-    url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
-            queryset=models.Repository.objects.all(),
-            template_name="repository_detail.html"
-        ), name='repo_detail'),
-    
     # Crud Actions
     url(r'^create/?$', 
             user_passes_test(permissions.is_staff)(
@@ -70,7 +65,11 @@ urlpatterns = patterns('',
             user_passes_test(permissions.is_staff)(
                 views.RepositoryDeleteView.as_view()), name='repo_delete'),
     
-    # this catch-all item must be at the bottom
+    # these catch-all item must be at the bottom
+    url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
+            queryset=models.Repository.objects.all(),
+            template_name="repository_detail.html"
+        ), name='repo_detail'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
             ListCollectionsView.as_view(
                 template_name="collection_list.html"    
