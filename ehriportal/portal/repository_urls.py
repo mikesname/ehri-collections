@@ -3,9 +3,9 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
 from django.views.generic.list_detail import object_detail, object_list
 from django.views.generic.create_update import update_object
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 
-from portal import views, forms, models
+from portal import views, forms, models, permissions
 from portal.haystack_util import FacetClass
 
 from haystack.query import SearchQuerySet
@@ -58,10 +58,19 @@ urlpatterns = patterns('',
             queryset=models.Repository.objects.all(),
             template_name="repository_detail.html"
         ), name='repo_detail'),
-    url(r'^(?P<slug>[-\w]+)/edit/?$', update_object, dict(
-            form_class=forms.RepoEditForm,
-            template_name="repository_form.html",
-        ), name='repo_edit'),
+    
+    # Crud Actions
+    url(r'^create/?$', 
+            user_passes_test(permissions.is_staff)(
+                views.RepositoryEditView.as_view()), name='repo_create'),
+    url(r'^edit/(?P<slug>[-\w]+)/?$',
+            user_passes_test(permissions.is_staff)(
+                views.RepositoryEditView.as_view()), name='repo_edit'),
+    url(r'^delete/(?P<slug>[-\w]+)/?$', 
+            user_passes_test(permissions.is_staff)(
+                views.RepositoryDeleteView.as_view()), name='repo_delete'),
+    
+    # this catch-all item must be at the bottom
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
             ListCollectionsView.as_view(
                 template_name="collection_list.html"    

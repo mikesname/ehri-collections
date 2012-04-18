@@ -258,7 +258,7 @@ class Repository(Resource):
     def primary_contact(self):
         """Get the main contact property."""
         try:
-            return self.contacts.all().order_by("primary")[0]
+            return self.contact_set.all().order_by("primary")[0]
         except IndexError:
             return None
 
@@ -288,19 +288,19 @@ class Contact(models.Model):
 
     primary = models.BooleanField()
     repository = models.ForeignKey(
-            Repository, verbose_name="Contact addresses", related_name="contacts")
+            Repository, verbose_name="Contact addresses")
     contact_person = models.CharField(max_length=255, null=True, blank=True)
     street_address = models.TextField(null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    region = models.CharField(max_length=100, null=True, blank=True)
+    postal_code = models.CharField(max_length=100, null=True, blank=True)
+    country_code = models.CharField(max_length=100, null=True, blank=True)
     website = models.URLField(null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     telephone = models.CharField(max_length=100, null=True, blank=True)
     fax = models.CharField(max_length=100, null=True, blank=True)
     contact_type = models.CharField(
             max_length=100, blank=True, null=True, choices=CONTACT_TYPES)
-    postal_code = models.CharField(max_length=100, null=True, blank=True)
-    country_code = models.CharField(max_length=100, null=True, blank=True)
-    city = models.CharField(max_length=100, null=True, blank=True)
-    region = models.CharField(max_length=100, null=True, blank=True)
     note = models.TextField(null=True, blank=True)
     created_on = models.DateTimeField(editable=False)
     updated_on = models.DateTimeField(editable=False, null=True, blank=True)

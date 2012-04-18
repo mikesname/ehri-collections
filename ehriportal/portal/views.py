@@ -163,7 +163,7 @@ class CollectionEditView(UpdateView):
             context["propforms"] = {}
             for propname in self.properties:
                 context["propforms"][propname] = forms.propertyformset_factory(
-                        models.Collection, propname)(
+                        self.model, propname)(
                                 self.request.POST, self.request.FILES,
                                     instance=self.object, prefix=propname)
         else:
@@ -172,7 +172,7 @@ class CollectionEditView(UpdateView):
             context["propforms"] = {}
             for propname in self.properties:
                 context["propforms"][propname] = forms.propertyformset_factory(
-                        models.Collection, propname)(
+                        self.model, propname)(
                                 instance=self.object, prefix=propname)
         return context
 
@@ -181,3 +181,68 @@ class CollectionDeleteView(DeleteView):
     template_name = "collection_confirm_delete.html"
     success_url = reverse_lazy("collection_search")
     model = models.Collection
+
+
+class RepositoryEditView(UpdateView):
+    """Generic form implementation for creating or updating a
+    repository object."""
+    form_class = forms.RepositoryEditForm
+    model = models.Repository
+    template_name = "repository_form.html"
+    properties = ["language", "script"]
+
+    def get_object(self):
+        if self.kwargs.get("slug"):
+            return get_object_or_404(self.model, slug=self.kwargs.get("slug"))
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        othernames = context["othernames"]
+        contacts = context["contacts"]
+        propforms = context["propforms"]
+        if contacts.is_valid() and othernames.is_valid() and \
+                False not in [pf.is_valid() for pf in propforms.values()]:
+            self.object = form.save()
+            contacts.instance = self.object
+            contacts.save()
+            othernames.instance = self.object
+            othernames.save()
+            for pf in propforms.values():
+                pf.instance = self.object
+                pf.save()
+            return HttpResponseRedirect(self.object.get_absolute_url())
+        return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        print form.errors
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_context_data(self, **kwargs):
+        context = super(RepositoryEditView, self).get_context_data(**kwargs)
+        if self.request.method == "POST":
+            context["contacts"] = forms.ContactFormSet(
+                    self.request.POST, self.request.FILES, instance=self.object)
+            context["othernames"] = forms.OtherNameFormSet(
+                    self.request.POST, self.request.FILES, instance=self.object)
+            context["propforms"] = {}
+            for propname in self.properties:
+                context["propforms"][propname] = forms.propertyformset_factory(
+                        self.model, propname)(
+                                self.request.POST, self.request.FILES,
+                                    instance=self.object, prefix=propname)
+        else:
+            context["contacts"] = forms.ContactFormSet(instance=self.object)
+            context["othernames"] = forms.OtherNameFormSet(instance=self.object)
+            context["propforms"] = {}
+            for propname in self.properties:
+                context["propforms"][propname] = forms.propertyformset_factory(
+                        self.model, propname)(
+                                instance=self.object, prefix=propname)
+        return context
+
+
+class RepositoryDeleteView(DeleteView):
+    template_name = "repository_confirm_delete.html"
+    success_url = reverse_lazy("repository_search")
+    model = models.Repository
+

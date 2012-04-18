@@ -1,3 +1,4 @@
+{% load i18n %}
 {% load staticfiles %}
 {% if object.logo %}
 <div class="repo-logo">
@@ -23,7 +24,7 @@
 </div>
 {% endif %}
 <address class="well">
-    <h3>Contact details</h3>
+    <h3>{% trans "Contact details" %}</h3>
     <p>
     {% for contact in object.contacts.all %}
         {{contact.format|linebreaks}}
@@ -36,3 +37,11 @@
     {% endfor %}
     </p>
 </address>
+
+<div class="well">
+    <h5>{% trans "Administration Actions" %}</h5>
+    <p>
+        <a class="btn" href="{% url repo_edit slug=object.slug %}">Edit</a>
+        <a class="btn btn-danger" href="{% url repo_delete slug=object.slug %}">Delete</a>
+    </p>
+</div>
