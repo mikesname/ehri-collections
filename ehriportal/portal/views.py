@@ -119,7 +119,49 @@ class PaginatedFacetView(PortalSearchListView):
         return extra
 
 
-class CollectionEditView(UpdateView):
+# The Create and Edit actions for Repository, Collection, and Authority
+# models are all pretty much the same, and based on the Django UpdateView
+# generic template class. The only thing that varies is the specific
+# formsets they use. What we do here is create a base class derived from
+# update view that works pretty much the the `BookCreateView` detailed 
+# here: http://haineault.com/blog/155/
+#
+# We just need to override the `get_formsets` method in each model-
+# specific subclass to return a dictionary of formsets specific to
+# each entity.
+
+class PortalUpdateView(UpdateView):
+    """Base class for entity create/edit that require
+    formsets in addition to their main form."""
+
+    def get_formsets(self):
+        raise NotImplementedError
+
+    def get_object(self):
+        if self.kwargs.get("slug"):
+            return get_object_or_404(self.model, slug=self.kwargs.get("slug"))
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        formsets = context["formsets"]
+        if False not in [pf.is_valid() for pf in formsets.values()]:
+            self.object = form.save()
+            for formset in formsets.values():
+                formset.instance = self.object
+                formset.save()
+            return HttpResponseRedirect(self.object.get_absolute_url())
+        return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_context_data(self, **kwargs):
+        context = super(PortalUpdateView, self).get_context_data(**kwargs)
+        context["formsets"] = self.get_formsets()
+        return context
+
+
+class CollectionEditView(PortalUpdateView):
     """Generic form implementation for creating or updating a
     collection object."""
     form_class = forms.CollectionEditForm
@@ -128,53 +170,26 @@ class CollectionEditView(UpdateView):
     properties = ["language", "script", "language_of_description", 
             "script_of_description"]
 
-    def get_object(self):
-        if self.kwargs.get("slug"):
-            return get_object_or_404(self.model, slug=self.kwargs.get("slug"))
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        dates = context["dates"]
-        othernames = context["othernames"]
-        propforms = context["propforms"]
-        if dates.is_valid() and othernames.is_valid() and \
-                False not in [pf.is_valid() for pf in propforms.values()]:
-            self.object = form.save()
-            dates.instance = self.object
-            dates.save()
-            othernames.instance = self.object
-            othernames.save()
-            for pf in propforms.values():
-                pf.instance = self.object
-                pf.save()
-            return HttpResponseRedirect(self.object.get_absolute_url())
-        return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def get_context_data(self, **kwargs):
-        context = super(CollectionEditView, self).get_context_data(**kwargs)
+    def get_formsets(self):
+        formsets = {}
         if self.request.method == "POST":
-            context["dates"] = forms.DateFormSet(
+            formsets["dates"] = forms.DateFormSet(
                     self.request.POST, self.request.FILES, instance=self.object)
-            context["othernames"] = forms.OtherNameFormSet(
+            formsets["othernames"] = forms.OtherNameFormSet(
                     self.request.POST, self.request.FILES, instance=self.object)
-            context["propforms"] = {}
             for propname in self.properties:
-                context["propforms"][propname] = forms.propertyformset_factory(
+                formsets[propname] = forms.propertyformset_factory(
                         self.model, propname)(
                                 self.request.POST, self.request.FILES,
                                     instance=self.object, prefix=propname)
         else:
-            context["dates"] = forms.DateFormSet(instance=self.object)
-            context["othernames"] = forms.OtherNameFormSet(instance=self.object)
-            context["propforms"] = {}
+            formsets["dates"] = forms.DateFormSet(instance=self.object)
+            formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
             for propname in self.properties:
-                context["propforms"][propname] = forms.propertyformset_factory(
+                formsets[propname] = forms.propertyformset_factory(
                         self.model, propname)(
                                 instance=self.object, prefix=propname)
-        return context
+        return formsets
 
 
 class CollectionDeleteView(DeleteView):
@@ -183,7 +198,7 @@ class CollectionDeleteView(DeleteView):
     model = models.Collection
 
 
-class RepositoryEditView(UpdateView):
+class RepositoryEditView(PortalUpdateView):
     """Generic form implementation for creating or updating a
     repository object."""
     form_class = forms.RepositoryEditForm
@@ -191,53 +206,26 @@ class RepositoryEditView(UpdateView):
     template_name = "repository_form.html"
     properties = ["language", "script"]
 
-    def get_object(self):
-        if self.kwargs.get("slug"):
-            return get_object_or_404(self.model, slug=self.kwargs.get("slug"))
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        othernames = context["othernames"]
-        contacts = context["contacts"]
-        propforms = context["propforms"]
-        if contacts.is_valid() and othernames.is_valid() and \
-                False not in [pf.is_valid() for pf in propforms.values()]:
-            self.object = form.save()
-            contacts.instance = self.object
-            contacts.save()
-            othernames.instance = self.object
-            othernames.save()
-            for pf in propforms.values():
-                pf.instance = self.object
-                pf.save()
-            return HttpResponseRedirect(self.object.get_absolute_url())
-        return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def get_context_data(self, **kwargs):
-        context = super(RepositoryEditView, self).get_context_data(**kwargs)
+    def get_formsets(self):
+        formsets = {}
         if self.request.method == "POST":
-            context["contacts"] = forms.ContactFormSet(
+            formsets["contacts"] = forms.ContactFormSet(
                     self.request.POST, self.request.FILES, instance=self.object)
-            context["othernames"] = forms.OtherNameFormSet(
+            formsets["othernames"] = forms.OtherNameFormSet(
                     self.request.POST, self.request.FILES, instance=self.object)
-            context["propforms"] = {}
             for propname in self.properties:
-                context["propforms"][propname] = forms.propertyformset_factory(
+                formsets[propname] = forms.propertyformset_factory(
                         self.model, propname)(
                                 self.request.POST, self.request.FILES,
                                     instance=self.object, prefix=propname)
         else:
-            context["contacts"] = forms.ContactFormSet(instance=self.object)
-            context["othernames"] = forms.OtherNameFormSet(instance=self.object)
-            context["propforms"] = {}
+            formsets["contacts"] = forms.ContactFormSet(instance=self.object)
+            formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
             for propname in self.properties:
-                context["propforms"][propname] = forms.propertyformset_factory(
+                formsets[propname] = forms.propertyformset_factory(
                         self.model, propname)(
                                 instance=self.object, prefix=propname)
-        return context
+        return formsets
 
 
 class RepositoryDeleteView(DeleteView):
@@ -246,7 +234,7 @@ class RepositoryDeleteView(DeleteView):
     model = models.Repository
 
 
-class AuthorityEditView(UpdateView):
+class AuthorityEditView(PortalUpdateView):
     """Generic form implementation for creating or updating a
     authority object."""
     form_class = forms.AuthorityEditForm
@@ -254,52 +242,28 @@ class AuthorityEditView(UpdateView):
     template_name = "authority_form.html"
     properties = ["language", "script"]
 
-    def get_object(self):
-        if self.kwargs.get("slug"):
-            return get_object_or_404(self.model, slug=self.kwargs.get("slug"))
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        othernames = context["othernames"]
-        propforms = context["propforms"]
-        if othernames.is_valid() and \
-                False not in [pf.is_valid() for pf in propforms.values()]:
-            self.object = form.save()
-            othernames.instance = self.object
-            othernames.save()
-            for pf in propforms.values():
-                pf.instance = self.object
-                pf.save()
-            return HttpResponseRedirect(self.object.get_absolute_url())
-        return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def get_context_data(self, **kwargs):
-        context = super(AuthorityEditView, self).get_context_data(**kwargs)
+    def get_formsets(self):
+        formsets = {}
         if self.request.method == "POST":
-            context["othernames"] = forms.OtherNameFormSet(
+            formsets["othernames"] = forms.OtherNameFormSet(
                     self.request.POST, self.request.FILES, instance=self.object)
-            context["propforms"] = {}
             for propname in self.properties:
-                context["propforms"][propname] = forms.propertyformset_factory(
+                formsets[propname] = forms.propertyformset_factory(
                         self.model, propname)(
                                 self.request.POST, self.request.FILES,
                                     instance=self.object, prefix=propname)
         else:
-            context["othernames"] = forms.OtherNameFormSet(instance=self.object)
-            context["propforms"] = {}
+            formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
             for propname in self.properties:
-                context["propforms"][propname] = forms.propertyformset_factory(
+                formsets[propname] = forms.propertyformset_factory(
                         self.model, propname)(
                                 instance=self.object, prefix=propname)
-        return context
+        return formsets
 
 
 class AuthorityDeleteView(DeleteView):
-    template_name = "repository_confirm_delete.html"
-    success_url = reverse_lazy("repo_search")
+    template_name = "authority_confirm_delete.html"
+    success_url = reverse_lazy("authority_search")
     model = models.Authority
 
 

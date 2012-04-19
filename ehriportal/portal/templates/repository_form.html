@@ -25,9 +25,9 @@
                 {% include "_form_field.html" with field=form.identifier %}
                 {% include "_form_field.html" with field=form.name %}
 
-                <div class="dynamic-formset" id="id_formset-{{othernames.prefix}}" data-prefix="{{othernames.prefix}}">
-                    {{othernames.management_form}}
-                    {% for f in othernames %}
+                <div class="dynamic-formset" id="id_formset-{{formsets.othernames.prefix}}" data-prefix="{{formsets.othernames.prefix}}">
+                    {{formsets.othernames.management_form}}
+                    {% for f in formsets.othernames %}
                         <div class="control-group form-inline {% if f.errors %}error{% endif %}"
                                 id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
                             <label for="id_{{f.prefix}}-{{f.name.name}}">{% if forloop.first %}Alternate Name{% endif %}</label>
@@ -48,8 +48,8 @@
             </fieldset>
             <fieldset>
                 <legend>Contact Area</legend>
-                <div class="contact-formset" id="id_formset-{{contacts.prefix}}" data-prefix="{{contacts.prefix}}">
-                    {{contacts.management_form}}
+                <div class="contact-formset" id="id_formset-{{formsets.contacts.prefix}}" data-prefix="{{formsets.contacts.prefix}}">
+                    {{formsets.contacts.management_form}}
                     {% for f in contacts %}
                         <div class="control-group form-inline {% if f.errors %}error{% endif %}"
                             id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
@@ -90,8 +90,8 @@
                 {% include "_form_field.html" with field=form.description_identifier %}
                 {% include "_form_field.html" with field=form.institution_identifier %}
                 {% include "_form_field.html" with field=form.rules %}
-                {% include "_property_form_field.html" with propform=propforms.language name="Language" %}
-                {% include "_property_form_field.html" with propform=propforms.script name="Script" %}
+                {% include "_property_form_field.html" with propform=formsets.language name="Language" %}
+                {% include "_property_form_field.html" with propform=formsets.script name="Script" %}
                 {% include "_form_field.html" with field=form.sources %}
             </fieldset>
 

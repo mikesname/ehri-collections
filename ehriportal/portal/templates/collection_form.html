@@ -24,9 +24,9 @@
                 {% include "_form_field.html" with field=form.identifier %}
                 {% include "_form_field.html" with field=form.name %}
 
-                <div class="dynamic-formset" id="id_formset-{{othernames.prefix}}" data-prefix="{{othernames.prefix}}">
-                    {{othernames.management_form}}
-                    {% for f in othernames %}
+                <div class="dynamic-formset" id="id_formset-{{formsets.othernames.prefix}}" data-prefix="{{formsets.othernames.prefix}}">
+                    {{formsets.othernames.management_form}}
+                    {% for f in formsets.othernames %}
                         <div class="control-group form-inline {% if f.errors %}error{% endif %}"
                                 id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
                             <label for="id_{{f.prefix}}-{{f.name.name}}">{% if forloop.first %}Alternate Name{% endif %}</label>
@@ -43,9 +43,9 @@
                     {% endfor %}
                 </div>
 
-                <div class="dynamic-formset" id="id_formset-{{dates.prefix}}" data-prefix="{{dates.prefix}}">
-                    {{dates.management_form}}
-                    {% for f in dates %}
+                <div class="dynamic-formset" id="id_formset-{{formsets.dates.prefix}}" data-prefix="{{formsets.dates.prefix}}">
+                    {{formsets.dates.management_form}}
+                    {% for f in formsets.dates %}
                         <div class="control-group form-inline date-field {% if f.errors %}error{% endif %}"
                                 id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
                             <label for="id_{{f.prefix}}-{{f.start_date.name}}">{% if forloop.first %}Date{% endif %}</label>
@@ -86,8 +86,8 @@
                 <legend>Conditions of Access &amp; Use Area</legend>
                 {% include "_form_field.html" with field=form.access_conditions %}
                 {% include "_form_field.html" with field=form.reproduction_conditions %}
-                {% include "_property_form_field.html" with propform=propforms.language name="Language of Materials" %}
-                {% include "_property_form_field.html" with propform=propforms.script name="Script of Materials" %}
+                {% include "_property_form_field.html" with propform=formsets.language name="Language of Materials" %}
+                {% include "_property_form_field.html" with propform=formsets.script name="Script of Materials" %}
                 {% include "_form_field.html" with field=form.physical_characteristics %}
                 {% include "_form_field.html" with field=form.finding_aids %}
             </fieldset>
@@ -105,8 +105,8 @@
                 {% include "_form_field.html" with field=form.description_identifier %}
                 {% include "_form_field.html" with field=form.institution_identifier %}
                 {% include "_form_field.html" with field=form.rules %}
-                {% include "_property_form_field.html" with propform=propforms.language_of_description name="Language of Description" %}
-                {% include "_property_form_field.html" with propform=propforms.script_of_description name="Script of Description" %}
+                {% include "_property_form_field.html" with propform=formsets.language_of_description name="Language of Description" %}
+                {% include "_property_form_field.html" with propform=formsets.script_of_description name="Script of Description" %}
                 {% include "_form_field.html" with field=form.sources %}
             </fieldset>
 
