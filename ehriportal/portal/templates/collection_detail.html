@@ -10,6 +10,13 @@
 
 {% block body %}
     <h2>{{object.name}}</h2>
+    {% if object.other_names %}
+        <h3 class="alternate-name">
+        {% for on in object.other_names %}
+            {% if forloop.counter0 > 0 %}, {% endif %}{{on}}
+        {% endfor %}
+        </h3>
+    {% endif %}
     <div class="row">
         <div class="span9 columns">
             <div class="description-field">
@@ -23,15 +30,22 @@
             <div class="rules-field">
                 {{object.rules|linebreaks}}
             </div>
-            <h3>{% trans "Keywords" %}</h3>
-            <div class="tag-list">
+            <h3>{% trans "Subject Access Points" %}</h3>
+            <p class="tag-list">
                 {% for tag in object.tag_list %}
                 {# FIXME: The url here will break for tags with a space in them. #}
                 <a href="{% url collection_search %}?tag={{tag.name|quote_plus}}">
                     {{tag.name}}
                 </a>
                 {% endfor %}
-            </div>
+            </p>
+            <h3>{% trans "Name Access Points" %}</h3>
+            <p class="tag-list">
+                {% for name in object.name_access %}
+                {# FIXME: The url here will break for tags with a space in them. #}
+                <a href="{{name.get_instance.get_absolute_url}}">{{name.get_instance.name}}</a>
+                {% endfor %}
+            </p>
         </div>
         <div class="span3 columns">
             <div class="repo-logo">

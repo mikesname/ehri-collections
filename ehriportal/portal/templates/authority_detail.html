@@ -21,16 +21,23 @@
         </div>
     </div>
     <div class="span9 columns">
-        <h1>{{object.name}}</h1>
+        <h2>{{object.name}}</h2>
+        {% if object.other_names %}
+            <h3 class="alternate-name">
+            {% for on in object.other_names %}
+                {% if forloop.counter0 > 0 %}, {% endif %}{{on}}
+            {% endfor %}
+            </h3>
+        {% endif %}
 
-        <h2>{% trans "History" %}</h2>
+        <h3>{% trans "History" %}</h3>
         {% if object.history %}
             <p>{{object.history|markdown}}</p>
         {% else %}
             <p>No additional information is currently available.</p>
         {% endif %}
 
-        <h2>{% trans "Sources" %}</h2>
+        <h3>{% trans "Sources" %}</h3>
         {% if object.sources %}
             <p>{{object.sources|markdown}}</p>
         {% endif %}
