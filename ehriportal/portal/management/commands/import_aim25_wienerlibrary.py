@@ -124,6 +124,17 @@ def get_keywords(soup):
     return [urllib.unquote(a) for a in attrs]
 
 
+def get_corporate_names(soup):
+    """Get person names, represented as checkboxes."""
+    head = soup.find("h2", text="Related Corporate Name Search")
+    if head is None:
+        return []
+    div = head.parent.parent.parent
+    attrs = [i.attrMap["value"] for i in \
+            div.findAll("input", {"name": "keyword"})]
+    return [urllib.unquote(a) for a in attrs]
+
+
 def get_person_names(soup):
     """Get person names, represented as checkboxes."""
     head = soup.find("h2", text="Related Personal Name Search")
@@ -144,9 +155,11 @@ def scrape_item(url):
     prs = get_paragraph_divided(soup)
     keywords = get_keywords(soup)
     persons = get_person_names(soup)
+    corps = get_corporate_names(soup)
     info = dict(ids.items() + brs.items() + prs.items())
     info["keywords"] = keywords
     info["people"] = persons
+    info["corps"] = corps
     return info
 
 
@@ -207,7 +220,21 @@ class Command(BaseCommand):
         coll.tags.add(*data["keywords"])
         fd = models.FuzzyDate.from_fuzzy_date(data["dates"])
         if fd:
-            coll.dates.add(fd)
+            coll.date_set.add(fd)
+
+        for pstring in data["people"]:
+            person = self.add_person(pstring)
+            if person:
+                access = models.NameAccess(subject=person, object=coll)
+                access.save()
+                sys.stderr.write("Added person: %s\n" % person)
+
+        for cstring in data["corps"]:
+            corp = self.add_corporation(cstring)
+            if corp:
+                access = models.NameAccess(subject=corp, object=coll)
+                access.save()
+                sys.stderr.write("Added corporate body: %s\n" % corp)
 
         # lang of description is always english here
         coll.set_property("language_of_description", "en")
@@ -221,5 +248,67 @@ class Command(BaseCommand):
             if code is not None:
                 sys.stderr.write("Adding language code %s for %s\n" % (code, coll))
                 coll.set_property("language", code)
+
+    def add_person(self, desc):
+        """Attempt to add person name from Aim25s dodgy string."""
+        if "family" in desc.lower():
+            return self.add_family(desc)
+
+        # typical string looks like
+        # LastName | FirstName | Othername | b 1939 | Occupation | stuff 
+        # ... so we need to find the first cell that looks like a date,
+        # put everything before it in a name, everything after in history
+        plist = [s.strip() for s in desc.split("|")]
+        dateidx = None
+        for i, s in enumerate(plist):
+            if re.search("\d{4}", s):
+                dateidx = i
+                break
+        if dateidx is None and len(plist) < 2:
+            return
+        name = None
+        kwargs = {}
+        if dateidx is None:
+            name = "%s, %s" % (plist[0], " ".join(plist[1:]))
+        else:
+            names = plist[:dateidx]
+            name = "%s, %s" % (names[0], " ".join(names[1:]))
+            kwargs["dates_of_existence"] = plist[dateidx]
+            kwargs["history"] = "\n".join(plist[dateidx+1:])
+        person, created = models.Person.objects.get_or_create(name=name, defaults=kwargs)
+        if created:
+            person.identifier = "person%06d" % models.Person.objects.count()
+        person.save()
+        return person
+
+
+    def add_family(self, desc):
+        """Add a family."""
+        plist = [s.strip() for s in desc.split("|")]
+        try:
+            family, created = models.Family.objects.get_or_create(name=plist[0])
+            if created:
+                family.identifier = "family%06d" % models.Family.objects.count()
+            family.save()
+            return family
+        except IndexError:
+            pass
+
+    def add_corporation(self, desc):
+        """Attempt to add a corporate name."""
+        plist = [s.strip() for s in desc.split("|")]
+        try:
+            names = plist[0].split(" x ")
+            corp, created = models.CorporateBody.objects.get_or_create(name=names[0])
+            if created:
+                corp.identifier = "corp%06d" % models.CorporateBody.objects.count()
+            corp.save()
+            for name in names[1:]:
+                on, created = models.OtherName.objects.get_or_create(name=name, resource=corp)
+                if created: on.save()
+            return corp
+        except IndexError:
+            pass
+
 
 
