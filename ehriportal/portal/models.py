@@ -152,6 +152,56 @@ class OtherName(models.Model):
 reversion.register(OtherName)
 
 
+class RelationManager(models.Manager):
+    """Manager that handles specific Relation types, like
+    name, or place, which are specificied at construction."""
+    def __init__(self, *args, **kwargs):
+        self.type = kwargs.pop("filter_type", None)
+        super(RelationManager, self).__init__(*args, **kwargs)
+
+    def get_query_set(self, *args, **kwargs):
+        qs = super(RelationManager, self).get_query_set(*args, **kwargs)
+        if self.type is not None:
+            qs = qs.filter(type=self.type)
+        return qs
+
+
+class Relation(models.Model):
+    """Relationship between two objects."""
+    TYPES = (
+            ("name", "Name Access"),
+            ("place", "Place Access"),
+    )
+    subject = models.ForeignKey(Resource, related_name="+")
+    object = models.ForeignKey(Resource, related_name="+")
+    type = models.CharField(choices=TYPES, max_length=10)
+    objects = RelationManager()
+
+
+class NameAccess(Relation):
+    """Convience wrapper for a Resource->Resource name access
+    relationship."""
+    class Meta:
+        proxy = True
+    objects = RelationManager(filter_type="name")
+
+    def save(self, *args, **kwargs):
+        self.type = "name"
+        super(NameAccess, self).save(*args, **kwargs)
+
+
+class PlaceAccess(Relation):
+    """Convience wrapper for a Resource->Resource place access
+    relationship."""
+    class Meta:
+        proxy = True
+    objects = RelationManager(filter_type="place")
+
+    def save(self, *args, **kwargs):
+        self.type = "place"
+        super(PlaceAccess, self).save(*args, **kwargs)
+
+
 class PropertyManager(models.Manager):
     """Manager that handles specific property types, like
     language and script, which are specificied at construction."""
@@ -381,6 +431,12 @@ class Collection(Resource):
 
     def natural_key(self):
         return (self.slug,)
+
+    @property
+    def name_access(self):
+        # TODO: Find the proper way of doing this
+        return [ne.subject for ne in NameAccess.objects.select_related()\
+                    .filter(object=self).all()]
 
     @property
     def languages_of_description(self):
@@ -616,4 +672,3 @@ class FuzzyDate(models.Model):
         return out
 
 reversion.register(FuzzyDate)
-
