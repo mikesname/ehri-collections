@@ -4,12 +4,12 @@
 {% load ifsetting_tag %}
 {% load pagination_tags %}
 
-{% block head_title %}{% trans "Repositories" %}{% endblock %}
+{% block head_title %}{% trans "Authorities" %}{% endblock %}
 
-{% block body_class %}repositories{% endblock %}
+{% block body_class %}authorities{% endblock %}
 
 {% block body %}
-    <h2>{% trans "Repositories" %}</h2>
+    <h2>{% trans "Authorities" %}</h2>
     <table class="zebra-striped">
         {% for object in object_list %}
         <tr>
