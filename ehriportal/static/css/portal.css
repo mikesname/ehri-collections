@@ -160,3 +160,8 @@ a.openid-button:hover {
     padding-top: 0;
     padding-bottom: 0;
 }
+
+.alternate-name {
+    color: #777;
+    font-style: italic;
+}
