@@ -14,6 +14,13 @@ from portal import models
 class EntityCrudTestMixin(object):
     """Mixin class which defines a lot of boilerplate
     CRUD-deleted tests."""
+    def create_user_and_login(self):
+        """Create a staff user to perform admin actions."""
+        user = User.objects.create_user("test", password="testpass")
+        user.is_staff = True
+        user.save()
+        self.client.login(username="test", password="testpass")
+
     def test_list(self):
         """Test list of objects."""
         response = self.client.get(reverse(self.urlprefix + "_list"))
@@ -139,10 +146,7 @@ class EntityCrudTestMixin(object):
 class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "repository.json", "collection.json"]
     def setUp(self):
-        user = User.objects.create_user("test", password="testpass")
-        user.is_staff = True
-        user.save()
-        self.client.login(username="test", password="testpass")
+        self.create_user_and_login()
         self.model = models.Repository
         self.slug = "wiener-library"
         self.urlprefix = "repo"
@@ -168,10 +172,7 @@ class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
 class PortalCollectionTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "repository.json", "collection.json"]
     def setUp(self):
-        user = User.objects.create_user("test", password="testpass")
-        user.is_staff = True
-        user.save()
-        self.client.login(username="test", password="testpass")
+        self.create_user_and_login()
         self.model = models.Collection
         self.urlprefix = "collection"
         self.slug = "caro-jella-letter-from-theresienstadt"
@@ -193,10 +194,7 @@ class PortalCollectionTest(TestCase, EntityCrudTestMixin):
 class PortalAuthorityTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "authority.json"]
     def setUp(self):
-        user = User.objects.create_user("test", password="testpass")
-        user.is_staff = True
-        user.save()
-        self.client.login(username="test", password="testpass")
+        self.create_user_and_login()
         self.model = models.Authority
         self.urlprefix = "authority"
         self.slug = "smith-john"
