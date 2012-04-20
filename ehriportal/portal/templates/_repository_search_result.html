@@ -9,7 +9,14 @@
             {{ result.country|truncatewords:2 }}
         </a>
     </span>
-</h4>                
+</h4>
+{% if result.other_names %}
+<h5 class="alternate-name">
+    {% for name in result.other_names %}
+        {% if forloop.counter0 > 0 %}, {% endif %}{{name}}
+    {% endfor %}
+</h5>
+{% endif %}
 <p>
 {% if result.description %}
     {% highlight result.description with form.q.value max_length 200 %}
