@@ -451,8 +451,20 @@ reversion.register(Collection, follow=["resource_ptr", "date_set"])
 
 
 class AuthorityManager(models.Manager):
+    """Manager that handles specific Authority types, like
+    person, or family, which are specificied at construction."""
+    def __init__(self, *args, **kwargs):
+        self.entity_type = kwargs.pop("filter_entity", None)
+        super(AuthorityManager, self).__init__(*args, **kwargs)
+
     def get_by_natural_key(self, slug):
         return self.get(slug=slug)
+
+    def get_query_set(self, *args, **kwargs):
+        qs = super(AuthorityManager, self).get_query_set(*args, **kwargs)
+        if self.entity_type is not None:
+            qs = qs.filter(type_of_entity=self.entity_type)
+        return qs
 
 
 class Authority(Resource):
@@ -514,6 +526,42 @@ class Authority(Resource):
 
 reversion.register(Authority, follow=[
         "resource_ptr", "property_set", "place_set"])
+
+
+class Person(Authority):
+    """Convenience wrapper for Authority with
+    type_of_entity='person'"""
+    class Meta:
+        proxy = True
+    objects = AuthorityManager(filter_entity="person")
+
+    def save(self, *args, **kwargs):
+        self.type_of_entity = "person"
+        super(Person, self).save(*args, **kwargs)
+
+
+class CorporateBody(Authority):
+    """Convenience wrapper for Authority with
+    type_of_entity='corporate_body'"""
+    class Meta:
+        proxy = True
+    objects = AuthorityManager(filter_entity="corporate_body")
+
+    def save(self, *args, **kwargs):
+        self.type_of_entity = "corporate_body"
+        super(CorporateBody, self).save(*args, **kwargs)
+
+
+class Family(Authority):
+    """Convenience wrapper for Authority with
+    type_of_entity='family'"""
+    class Meta:
+        proxy = True
+    objects = AuthorityManager(filter_entity="family")
+
+    def save(self, *args, **kwargs):
+        self.type_of_entity = "family"
+        super(Family, self).save(*args, **kwargs)
 
 
 class FuzzyDate(models.Model):
