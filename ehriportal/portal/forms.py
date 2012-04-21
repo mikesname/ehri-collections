@@ -111,8 +111,12 @@ DateFormSet = inlineformset_factory(models.Collection, models.FuzzyDate,
         form=FuzzyDateForm, extra=1)
 
 
-OtherNameFormSet = inlineformset_factory(models.Collection, models.OtherName,
-        extra=1)
+OtherNameFormSet = inlineformset_factory(models.Collection, models.OtherFormOfName,
+        exclude=("type",), extra=1)
+
+
+ParallelNameFormSet = inlineformset_factory(models.Collection, models.ParallelFormOfName,
+        exclude=("type",), extra=1)
 
 
 ContactFormSet = inlineformset_factory(models.Repository, models.Contact,

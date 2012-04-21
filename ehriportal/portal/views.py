@@ -211,6 +211,8 @@ class RepositoryEditView(PortalUpdateView):
         if self.request.method == "POST":
             formsets["contacts"] = forms.ContactFormSet(
                     self.request.POST, self.request.FILES, instance=self.object)
+            formsets["parallelnames"] = forms.ParallelNameFormSet(
+                    self.request.POST, self.request.FILES, instance=self.object)
             formsets["othernames"] = forms.OtherNameFormSet(
                     self.request.POST, self.request.FILES, instance=self.object)
             for propname in self.properties:
@@ -220,6 +222,7 @@ class RepositoryEditView(PortalUpdateView):
                                     instance=self.object, prefix=propname)
         else:
             formsets["contacts"] = forms.ContactFormSet(instance=self.object)
+            formsets["parallelnames"] = forms.ParallelNameFormSet(instance=self.object)
             formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
             for propname in self.properties:
                 formsets[propname] = forms.propertyformset_factory(

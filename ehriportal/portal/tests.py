@@ -102,7 +102,7 @@ class EntityCrudTestMixin(object):
         self.assertNotIn("Another Name", c.other_names)
         self.testdata.update(self.updatedata)
         self.testdata.update({
-            "othername_set-0-name": "Another Name",
+            "otherformofname_set-0-name": "Another Name",
         })
         response = self.client.post(reverse(self.urlprefix + "_edit", kwargs={
             "slug": self.slug,
@@ -156,7 +156,8 @@ class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
             "name": "Test",
             "language-0-value": "en",
         }
-        for field in ["contact_set", "othername_set", "script", "language"]:
+        for field in ["contact_set", "otherformofname_set", "parallelformofname_set",
+                "script", "language"]:
             self.testdata["%s-INITIAL_FORMS" % field] = 0 
             self.testdata["%s-MAX_NUM_FORMS" % field] = 1
             self.testdata["%s-TOTAL_FORMS" % field] = 1
@@ -183,7 +184,7 @@ class PortalCollectionTest(TestCase, EntityCrudTestMixin):
             "repository": self.model.objects.get(slug=self.slug).repository.pk,
             "language-0-value": "en",
         }
-        for field in ["date_set", "othername_set",
+        for field in ["date_set", "otherformofname_set",
                 "script", "script_of_description",
                 "language", "language_of_description"]:
             self.testdata["%s-INITIAL_FORMS" % field] = 0 
@@ -204,7 +205,7 @@ class PortalAuthorityTest(TestCase, EntityCrudTestMixin):
             "name": "Auth Test",
             "language-0-value": "en",
         }
-        for field in ["othername_set", "script", "language"]:
+        for field in ["otherformofname_set", "script", "language"]:
             self.testdata["%s-INITIAL_FORMS" % field] = 0 
             self.testdata["%s-MAX_NUM_FORMS" % field] = 1
             self.testdata["%s-TOTAL_FORMS" % field] = 1

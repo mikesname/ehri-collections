@@ -38,6 +38,35 @@ add_introspection_rules(
 )
 
 
+def proxymanager_factory(proxymanagername, managercls, attrname):
+    """Type factory for proxy managers."""
+    def init_func(self, *args, **kwargs):
+        setattr(self, attrname, kwargs.pop("filter_%s" % attrname, None))
+        managercls.__init__(self, *args, **kwargs)
+
+    def get_query_set_func(self, *args, **kwargs):
+        qs = managercls.get_query_set(self, *args, **kwargs)
+        attr = getattr(self, attrname)
+        if attr is not None:
+            qs = qs.filter(**{attrname:attr})
+        return qs
+    return type(proxymanagername, (managercls,),
+            dict(__init__=init_func, get_query_set=get_query_set_func))
+
+
+def proxymodel_factory(proxyname, modelcls, managercls, attrname, attrval):
+    """Type factory for proxy models."""
+    def save_func(self, *args, **kwargs):
+        setattr(self, attrname, attrval)
+        modelcls.save(self, *args, **kwargs)
+    class Meta_cls:
+        proxy = True
+    return type(proxyname, (modelcls,),
+            dict(save=save_func, Meta=Meta_cls,
+                __module__=modelcls.__module__,
+                objects=managercls(**{"filter_%s" % attrname: attrval})))
+
+
 class ResourceType(ModelBase):
     """Metaclass for archival resources. Don't fear the magic.
     All this does is instantiate models.TextField attributes
@@ -141,30 +170,35 @@ class ResourceImage(models.Model):
                 "%s%s" % (inst.resource.slug,
                     os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
     caption = models.CharField(max_length=255, null=True, blank=True)
-
 reversion.register(ResourceImage)
 
 
-class OtherName(models.Model):
-    name = models.CharField("Alternate name", max_length=255)
-    resource = models.ForeignKey(Resource)
+OtherNameManager = proxymanager_factory("OtherNameManager",
+        models.Manager, "type")
 
+
+class OtherName(models.Model):
+    TYPES = (
+            ("other", "Other"),
+            ("parallel", "Parallel"),
+    )
+    name = models.CharField("Alternate name", max_length=255)
+    type = models.CharField("Type of name", max_length=10)
+    resource = models.ForeignKey(Resource)
+    objects = OtherNameManager()
 reversion.register(OtherName)
 
 
-class RelationManager(models.Manager):
-    """Manager that handles specific Relation types, like
-    name, or place, which are specificied at construction."""
-    def __init__(self, *args, **kwargs):
-        self.type = kwargs.pop("filter_type", None)
-        super(RelationManager, self).__init__(*args, **kwargs)
+OtherFormOfName = proxymodel_factory("OtherFormOfName",
+        OtherName, OtherNameManager, "type", "other")
 
-    def get_query_set(self, *args, **kwargs):
-        qs = super(RelationManager, self).get_query_set(*args, **kwargs)
-        if self.type is not None:
-            qs = qs.filter(type=self.type)
-        return qs
 
+ParallelFormOfName = proxymodel_factory("ParallelFormOfName",
+        OtherName, OtherNameManager, "type", "parallel")
+
+
+RelationManager = proxymanager_factory("RelationManager",
+        models.Manager, "type")
 
 class Relation(models.Model):
     """Relationship between two objects."""
@@ -178,42 +212,15 @@ class Relation(models.Model):
     objects = RelationManager()
 
 
-class NameAccess(Relation):
-    """Convience wrapper for a Resource->Resource name access
-    relationship."""
-    class Meta:
-        proxy = True
-    objects = RelationManager(filter_type="name")
+NameAccess = proxymodel_factory("NameAccess", Relation, RelationManager,
+            "type", "name")
 
-    def save(self, *args, **kwargs):
-        self.type = "name"
-        super(NameAccess, self).save(*args, **kwargs)
+PlaceAccess = proxymodel_factory("PlaceAccess", Relation, RelationManager,
+            "type", "place")
 
 
-class PlaceAccess(Relation):
-    """Convience wrapper for a Resource->Resource place access
-    relationship."""
-    class Meta:
-        proxy = True
-    objects = RelationManager(filter_type="place")
-
-    def save(self, *args, **kwargs):
-        self.type = "place"
-        super(PlaceAccess, self).save(*args, **kwargs)
-
-
-class PropertyManager(models.Manager):
-    """Manager that handles specific property types, like
-    language and script, which are specificied at construction."""
-    def __init__(self, *args, **kwargs):
-        self.name = kwargs.pop("filter_name", None)
-        super(PropertyManager, self).__init__(*args, **kwargs)
-
-    def get_query_set(self, *args, **kwargs):
-        qs = super(PropertyManager, self).get_query_set(*args, **kwargs)
-        if self.name is not None:
-            qs = qs.filter(name=self.name)
-        return qs
+PropertyManager = proxymanager_factory("PropertyManager",
+        models.Manager, "name")
 
 
 class Property(models.Model):
@@ -230,15 +237,8 @@ reversion.register(Property)
 def propertyproxy_factory(propname):
     """Get a class that represents a property of 
     a specific given name, i.e. script or language."""
-    def save_func(self, *args, **kwargs):
-        self.name = propname
-        Property.save(self, *args, **kwargs)
-    class Meta_cls:
-        proxy = True
-    return type("Property_%s" % propname, (Property,),
-            dict(save=save_func, Meta=Meta_cls,
-                __module__=Property.__module__,
-                objects=PropertyManager(filter_name=propname)))
+    return proxymodel_factory("Property_%s" % propname, Property,
+            PropertyManager, "name", propname)
 
 
 class Place(models.Model):
@@ -502,25 +502,11 @@ class Collection(Resource):
 
     def __unicode__(self):
         return self.name
-
 reversion.register(Collection, follow=["resource_ptr", "date_set"])
 
-
-class AuthorityManager(models.Manager):
-    """Manager that handles specific Authority types, like
-    person, or family, which are specificied at construction."""
-    def __init__(self, *args, **kwargs):
-        self.entity_type = kwargs.pop("filter_entity", None)
-        super(AuthorityManager, self).__init__(*args, **kwargs)
-
-    def get_by_natural_key(self, slug):
-        return self.get(slug=slug)
-
-    def get_query_set(self, *args, **kwargs):
-        qs = super(AuthorityManager, self).get_query_set(*args, **kwargs)
-        if self.entity_type is not None:
-            qs = qs.filter(type_of_entity=self.entity_type)
-        return qs
+AuthorityManager = proxymanager_factory("AuthorityManager",
+        models.Manager, "type_of_entity")
+AuthorityManager.get_by_natural_key = lambda self, slug: self.get(slug=slug)
 
 
 class Authority(Resource):
@@ -579,45 +565,16 @@ class Authority(Resource):
 
     def __unicode__(self):
         return self.name
-
 reversion.register(Authority, follow=[
         "resource_ptr", "property_set", "place_set"])
 
-
-class Person(Authority):
-    """Convenience wrapper for Authority with
-    type_of_entity='person'"""
-    class Meta:
-        proxy = True
-    objects = AuthorityManager(filter_entity="person")
-
-    def save(self, *args, **kwargs):
-        self.type_of_entity = "person"
-        super(Person, self).save(*args, **kwargs)
-
-
-class CorporateBody(Authority):
-    """Convenience wrapper for Authority with
-    type_of_entity='corporate_body'"""
-    class Meta:
-        proxy = True
-    objects = AuthorityManager(filter_entity="corporate_body")
-
-    def save(self, *args, **kwargs):
-        self.type_of_entity = "corporate_body"
-        super(CorporateBody, self).save(*args, **kwargs)
-
-
-class Family(Authority):
-    """Convenience wrapper for Authority with
-    type_of_entity='family'"""
-    class Meta:
-        proxy = True
-    objects = AuthorityManager(filter_entity="family")
-
-    def save(self, *args, **kwargs):
-        self.type_of_entity = "family"
-        super(Family, self).save(*args, **kwargs)
+# Proxy models for different types of authority
+Person = proxymodel_factory("Person", Authority, AuthorityManager,
+        "type_of_entity", "person")
+Family = proxymodel_factory("Family", Authority, AuthorityManager,
+        "type_of_entity", "family")
+CorporateBody = proxymodel_factory("CorporateBody", Authority, AuthorityManager,
+        "type_of_entity", "corporate_body")
 
 
 class FuzzyDate(models.Model):
@@ -670,5 +627,5 @@ class FuzzyDate(models.Model):
         if self.end_date:
             out += "-%d" % self.end_date.year
         return out
-
 reversion.register(FuzzyDate)
+
