@@ -25,12 +25,30 @@
                 {% include "_form_field.html" with field=form.identifier %}
                 {% include "_form_field.html" with field=form.name %}
 
+                <div class="dynamic-formset" id="id_formset-{{formsets.parallelnames.prefix}}" data-prefix="{{formsets.parallelnames.prefix}}">
+                    {{formsets.parallelnames.management_form}}
+                    {% for f in formsets.parallelnames %}
+                        <div class="control-group form-inline {% if f.errors %}error{% endif %}"
+                                id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
+                            <label for="id_{{f.prefix}}-{{f.name.name}}">{% if forloop.first %}Parallel Forms of Name{% endif %}</label>
+                            <div class="controls inlinemulti">
+                                {{f.id}}
+                                {{f.name}}
+                                {{f.DELETE}}
+                                {{f.DELETE.label_tag}}
+                                {% if f.errors %}
+                                    <span class="help-inline">{{f.errors}}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
                 <div class="dynamic-formset" id="id_formset-{{formsets.othernames.prefix}}" data-prefix="{{formsets.othernames.prefix}}">
                     {{formsets.othernames.management_form}}
                     {% for f in formsets.othernames %}
                         <div class="control-group form-inline {% if f.errors %}error{% endif %}"
                                 id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
-                            <label for="id_{{f.prefix}}-{{f.name.name}}">{% if forloop.first %}Alternate Name{% endif %}</label>
+                            <label for="id_{{f.prefix}}-{{f.name.name}}">{% if forloop.first %}Other Forms of Name{% endif %}</label>
                             <div class="controls inlinemulti">
                                 {{f.id}}
                                 {{f.name}}
@@ -50,7 +68,7 @@
                 <legend>Contact Area</legend>
                 <div class="contact-formset" id="id_formset-{{formsets.contacts.prefix}}" data-prefix="{{formsets.contacts.prefix}}">
                     {{formsets.contacts.management_form}}
-                    {% for f in contacts %}
+                    {% for f in formsets.contacts %}
                         <div class="control-group form-inline {% if f.errors %}error{% endif %}"
                             id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
                             {{ f|as_bootstrap }}
