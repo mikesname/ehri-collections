@@ -206,14 +206,13 @@ reversion.register(OtherName)
 
 OtherFormOfName = proxymodel_factory("OtherFormOfName",
         OtherName, OtherNameManager, "type", "other")
-
-
 ParallelFormOfName = proxymodel_factory("ParallelFormOfName",
         OtherName, OtherNameManager, "type", "parallel")
 
 
 RelationManager = proxymanager_factory("RelationManager",
         models.Manager, "type")
+
 
 class Relation(models.Model):
     """Relationship between two objects."""
@@ -229,7 +228,6 @@ class Relation(models.Model):
 
 NameAccess = proxymodel_factory("NameAccess", Relation, RelationManager,
             "type", "name")
-
 PlaceAccess = proxymodel_factory("PlaceAccess", Relation, RelationManager,
             "type", "place")
 
@@ -245,7 +243,6 @@ class Property(models.Model):
     value = models.CharField(max_length=255)
 
     objects = PropertyManager()
-
 reversion.register(Property)
 
 
@@ -261,7 +258,6 @@ class Place(models.Model):
     resource = models.ForeignKey(Resource)
     point = models.PointField()
     objects = models.GeoManager()
-
 reversion.register(Place)
 
 
@@ -309,7 +305,6 @@ class Repository(Resource):
             upload_to=lambda inst, fn: os.path.join(inst.slug,
                 "%s_logo%s" % (inst.slug,
                     os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
-
     tags = TaggableManager(blank=True)
     objects = RepositoryManager()
 
@@ -343,7 +338,6 @@ class Repository(Resource):
 
     def __unicode__(self):
         return self.name
-
 reversion.register(Repository, follow=["resource_ptr", "contact_set"])
 
 
@@ -391,7 +385,6 @@ class Contact(models.Model):
                     if self.country_code else None
         ] if e is not None]
         return "\n".join(elems).replace(", ", "\n")
-
 reversion.register(Contact)
 
 
@@ -437,7 +430,6 @@ class Collection(Resource):
                 choices=LODS, blank=True, null=True)
     creator = models.ForeignKey("Authority", null=True, blank=True)
     repository = models.ForeignKey(Repository)
-
     tags = TaggableManager(blank=True)
     objects = CollectionManager()
 
@@ -519,6 +511,7 @@ class Collection(Resource):
         return self.name
 reversion.register(Collection, follow=["resource_ptr", "date_set"])
 
+
 AuthorityManager = proxymanager_factory("AuthorityManager",
         models.Manager, "type_of_entity")
 AuthorityManager.get_by_natural_key = lambda self, slug: self.get(slug=slug)
@@ -557,7 +550,6 @@ class Authority(Resource):
     lod = models.CharField("Level of Description", max_length=255, choices=LODS, blank=True, null=True)
     type_of_entity = models.CharField("Type of Entity", max_length=255,
             choices=ENTITY_TYPES, blank=True, null=True)
-
     tags = TaggableManager(blank=True)
     objects = AuthorityManager()
 
