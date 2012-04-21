@@ -38,6 +38,19 @@ add_introspection_rules(
 )
 
 
+# A note on Proxy models.
+# Quite a lot of the time in this app we use 'Proxy' models that
+# provide a simplified interface to a given entity. For example,
+# the OtherName entity has the `type` field which tells us that
+# it is (for instance) either an `other` form of name or a 
+# `parallel` form of name. Creating a proxy model called
+# ParallelFormOfName that always sets type=`parallel` behind the
+# scenes simplifies the code that uses it quite a lot. This is 
+# especially true when dealing with the Property class, and with
+# types of reference such as NameAccess and PlaceAccess. 
+# The two functions below abstract the boilerplate from creating
+# proxy classes that have a specific attribute with a particular
+# fixed value.
 def proxymanager_factory(proxymanagername, managercls, attrname):
     """Type factory for proxy managers."""
     def init_func(self, *args, **kwargs):
@@ -64,6 +77,8 @@ def proxymodel_factory(proxyname, modelcls, managercls, attrname, attrval):
     return type(proxyname, (modelcls,),
             dict(save=save_func, Meta=Meta_cls,
                 __module__=modelcls.__module__,
+                __doc__="Proxy model for %s where `%s`='%s'." % (
+                    modelcls.__name__, attrname, attrval),
                 objects=managercls(**{"filter_%s" % attrname: attrval})))
 
 
