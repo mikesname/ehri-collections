@@ -1,0 +1,26 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+
+{% block head_title %}{% trans "Delete" %} {{object.name}}{% endblock %}
+
+{% block body_class %}{% endblock %}
+
+{% block body %}
+    <h2>{% trans "Delete" %} &quot;{{object.name}}&quot;?</h2>
+    {% blocktrans %}
+        <p>This action cannot be reversed!  Are you sure you want to delete this item?</p>
+    {% endblocktrans %}
+    {% block body_details %}
+
+    {% endblock %}
+    {% block delete_form %}
+    <form method="POST" class="form-actions">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">{% trans "Yes, delete it!" %}</button>
+        <a href="{{ object.get_absolute_url }}" class="btn">{% trans "Cancel" %}</a>
+    </form>
+    {% endblock %}
+{% endblock %}
+
