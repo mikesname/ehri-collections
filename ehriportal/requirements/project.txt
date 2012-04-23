@@ -21,4 +21,4 @@ django-modeltranslation
  -e git+https://github.com/geopy/geopy.git#egg=geopy
 django-piston
 django-reversion
-
+diff-match-patch
