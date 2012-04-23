@@ -3,7 +3,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from django.conf.urls.defaults import *
 from django.core.urlresolvers import reverse_lazy
-from django.views.generic.list_detail import object_detail, object_list
+from django.views.generic.list_detail import object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required, user_passes_test
 from haystack.query import SearchQuerySet
@@ -57,10 +57,6 @@ infolist = dict(
         template_name="collection_list.html",
 )
 
-viewdict = dict(
-        queryset=models.Collection.objects.all()
-)
-
 
 urlpatterns = patterns('',
     url(r'^search/?$', views.PortalSearchListView.as_view(
@@ -86,10 +82,17 @@ urlpatterns = patterns('',
     url(r'^delete/(?P<slug>[-\w]+)/?$', 
             user_passes_test(permissions.is_staff)(
                 views.CollectionDeleteView.as_view()), name='collection_delete'),
+    url(r'^restore/(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRestoreView.as_view(
+            model=models.Collection,
+        ), name='collection_restore'),
+    url(r'^(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRevisionView.as_view(
+            model=models.Collection,
+            template_name="collection_revision.html"
+        ), name='collection_revision'),
 
     # This URL has to go last because it matches everything...
-    url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
-            queryset=models.Collection.objects.all(),
+    url(r'^(?P<slug>[-\w]+)/?$', views.PortalDetailView.as_view(
+            model=models.Collection,
             template_name="collection_detail.html"
         ), name='collection_detail'),
 )

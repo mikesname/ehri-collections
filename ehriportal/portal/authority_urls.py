@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
-from django.views.generic.list_detail import object_detail, object_list
+from django.views.generic.list_detail import object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required, user_passes_test
 
@@ -21,10 +21,6 @@ listinfo = dict(
         queryset=models.Authority.objects.all().order_by("name"),
         paginate_by=20,
         template_name="authority_list.html"
-)
-
-viewinfo = dict(
-        queryset=models.Authority.objects.all(),
 )
 
 class ListCollectionsView(ListView):
@@ -64,10 +60,19 @@ urlpatterns = patterns('',
     url(r'^delete/(?P<slug>[-\w]+)/?$', 
             user_passes_test(permissions.is_staff)(
                 views.AuthorityDeleteView.as_view()), name='authority_delete'),
+    url(r'^restore/(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRestoreView.as_view(
+            model=models.Authority,
+        ), name='authority_restore'),
+    url(r'^(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRevisionView.as_view(
+            model=models.Authority,
+            template_name="authority_revision.html"
+        ), name='authority_revision'),
+    
+    
     
     # these catch-all item must be at the bottom
-    url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
-            queryset=models.Authority.objects.all(),
+    url(r'^(?P<slug>[-\w]+)/?$', views.PortalDetailView.as_view(
+            model=models.Authority,
             template_name="authority_detail.html"
         ), name='authority_detail'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 

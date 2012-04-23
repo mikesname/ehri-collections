@@ -6,7 +6,8 @@ import json
 
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import ListView
-from django.views.generic.edit import DeleteView, UpdateView
+from django.views.generic.edit import DeleteView, UpdateView, ProcessFormView
+from django.views.generic.detail import DetailView
 from django import forms
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseRedirect, Http404
@@ -15,6 +16,7 @@ from django.shortcuts import get_object_or_404, render
 
 from haystack.query import SearchQuerySet
 from portal import models, forms, utils
+import reversion
 
 
 class PortalSearchListView(ListView):
@@ -133,7 +135,6 @@ class PaginatedFacetView(PortalSearchListView):
 class PortalUpdateView(UpdateView):
     """Base class for entity create/edit that require
     formsets in addition to their main form."""
-
     def get_formsets(self):
         raise NotImplementedError
 
@@ -145,11 +146,15 @@ class PortalUpdateView(UpdateView):
         context = self.get_context_data()
         formsets = context["formsets"]
         if False not in [pf.is_valid() for pf in formsets.values()]:
-            self.object = form.save()
-            for formset in formsets.values():
-                formset.instance = self.object
-                formset.save()
-            return HttpResponseRedirect(self.object.get_absolute_url())
+            # run update in a reversion 
+            with reversion.create_revision():
+                reversion.set_user(self.request.user)
+                reversion.set_comment("Created" if not self.object else "Updated")
+                self.object = form.save()
+                for formset in formsets.values():
+                    formset.instance = self.object
+                    formset.save()
+                return HttpResponseRedirect(self.object.get_absolute_url())
         return self.form_invalid(form)
 
     def form_invalid(self, form):
@@ -270,3 +275,63 @@ class AuthorityDeleteView(DeleteView):
     model = models.Authority
 
 
+class PortalDetailView(DetailView):
+    """Show information about an object."""
+    #def get_object(self, *args, **kwargs):
+    #    revision_id = self.request.GET.get("v")
+    #    if revision_id:
+
+
+    def get_context_data(self, **kwargs):
+        context = super(PortalDetailView, self).get_context_data(**kwargs)
+        context["history"] = reversion.get_for_object(self.object)
+        return context
+
+
+class PortalRevisionView(DetailView):
+    """Show information about an object revision."""
+    def get_context_data(self, **kwargs):
+        context = super(PortalRevisionView, self).get_context_data(**kwargs)
+        try:
+            context["version"] = reversion.get_for_object(self.object).get(
+                    id=self.kwargs["revision"])
+        except reversion.revisions.Revision.DoesNotExist:
+            raise Http404
+        return context
+
+
+class PortalRestoreView(UpdateView):
+    """Restore a particular model revision."""
+    model = None
+    form_class = forms.RestoreRevisionForm
+    template_name = "confirm_restore_base.html"
+
+    def get_form(self, *args, **kwargs):
+        # NB: Have to override this because otherwise
+        # Django tries to instantiate it as it would
+        # a modelform (but we don't want a modelform)
+        return self.form_class(self.request.POST, self.request.FILES)
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        version = context["version"]
+        with reversion.create_revision():
+            reversion.set_comment("Reverted revision '%s'" % version.id)
+            version.revert()
+            return HttpResponseRedirect(self.object.get_absolute_url())
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_context_data(self, **kwargs):
+        context = super(PortalRestoreView, self).get_context_data(**kwargs)
+        try:
+            context["version"] = reversion.get_for_object(self.object).get(
+                    id=self.kwargs["revision"])
+        except reversion.revisions.Revision.DoesNotExist:
+            raise Http404
+        return context
+
+
+    
+    

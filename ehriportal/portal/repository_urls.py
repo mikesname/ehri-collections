@@ -1,7 +1,7 @@
 from django.conf.urls.defaults import *
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView
-from django.views.generic.list_detail import object_detail, object_list
+from django.views.generic.list_detail import object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required, user_passes_test
 
@@ -64,10 +64,17 @@ urlpatterns = patterns('',
     url(r'^delete/(?P<slug>[-\w]+)/?$', 
             user_passes_test(permissions.is_staff)(
                 views.RepositoryDeleteView.as_view()), name='repo_delete'),
+    url(r'^restore/(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRestoreView.as_view(
+            model=models.Repository,
+        ), name='repo_restore'),
     
     # these catch-all item must be at the bottom
-    url(r'^(?P<slug>[-\w]+)/?$', object_detail, dict(
-            queryset=models.Repository.objects.all(),
+    url(r'^(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRevisionView.as_view(
+            model=models.Repository,
+            template_name="repository_revision.html"
+        ), name='repo_revision'),
+    url(r'^(?P<slug>[-\w]+)/?$', views.PortalDetailView.as_view(
+            model=models.Repository,
             template_name="repository_detail.html"
         ), name='repo_detail'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 

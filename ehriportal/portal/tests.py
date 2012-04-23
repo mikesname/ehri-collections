@@ -7,6 +7,7 @@ Portal model unit tests.
 from django.test import TestCase
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
+from django.core import management
 
 from portal import models
 
@@ -14,6 +15,12 @@ from portal import models
 class EntityCrudTestMixin(object):
     """Mixin class which defines a lot of boilerplate
     CRUD-deleted tests."""
+    def create_initial_revisions(self, *appmodels):
+        """Create initial model revisions for entity data."""
+        if not appmodels:
+            appmodels = ["portal"]
+        management.call_command("createinitialrevisions", *appmodels)
+
     def create_user_and_login(self):
         """Create a staff user to perform admin actions."""
         user = User.objects.create_user("test", password="testpass")
@@ -142,10 +149,50 @@ class EntityCrudTestMixin(object):
         ccount2 = self.model.objects.count()
         self.assertEqual(ccount, ccount2 + 1)
         
+    def test_revisions(self):
+        """Test viewing a revision of an object."""
+        import reversion
+        obj = self.model.objects.get(slug=self.slug)
+        history = reversion.get_for_object(obj)
+        self.assertTrue(len(history) > 0)
+
+        response = self.client.get(reverse(self.urlprefix + "_revision", kwargs={
+            "slug": self.slug,
+            "revision": history[0].id,
+        }))
+        self.assertEqual(response.status_code, 200)
+        
+    def test_confirm_restore(self):
+        """Test confirming restore of an object."""
+        import reversion
+        obj = self.model.objects.get(slug=self.slug)
+        history = reversion.get_for_object(obj)
+        self.assertTrue(len(history) > 0)
+        response = self.client.get(reverse(self.urlprefix + "_restore", kwargs={
+            "slug": self.slug,
+            "revision": history[0].id,
+        }))
+        self.assertEqual(response.status_code, 200)
+        
+    def test_restore(self):
+        """Test restoring of an object."""
+        import reversion
+        obj = self.model.objects.get(slug=self.slug)
+        history = reversion.get_for_object(obj)
+        self.assertTrue(len(history) > 0)
+        revcount = len(history)
+        response = self.client.post(reverse(self.urlprefix + "_restore", kwargs={
+            "slug": self.slug,
+            "revision": history[0].id,
+        }))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(len(reversion.get_for_object(obj)), revcount + 1)
+        
 
 class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "repository.json", "collection.json"]
     def setUp(self):
+        self.create_initial_revisions()
         self.create_user_and_login()
         self.model = models.Repository
         self.slug = "wiener-library"
@@ -173,6 +220,7 @@ class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
 class PortalCollectionTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "repository.json", "collection.json"]
     def setUp(self):
+        self.create_initial_revisions()
         self.create_user_and_login()
         self.model = models.Collection
         self.urlprefix = "collection"
@@ -195,6 +243,7 @@ class PortalCollectionTest(TestCase, EntityCrudTestMixin):
 class PortalAuthorityTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "authority.json"]
     def setUp(self):
+        self.create_initial_revisions()
         self.create_user_and_login()
         self.model = models.Authority
         self.urlprefix = "authority"

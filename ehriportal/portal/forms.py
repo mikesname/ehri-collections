@@ -100,6 +100,9 @@ class AuthorityEditForm(forms.ModelForm):
     class Meta:
         model = models.Authority
 
+class RestoreRevisionForm(forms.Form):
+    """Restore a revision of an object."""
+
 
 def propertyformset_factory(topclass, propname):
     propcls = models.propertyproxy_factory(propname)

@@ -143,14 +143,14 @@ class Resource(models.Model):
         return self.get_property("language")
 
     @property
+    def scripts(self):
+        """Short cut for fetching script properties."""
+        return self.get_property("script")
+
+    @property
     def tag_list(self):
         """Short cut for listing all tags."""
         return self.tags.all()
-
-    @property
-    def scripts(self):
-        """Short cut for fetching language properties."""
-        return self.get_property("script")
 
     def get_property(self, propname):
         """Fetch a list of properties with the given name."""
@@ -333,6 +333,22 @@ class Repository(Resource):
     def get_absolute_url(self):
         return ('repo_detail', [self.slug])
 
+    @models.permalink
+    def get_edit_url(self):
+        return ('repo_edit', [self.slug])
+
+    @models.permalink
+    def get_delete_url(self):
+        return ('repo_delete', [self.slug])
+
+    @models.permalink
+    def get_revision_url(self, version_id):
+        return ('repo_revision', [self.slug, version_id])
+    
+    @models.permalink
+    def get_restore_url(self, version_id):
+        return ('repo_restore', [self.slug, version_id])
+    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -504,6 +520,22 @@ class Collection(Resource):
     def get_absolute_url(self):
         return ('collection_detail', [self.slug])
 
+    @models.permalink
+    def get_edit_url(self):
+        return ('collection_edit', [self.slug])
+
+    @models.permalink
+    def get_delete_url(self):
+        return ('collection_delete', [self.slug])
+
+    @models.permalink
+    def get_revision_url(self, version_id):
+        return ('collection_revision', [self.slug, version_id])
+
+    @models.permalink
+    def get_restore_url(self, version_id):
+        return ('collection_restore', [self.slug, version_id])
+    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -567,6 +599,22 @@ class Authority(Resource):
     def get_absolute_url(self):
         return ('authority_detail', [self.slug])
 
+    @models.permalink
+    def get_edit_url(self):
+        return ('authority_edit', [self.slug])
+
+    @models.permalink
+    def get_delete_url(self):
+        return ('authority_delete', [self.slug])
+
+    @models.permalink
+    def get_revision_url(self, version_id):
+        return ('authority_revision', [self.slug, version_id])
+    
+    @models.permalink
+    def get_restore_url(self, version_id):
+        return ('authority_restore', [self.slug, version_id])
+    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
