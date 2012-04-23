@@ -47,9 +47,11 @@ def stripparam(url, paramnames):
     
 @register.filter
 def langcode2name(code):
-    """Creates a haystack facet parameter in format:
-        &selected_facets=<name>_exact:<value>"""
     return utils.language_name_from_code(code)
+
+@register.filter
+def scriptcode2name(code):
+    return utils.script_name_from_code(code)
 
 @register.filter
 def us2title(value):
@@ -86,3 +88,16 @@ def getitem(value, key):
 def hasitem(value, key):
     """Checks if an item is in a dictionary-like object."""
     return value.get(key) is not None
+
+# FIXME: This filter should really be a tag
+@register.filter
+def revision_url(object, version_id):
+    """Returns a revision url from the object."""
+    return object.get_revision_url(version_id)
+
+# FIXME: Ditto, should also be a tag
+@register.filter
+def restore_url(object, version_id):
+    """Returns a restore url from the object."""
+    return object.get_restore_url(version_id)
+
