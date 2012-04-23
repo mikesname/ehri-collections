@@ -165,3 +165,8 @@ a.openid-button:hover {
     color: #777;
     font-style: italic;
 }
+
+.object-version-comment {
+    font-size: 0.9em;
+    font-weight: lighter;
+}
