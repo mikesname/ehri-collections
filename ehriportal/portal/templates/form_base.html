@@ -1,0 +1,37 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}
+    {% if object %}
+        {% trans "Edit" %} - {{object.name}}
+    {% else %}
+        {% trans "Create" %}
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+{% if object %}
+    <h2>{{object.name}}</h2>
+{% else %}
+<h2>{% trans "New" %} {% block modelname %}{% endblock %}</h2>
+{% endif %}
+<div class="row">
+    <div class="span12">
+        <form method="post" class="entity-form">
+            {% csrf_token %}
+            {% block fieldsets %}
+            {% endblock %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    {% if object %}{% trans "Update" %}{% else %}{% trans "Save" %}{% endif %}
+                </button>
+                {% if object %}
+                    <a class="btn" href="{{object.get_absolute_url}}">{% trans "Cancel" %}</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

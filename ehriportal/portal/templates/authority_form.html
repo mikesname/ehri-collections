@@ -1,4 +1,4 @@
-{% extends "site_base.html" %}
+{% extends "form_base.html" %}
 
 {% load i18n %}
 {% load ifsetting_tag %}
@@ -6,74 +6,56 @@
 {% load portal_tags %}
 {% load bootstrap_tags %}
 
-{% block head_title %}
-    {% if object %}
-        {% trans "Edit Authority" %} - {{object.name}}
-    {% else %}
-        {% trans "Create Authority" %}
-    {% endif %}
-{% endblock %}
+{% block body_class %}authorities{% endblock %}
+{% block modelname %}{% trans "Authority" %}{% endblock %}
 
-{% block body %}
-<h1>{{object.name}}</h1>
-<div class="row">
-    <div class="span12">
-        <form method="post" class="entity-form form-horizontal" id="collection-edit-form">
-            {% csrf_token %}
-            <fieldset>
-                <legend>Identity Area</legend>
-                {% include "_form_field.html" with field=form.identifier %}
-                {% include "_form_field.html" with field=form.name %}
+{% block fieldsets %}
+    <fieldset>
+        <legend>Identity Area</legend>
+        {% include "_form_field.html" with field=form.identifier %}
+        {% include "_form_field.html" with field=form.name %}
 
-                <div class="dynamic-formset" id="id_formset-{{formsets.othernames.prefix}}" data-prefix="{{formsets.othernames.prefix}}">
-                    {{formsets.othernames.management_form}}
-                    {% for f in formsets.othernames %}
-                        <div class="control-group form-inline {% if f.errors %}error{% endif %}"
-                                id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
-                            <label for="id_{{f.prefix}}-{{f.name.name}}">{% if forloop.first %}Alternate Name{% endif %}</label>
-                            <div class="controls inlinemulti">
-                                {{f.id}}
-                                {{f.name}}
-                                {{f.DELETE}}
-                                {{f.DELETE.label_tag}}
-                                {% if f.errors %}
-                                    <span class="help-inline">{{f.errors}}</span>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
+        <div class="dynamic-formset" id="id_formset-{{formsets.othernames.prefix}}" data-prefix="{{formsets.othernames.prefix}}">
+            {{formsets.othernames.management_form}}
+            <label>{% trans "Parallel Form(s) of Name" %}</label>
+            {% for f in formsets.othernames %}
+                <div class="control-group form-inline {% if f.errors %}error{% endif %}"
+                        id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
+                    <div class="controls inlinemulti">
+                        {{f.id}}
+                        {{f.name}}
+                        {{f.DELETE}}
+                        {{f.DELETE.label_tag}}
+                        {% if f.errors %}
+                            <span class="help-inline">{{f.errors}}</span>
+                        {% endif %}
+                    </div>
                 </div>
+            {% endfor %}
+        </div>
 
-                {% include "_form_field.html" with field=form.type_of_entity %}
-            </fieldset>
+        {% include "_form_field.html" with field=form.type_of_entity %}
+    </fieldset>
 
-            <fieldset>
-                <legend>Description Area</legend>
-                {% include "_form_field.html" with field=form.dates_of_existence %}
-                {% include "_form_field.html" with field=form.history %}
-                {% include "_form_field.html" with field=form.places %}
-                {% include "_form_field.html" with field=form.legal_status %}
-                {% include "_form_field.html" with field=form.functions %}
-                {% include "_form_field.html" with field=form.mandates %}
-                {% include "_form_field.html" with field=form.internal_structures %}
-                {% include "_form_field.html" with field=form.general_context %}
-            </fieldset>
+    <fieldset>
+        <legend>Description Area</legend>
+        {% include "_form_field.html" with field=form.dates_of_existence %}
+        {% include "_form_field.html" with field=form.history %}
+        {% include "_form_field.html" with field=form.places %}
+        {% include "_form_field.html" with field=form.legal_status %}
+        {% include "_form_field.html" with field=form.functions %}
+        {% include "_form_field.html" with field=form.mandates %}
+        {% include "_form_field.html" with field=form.internal_structures %}
+        {% include "_form_field.html" with field=form.general_context %}
+    </fieldset>
 
-            <fieldset>
-                <legend>Control Area</legend>
-                {% include "_form_field.html" with field=form.description_identifier %}
-                {% include "_form_field.html" with field=form.institution_identifier %}
-                {% include "_form_field.html" with field=form.rules %}
-                {% include "_property_form_field.html" with propform=formsets.language name="Language" %}
-                {% include "_property_form_field.html" with propform=formsets.script name="Script" %}
-                {% include "_form_field.html" with field=form.sources %}
-            </fieldset>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-                <a class="btn" href="{{object.get_absolute_url}}">Cancel</a>
-            </div>
-        </form>
-    </div>
-</div>
+    <fieldset>
+        <legend>Control Area</legend>
+        {% include "_form_field.html" with field=form.description_identifier %}
+        {% include "_form_field.html" with field=form.institution_identifier %}
+        {% include "_form_field.html" with field=form.rules %}
+        {% include "_property_form_field.html" with propform=formsets.language name="Language" %}
+        {% include "_property_form_field.html" with propform=formsets.script name="Script" %}
+        {% include "_form_field.html" with field=form.sources %}
+    </fieldset>
 {% endblock %}
