@@ -85,6 +85,10 @@ urlpatterns = patterns('',
     url(r'^restore/(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRestoreView.as_view(
             model=models.Collection,
         ), name='collection_restore'),
+    url(r'^diff/(?P<slug>[-\w]+)/(?P<revision1>\d+)/(?P<revision2>\d+)/?$', views.PortalRevisionDiffView.as_view(
+            model=models.Collection,
+            template_name="collection_diff.html",
+        ), name='collection_diff'),
     url(r'^(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRevisionView.as_view(
             model=models.Collection,
             template_name="collection_revision.html"

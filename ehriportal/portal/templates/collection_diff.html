@@ -1,0 +1,47 @@
+{% extends "detail_base.html" %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+{% load portal_tags %}
+
+{% block head_title %}{{object.name}}{% endblock %}
+
+{% block body_class %}collections{% endblock %}
+
+{% block sidebar_details %}
+    <div class="repo-logo">
+        <a href="{%url repo_detail object.repository.slug %}">
+        {% if object.repository.logo %}
+            <img  src="{{object.repository.logo.url}}" />
+        {% else %}
+        <div class="logo-placeholder"><h3>{{object.repository.name}}</h3></div>
+        {% endif %}
+        </a>
+    </div>
+    {% include "_collection_info.html" %}
+{% endblock %}
+
+{% block body_description %}
+    {% include "_collection_description_diff.html" %}
+    {% if object.tag_list %}
+    <h4>{% trans "Subject Access Points" %}</h4>
+    <p class="tag-list">
+        {% for tag in object.tag_list %}
+        {# FIXME: The url here will break for tags with a space in them. #}
+        <a href="{% url collection_search %}?tag={{tag.name|quote_plus}}">
+            {{tag.name}}
+        </a>
+        {% endfor %}
+    </p>
+    {% endif %}
+    {% if object.name_access %}
+    <h4>{% trans "Name Access Points" %}</h4>
+    <p class="tag-list">
+        {% for name in object.name_access %}
+        {# FIXME: The url here will break for tags with a space in them. #}
+        <a href="{{name.get_instance.get_absolute_url}}">{{name.get_instance.name}}</a>
+        {% endfor %}
+    </p>
+    {% endif %}
+{% endblock %}
+

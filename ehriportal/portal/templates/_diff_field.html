@@ -1,0 +1,12 @@
+{% load portal_tags %}
+{% load reversion_tags %}
+{% load i18n %}
+
+
+{% if newversion.field_dict|getattribute:field or oldversion.field_dict|getattribute:field %}
+<div class="description-field">
+    <h4>{% trans name %}</h4>
+    <p>{% vdiff newversion oldversion field %}</p>
+</div>
+{% endif %}
+

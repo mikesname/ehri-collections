@@ -300,6 +300,20 @@ class PortalRevisionView(DetailView):
         return context
 
 
+class PortalRevisionDiffView(DetailView):
+    """Show information about an object revision."""
+    def get_context_data(self, **kwargs):
+        context = super(PortalRevisionDiffView, self).get_context_data(**kwargs)
+        try:
+            context["newversion"] = reversion.get_for_object(self.object).get(
+                    id=self.kwargs["revision1"])
+            context["oldversion"] = reversion.get_for_object(self.object).get(
+                    id=self.kwargs["revision2"])
+        except reversion.revisions.Revision.DoesNotExist:
+            raise Http404
+        return context
+
+
 class PortalRestoreView(UpdateView):
     """Restore a particular model revision."""
     model = None
