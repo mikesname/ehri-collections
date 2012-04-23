@@ -1,0 +1,16 @@
+{% extends "revision_base.html" %}
+
+{% block body_class %}collections{% endblock %}
+
+{% block sidebar_details %}
+    {% with version.field_dict as object %}
+        {% include "_collection_info.html" %}
+    {% endwith %}
+{% endblock %}
+
+{% block revision_description %}
+    {% with version.field_dict as object %}
+        {% include "_collection_description.html" %}
+    {% endwith %}
+{% endblock %}
+

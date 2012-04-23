@@ -1,4 +1,4 @@
-{% extends "site_base.html" %}
+{% extends "detail_base.html" %}
 
 {% load i18n %}
 {% load ifsetting_tag %}
@@ -8,141 +8,40 @@
 
 {% block body_class %}collections{% endblock %}
 
-{% block body %}
-    <h2>{{object.name}}</h2>
-    {% if object.other_names %}
-        <h3 class="alternate-name">
-        {% for on in object.other_names %}
-            {% if forloop.counter0 > 0 %}, {% endif %}{{on}}
-        {% endfor %}
-        </h3>
-    {% endif %}
-    <div class="row">
-        <div class="span9 columns">
-            <div class="description-field">
-                {{object.scope_and_content|linebreaks}}
-            </div>
-            <h3>{% trans "Revision history" %}</h3>
-            <div class="revision-field">
-                {{object.revision_history|linebreaks}}
-            </div>
-            <h3>{% trans "Rules" %}</h3>
-            <div class="rules-field">
-                {{object.rules|linebreaks}}
-            </div>
-            <h3>{% trans "Subject Access Points" %}</h3>
-            <p class="tag-list">
-                {% for tag in object.tag_list %}
-                {# FIXME: The url here will break for tags with a space in them. #}
-                <a href="{% url collection_search %}?tag={{tag.name|quote_plus}}">
-                    {{tag.name}}
-                </a>
-                {% endfor %}
-            </p>
-            <h3>{% trans "Name Access Points" %}</h3>
-            <p class="tag-list">
-                {% for name in object.name_access %}
-                {# FIXME: The url here will break for tags with a space in them. #}
-                <a href="{{name.get_instance.get_absolute_url}}">{{name.get_instance.name}}</a>
-                {% endfor %}
-            </p>
-        </div>
-        <div class="span3 columns">
-            <div class="repo-logo">
-                <a href="{%url repo_detail object.repository.slug %}">
-                {% if object.repository.logo %}
-                    <img  src="{{object.repository.logo.url}}" />
-                {% else %}
-                <div class="logo-placeholder"><h3>{{object.repository.name}}</h3></div>
-                {% endif %}
-                </a>
-            </div>
-            <table class="table table-striped">
-                {% if object.date_set.count %}    
-                    <tr>
-                        <td>
-                            <strong>{% trans "Dates" %}</strong>
-                        </td>
-                        <td>
-                            {% for date in object.date_set.all %}
-                                {% if forloop.count0 > 0 %}{{", "}}{% endif %}{{date}}
-                            {% endfor %}
-                        </td>
-                    </tr>
-                {% endif %}
-                {% if object.languages %}    
-                    <tr>
-                        <td colspan="2">
-                            <strong>{% trans "Languages:" %}</strong>
-                            {% for lang in object.languages %}
-                            <br />
-                            {{ lang|langcode2name }}
-                            {% endfor %}
-                        </td>
-                    </tr>
-                {% endif %}
-                {% if object.location_of_originals %}
-                    <tr>
-                        <td><strong>{% trans "Location (Origins):" %}</strong></td><td>{{object.location_of_originals}}</td>
-                    </tr>
-                {% endif %}
-                {% if object.location_of_copies %}
-                    <tr>
-                        <td><strong>{% trans "Location (Copies):" %}</strong></td><td>{{object.location_of_copies}}</td>
-                    </tr>
-                {% endif %}
-                {% if object.extent_and_medium %}
-                    <tr>
-                        <td><strong>{% trans "Extent:" %}</strong></td><td>{{object.extent_and_medium}}</td>
-                    </tr>
-                {% endif %}
-                {% if object.access_conditions %}
-                    <tr>
-                        <td><strong>{% trans "Access:" %}</strong></td><td>{{object.access_conditions}}</td>
-                    </tr>
-                {% endif %}
-                {% if object.acquisition %}
-                    <tr>
-                        <td><strong>{% trans "Acquisition:" %}</strong></td><td>{{object.acquisition}}</td>
-                    </tr>
-                {% endif %}
-                {% if object.reproduction_conditions %}
-                    <tr>
-                        <td colspan="2">
-                            <strong>{% trans "Reproduction:" %}</strong>
-                            <br />
-                            {{object.reproduction_conditions}}
-                        </td>
-                    </tr>
-                {% endif %}
-                {% if object.finding_aids %}    
-                    <tr>
-                        <td colspan="2">
-                            <strong>{% trans "Finding aids:" %}</strong>
-                            <br />
-                            {{object.finding_aids}}
-                        </td>
-                    </tr>
-                {% endif %}
-                {% if object.arrangement %}    
-                    <tr>
-                        <td colspan="2">
-                            <strong>{% trans "Arrangement:" %}</strong>
-                            <br />
-                            {{object.arrangement}}
-                        </td>
-                    </tr>
-                {% endif %}
-                {% if user.is_staff %}
-                    <tr><td colspan="2"><strong>{% trans "Administration Actions" %}</strong></td></tr>
-                    <tr>
-                        <td colspan="2">
-                            <a class="btn" href="{% url collection_edit slug=object.slug %}">Edit</a>
-                            <a class="btn btn-danger" href="{% url collection_delete slug=object.slug %}">Delete</a>
-                        </td>
-                    </tr>
-                {% endif %}
-            </table>
-        </div>
+{% block sidebar_details %}
+    <div class="repo-logo">
+        <a href="{%url repo_detail object.repository.slug %}">
+        {% if object.repository.logo %}
+            <img  src="{{object.repository.logo.url}}" />
+        {% else %}
+        <div class="logo-placeholder"><h3>{{object.repository.name}}</h3></div>
+        {% endif %}
+        </a>
     </div>
+    {% include "_collection_info.html" %}
 {% endblock %}
+
+{% block body_description %}
+    {% include "_collection_description.html" %}
+    {% if object.tag_list %}
+    <h4>{% trans "Subject Access Points" %}</h4>
+    <p class="tag-list">
+        {% for tag in object.tag_list %}
+        {# FIXME: The url here will break for tags with a space in them. #}
+        <a href="{% url collection_search %}?tag={{tag.name|quote_plus}}">
+            {{tag.name}}
+        </a>
+        {% endfor %}
+    </p>
+    {% endif %}
+    {% if object.name_access %}
+    <h4>{% trans "Name Access Points" %}</h4>
+    <p class="tag-list">
+        {% for name in object.name_access %}
+        {# FIXME: The url here will break for tags with a space in them. #}
+        <a href="{{name.get_instance.get_absolute_url}}">{{name.get_instance.name}}</a>
+        {% endfor %}
+    </p>
+    {% endif %}
+{% endblock %}
+

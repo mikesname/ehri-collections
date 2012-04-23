@@ -1,47 +1,16 @@
-{% extends "site_base.html" %}
+{% extends "detail_base.html" %}
 
 {% load i18n %}
 {% load ifsetting_tag %}
 {% load markup %}
 
-{% block head_title %}{% trans "Authorities" %}{% endblock %}
-
 {% block body_class %}authorities{% endblock %}
 
-{% block body %}
+{% block sidebar_details %}
+    {% include "_authority_info.html" %}
+{% endblock %}
 
-<div class="row">
-    <div class="span3 columns">
-        <div class="well">
-            <h5>{% trans "Administration Actions" %}</h5>
-            <p>
-                <a class="btn" href="{% url authority_edit slug=object.slug %}">Edit</a>
-                <a class="btn btn-danger" href="{% url authority_delete slug=object.slug %}">Delete</a>
-            </p>
-        </div>
-    </div>
-    <div class="span9 columns">
-        <h2>{{object.name}}</h2>
-        {% if object.other_names %}
-            <h3 class="alternate-name">
-            {% for on in object.other_names %}
-                {% if forloop.counter0 > 0 %}, {% endif %}{{on}}
-            {% endfor %}
-            </h3>
-        {% endif %}
-
-        <h3>{% trans "History" %}</h3>
-        {% if object.history %}
-            <p>{{object.history|markdown}}</p>
-        {% else %}
-            <p>No additional information is currently available.</p>
-        {% endif %}
-
-        <h3>{% trans "Sources" %}</h3>
-        {% if object.sources %}
-            <p>{{object.sources|markdown}}</p>
-        {% endif %}
-    </div>
-</div>
+{% block body_description %}
+    {% include "_authority_description.html" %}
 {% endblock %}
 

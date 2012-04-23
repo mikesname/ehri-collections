@@ -1,0 +1,45 @@
+{% load i18n %}
+{% load portal_tags %}
+
+<table class="table table-striped well">
+    {% if object.date_set.count %}    
+        <tr>
+            <td>
+                <strong>{% trans "Dates" %}</strong>
+            </td>
+            <td>
+                {% for date in object.date_set.all %}
+                    {% if forloop.count0 > 0 %}{{", "}}{% endif %}{{date}}
+                {% endfor %}
+            </td>
+        </tr>
+    {% endif %}
+    {% if object.languages %}    
+        <tr>
+            <td colspan="2">
+                <strong>{% trans "Languages:" %}</strong>
+                {% for lang in object.languages %}
+                <br />
+                {{ lang|langcode2name }}
+                {% endfor %}
+            </td>
+        </tr>
+    {% endif %}
+    {% if object.scripts %}    
+        <tr>
+            <td colspan="2">
+                <strong>{% trans "Scripts:" %}</strong>
+                {% for lang in object.scripts %}
+                <br />
+                {{ lang|scriptcode2name }}
+                {% endfor %}
+            </td>
+        </tr>
+    {% endif %}
+    {% if object.extent_and_medium %}
+        <tr>
+            <td><strong>{% trans "Extent:" %}</strong></td><td>{{object.extent_and_medium}}</td>
+        </tr>
+    {% endif %}
+</table>
+

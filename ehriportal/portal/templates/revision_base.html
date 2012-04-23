@@ -1,0 +1,36 @@
+{% extends "detail_base.html" %}
+
+{% load portal_tags %}
+{% load i18n %}
+
+{% block sidebar_history %}
+
+{% endblock %}
+
+{% block sidebar_details %}
+
+{% endblock %}
+
+{% block sidebar_admin %}
+    <div class="well">
+        <h4>{% trans "Administration Actions" %}</h4>
+        <p>
+        <a class="btn btn-warning" href="{{ object|restore_url:version.id}}">
+            {% trans "Restore" %}
+        </a>
+        </p>
+    </div>
+{% endblock %}
+
+
+{% block body_description %}
+
+    <div class="alert alert-warning">
+        {% trans "Showing revision of item taken at" %} {{version.revision.date_created|date:"r"}}: <strong>
+            {{object.name}}</strong> 
+    </div>
+    {% block revision_description %}
+
+    {% endblock %}
+
+{% endblock %}

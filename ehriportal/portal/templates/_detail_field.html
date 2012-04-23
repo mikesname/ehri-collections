@@ -1,0 +1,12 @@
+{% load portal_tags %}
+{% load i18n %}
+{% load markup %}
+
+{% with object|getattribute:field as data %}
+    {% if data %}
+    <div class="description-field">
+        <h4>{% trans name %}</h4>
+        <p>{{data|markdown}}</p>
+    </div>
+    {% endif %}
+{% endwith %}

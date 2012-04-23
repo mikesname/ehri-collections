@@ -1,0 +1,24 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+
+{% block head_title %}{% trans "Restore" %} {{object.name}}{% endblock %}
+
+{% block body_class %}{% endblock %}
+
+{% block body %}
+    <h2>{% trans "Restore" %} &quot;{{object.name}}&quot;?</h2>
+    {% trans "Restore item to revision" %} {{version.revision.date_created|date:"r"}}?
+    {% block body_details %}
+
+    {% endblock %}
+    {% block delete_form %}
+    <form method="POST" class="form-actions">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">{% trans "Restore" %}</button>
+        <a href="{{ object.get_absolute_url }}" class="btn">{% trans "Cancel" %}</a>
+    </form>
+    {% endblock %}
+{% endblock %}
+

@@ -1,0 +1,73 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load ifsetting_tag %}
+{% load portal_tags %}
+
+{% block head_title %}{{object.name}}{% endblock %}
+{% block body_class %}{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="span3 columns">
+        {% block sidebar %}
+            {% block sidebar_details %}
+            {% endblock %}
+            {% if history %}
+                {% block sidebar_history %}
+                    <div class="well">
+                        <h4>{% trans "Revision History" %}</h4>
+                        <ul class="object-version-history">
+                        {% for version in history %}
+                            <li class="object-version">
+                                <a href="{{ object|revision_url:version.id }}">
+                                    {{version.revision.date_created|date:"D M Y"}}
+                                </a>
+                                <span class="object-version-user">
+                                    {{version.revision.user|default_if_none:""}}
+                                </span>
+                                {% if version.revision.comment %}
+                                    <div class="object-version-comment small">
+                                        <emph>{{version.revision.comment}}</emph>
+                                    </div>
+                                {% endif %}
+                            </li>    
+                        {% endfor %}
+                        </ul>
+                    </div>
+                {% endblock %}
+            {% endif %}
+            {% if user.is_staff %}
+                {% block sidebar_admin %}
+                    <div class="well">
+                        <h4>{% trans "Administration Actions" %}</h4>
+                        <p>
+                            <a class="btn" href="{{object.get_edit_url}}">Edit</a>
+                            <a class="btn btn-danger" href="{{object.get_delete_url}}">Delete</a>
+                        </p>
+                    </div>
+                {% endblock %}
+            {% endif %}
+        {% endblock %}
+    </div>
+    <div class="span9 columns">
+        {% block body_title %}
+        <h2>{{object.name}}</h2>
+        {% if object.other_names %}
+            <h3 class="alternate-name">
+            {% for on in object.other_names %}
+                {% if forloop.counter0 > 0 %}, {% endif %}{{on}}
+            {% endfor %}
+            </h3>
+            {% endif %}
+        {% endblock %}
+        <hr />
+        {% block body_description %}
+            {% blocktrans %}
+                No description given.
+            {% endblocktrans %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}
+

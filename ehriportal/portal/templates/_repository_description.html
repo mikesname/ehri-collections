@@ -1,0 +1,18 @@
+{% include "_detail_field.html" with field="general_context" name="General Context" %}
+{% include "_detail_field.html" with field="geocultural_context" name="Geocultural Context" %}
+{% include "_detail_field.html" with field="history" name="History" %}
+{% include "_detail_field.html" with field="reproduction_services" name="Reproduction Services" %}
+{% include "_detail_field.html" with field="finding_aids" name="Finding Aids" %}
+{% include "_detail_field.html" with field="disabled_access" name="Disabled Access" %}
+{% include "_detail_field.html" with field="buildings" name="Buildings" %}
+
+{% with object.collection_set.count as count %}
+    {% if count %}
+    <h3>
+        <a href={%url repo_collections object.slug %}>Browse {{count}} collection{{count|pluralize}}</a>
+    </h3>
+    {% else %}
+        <p>No collection information is currently available.</p>
+    {% endif %}
+{% endwith %}
+
