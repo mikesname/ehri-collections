@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Django settings for basic pinax project.
-
+import sys
 import os.path
 import posixpath
 
@@ -8,6 +8,7 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+TESTING = ["manage.py", "test"] == sys.argv[:2]
 
 # tells Pinax to serve media through the staticfiles app.
 SERVE_MEDIA = DEBUG
@@ -249,6 +250,12 @@ HAYSTACK_CONNECTIONS = {
         "BATCH_SIZE": 100,
     },
 }
+
+if TESTING:
+    HAYSTACK_CONNECTIONS["default"] = {
+        "ENGINE": "haystack.backends.whoosh_backend.WhooshEngine",
+        "PATH": "portal.index"
+    }
 
 # translation
 gettext = lambda s: s
