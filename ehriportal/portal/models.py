@@ -349,6 +349,10 @@ class Repository(Resource):
     def get_restore_url(self, version_id):
         return ('repo_restore', [self.slug, version_id])
     
+    @models.permalink
+    def get_diff_url(self):
+        return ('repo_diff', [self.slug])
+    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -536,6 +540,10 @@ class Collection(Resource):
     def get_restore_url(self, version_id):
         return ('collection_restore', [self.slug, version_id])
     
+    @models.permalink
+    def get_diff_url(self):
+        return ('collection_diff', [self.slug])
+    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -614,6 +622,10 @@ class Authority(Resource):
     @models.permalink
     def get_restore_url(self, version_id):
         return ('authority_restore', [self.slug, version_id])
+    
+    @models.permalink
+    def get_diff_url(self):
+        return ('authority_diff', [self.slug])
     
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)

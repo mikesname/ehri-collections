@@ -101,3 +101,4 @@ def restore_url(object, version_id):
     """Returns a restore url from the object."""
     return object.get_restore_url(version_id)
 
+

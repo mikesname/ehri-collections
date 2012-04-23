@@ -17,23 +17,31 @@
                 {% block sidebar_history %}
                     <div class="well">
                         <h4>{% trans "Revision History" %}</h4>
+                        <form action="{{object.get_diff_url}}">
                         <ul class="object-version-history">
-                        {% for version in history %}
-                            <li class="object-version">
-                                <a href="{{ object|revision_url:version.id }}">
-                                    {{version.revision.date_created|date:"D M Y"}}
-                                </a>
-                                <span class="object-version-user">
-                                    {{version.revision.user|default_if_none:""}}
-                                </span>
-                                {% if version.revision.comment %}
-                                    <div class="object-version-comment small">
-                                        <emph>{{version.revision.comment}}</emph>
-                                    </div>
-                                {% endif %}
-                            </li>    
-                        {% endfor %}
+                            {% for version in history %}
+                                <li class="object-version">
+                                    {% if history|length > 1 %}
+                                    <input type="checkbox" name="r" value="{{version.id}}" />
+                                    {% endif %}
+                                    <a href="{{ object|revision_url:version.id }}">
+                                        {{version.revision.date_created|date:"D M Y"}}
+                                    </a>
+                                    <span class="object-version-user">
+                                        {{version.revision.user|default_if_none:""}}
+                                    </span>
+                                    {% if version.revision.comment %}
+                                        <div class="object-version-comment small">
+                                            <emph>{{version.revision.comment}}</emph>
+                                        </div>
+                                    {% endif %}
+                                </li>    
+                            {% endfor %}
                         </ul>
+                        {% if history|length > 1 %}
+                            <input type="submit" class="btn btn-small" value="{%trans "Compare Revisions" %}" />
+                        {% endif %}
+                        </form>
                     </div>
                 {% endblock %}
             {% endif %}

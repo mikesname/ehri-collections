@@ -67,8 +67,10 @@ urlpatterns = patterns('',
             model=models.Authority,
             template_name="authority_revision.html"
         ), name='authority_revision'),
-    
-    
+    url(r'^diff/(?P<slug>[-\w]+)/?$', views.PortalRevisionDiffView.as_view(
+            model=models.Authority,
+            template_name="authority_diff.html",
+        ), name='authority_diff'),
     
     # these catch-all item must be at the bottom
     url(r'^(?P<slug>[-\w]+)/?$', views.PortalDetailView.as_view(

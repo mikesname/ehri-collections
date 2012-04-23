@@ -5,6 +5,9 @@
 {% load markup %}
 {% load portal_tags %}
 
+{% block body_class %}collections{% endblock %}
+{% block modelname %}{% trans "Collection" %}{% endblock %}
+
 {% block fieldsets %}
     <fieldset>
         <legend>Identity Area</legend>

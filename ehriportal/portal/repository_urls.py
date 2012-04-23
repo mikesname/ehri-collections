@@ -67,6 +67,10 @@ urlpatterns = patterns('',
     url(r'^restore/(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRestoreView.as_view(
             model=models.Repository,
         ), name='repo_restore'),
+    url(r'^diff/(?P<slug>[-\w]+)/?$', views.PortalRevisionDiffView.as_view(
+            model=models.Repository,
+            template_name="repository_diff.html",
+        ), name='repo_diff'),
     
     # these catch-all item must be at the bottom
     url(r'^(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRevisionView.as_view(

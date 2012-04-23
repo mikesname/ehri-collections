@@ -305,12 +305,15 @@ class PortalRevisionDiffView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(PortalRevisionDiffView, self).get_context_data(**kwargs)
         try:
+            revids = sorted(self.request.GET.getlist("r"))
             context["newversion"] = reversion.get_for_object(self.object).get(
-                    id=self.kwargs["revision1"])
+                    id=revids[0])
             context["oldversion"] = reversion.get_for_object(self.object).get(
-                    id=self.kwargs["revision2"])
+                    id=revids[1])
+        except IndexError:
+            raise Http404("oops, not found!")
         except reversion.revisions.Revision.DoesNotExist:
-            raise Http404
+            raise Http404("oops, revisions not found!")
         return context
 
 

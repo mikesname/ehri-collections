@@ -6,6 +6,9 @@
 {% load portal_tags %}
 {% load bootstrap_tags %}
 
+{% block body_class %}repositories{% endblock %}
+{% block modelname %}{% trans "Repository" %}{% endblock %}
+
 {% block fieldsets %}
     <fieldset>
         <legend>Identity Area</legend>
