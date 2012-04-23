@@ -30,6 +30,17 @@ $(function($) {
         $("input[name='openid_url']").val(this.href).closest("form").submit();
     });
 
+    // Make sure no more than two revision diff checkboxes are
+    // checked at the same time
+    $("input[type='submit']", $(".object-version-history")).prop("disabled", true);
+    $("input[type='checkbox']", $(".object-version-history")).click(function(event) {        
+        var checked = $("input[type='checkbox']:checked", $(".object-version-history"));
+        if (checked.length > 2) {
+            checked.not(this).prop("checked", false);
+        }
+        $("input[type='submit']", $(".object-version-history")).prop(
+                "disabled", checked.length != 2);
+    });
 
     var slider = $('.slide-out-div').tabSlideOut({
         tabHandle: '.handle',                              

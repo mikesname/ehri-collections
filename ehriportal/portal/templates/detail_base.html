@@ -3,11 +3,13 @@
 {% load i18n %}
 {% load ifsetting_tag %}
 {% load portal_tags %}
+{% load staticfiles %}
 
 {% block head_title %}{{object.name}}{% endblock %}
 {% block body_class %}{% endblock %}
 
 {% block body %}
+<script src="{% static "js/dynamic-formsets.js" %}"></script>
 <div class="row">
     <div class="span3 columns">
         {% block sidebar %}
@@ -15,12 +17,12 @@
             {% endblock %}
             {% if history %}
                 {% block sidebar_history %}
-                    <div class="well">
+                    <div class="well object-version-history">
                         <h4>{% trans "Revision History" %}</h4>
                         <form action="{{object.get_diff_url}}">
-                        <ul class="object-version-history">
+                        <ul>
                             {% for version in history %}
-                                <li class="object-version">
+                                <li>
                                     {% if history|length > 1 %}
                                     <input type="checkbox" name="r" value="{{version.id}}" />
                                     {% endif %}
