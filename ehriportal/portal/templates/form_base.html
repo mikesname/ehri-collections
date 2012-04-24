@@ -20,16 +20,17 @@
 <div class="row">
     <script src="{% static "js/dynamic-formsets.js" %}"></script>
     <div class="span12">
-        <form method="post" class="entity-form">
+        <form method="post" class="entity-form form-horizontal">
             {% csrf_token %}
             {% block fieldsets %}
             {% endblock %}
-
-            <div class="well control-group">
-                <label for="id_revision_comment">{% trans "Comment" %}</label>
-                <input type="text" name="revision_comment" id="id_revision_comment" />
-            </div>
             <div class="form-actions">
+                {% if object %}
+                    <div class="control-group">
+                        <input type="text" name="revision_comment" id="id_revision_comment" 
+                            placeholder="{% trans "Summary of changes (optional)" %}" />
+                    </div>
+                {% endif %}
                 <button type="submit" class="btn btn-primary">
                     {% if object %}{% trans "Update" %}{% else %}{% trans "Save" %}{% endif %}
                 </button>

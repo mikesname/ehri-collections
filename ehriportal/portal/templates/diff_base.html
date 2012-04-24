@@ -1,8 +1,19 @@
 {% extends "detail_base.html" %}
 
+{% load reversion_tags %}
+
 {% block sidebar_admin %}
 {% endblock %}
 
-{% block body %}
 
+{% block body_title %}
+    <h2>{{object.name}}</h2>
+    {% if object.other_names %}
+        <h3 class="alternate-name">
+        {% for on in object.other_names %}
+            {% if forloop.counter0 > 0 %}, {% endif %}{{on}}
+        {% endfor %}
+        </h3>
+    {% endif %}
 {% endblock %}
+
