@@ -188,6 +188,13 @@ class EntityCrudTestMixin(object):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(reversion.get_for_object(obj)), revcount + 1)
         
+    def test_history(self):
+        """Test viewing history."""
+        response = self.client.get(reverse(self.urlprefix + "_history", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 200)
+        
 
 class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "repository.json", "collection.json"]
