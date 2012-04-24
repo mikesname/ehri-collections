@@ -1,0 +1,47 @@
+{% load i18n %}
+{% load portal_tags %}
+<div class="well object-version-history">
+    <h4>{% trans "Revision History" %}</h4>
+    <form action="{{object.get_diff_url}}" class="form-horizontal">
+    <ul class="unstyled">
+        {% for v in history|slice:"5" %}
+            <li>
+                {% if history|length > 1 %}
+                <label for="id_r{{v.id}}" class="revision-num checkbox inline">
+                    <input type="checkbox" name="r" value="{{v.id}}" id="id_r{{v.id}}" />
+                </label>
+                {% endif %}
+                {# HACK! If it's the latest version, link back to this page. #}
+                {% if version and version.id == v.id %}
+                <a class="object-current-version" href="{% if forloop.first %}{{object.get_absolute_url}}{% else %}
+                    {{object|revision_url:v.id }}{% endif %}">
+                    {{v.revision.date_created|date:"D M Y"}}
+                </a>
+                {% elif not version and forloop.first %}
+                <a class="object-current-version" href="{{object.get_absolute_url}}">
+                    {{v.revision.date_created|date:"D M Y"}}
+                </a>
+                {% else %}
+                <a href="{% if forloop.first %}{{object.get_absolute_url}}{% else %}
+                    {{object|revision_url:v.id }}{% endif %}">
+                    {{v.revision.date_created|date:"D M Y"}}
+                </a>
+                {% endif %}
+                <span class="object-version-user">
+                    {{v.revision.user|default_if_none:""}}
+                </span>
+                {% if v.revision.comment %}
+                    <div class="object-version-comment small">
+                        <emph>{{v.revision.comment}}</emph>
+                    </div>
+                {% endif %}
+            </li>    
+        {% endfor %}
+    </ul>
+    {% if history|length > 1 %}
+        <input type="submit" class="btn btn-inverse btn-mini" value="{%trans "Compare Revisions" %}" />
+    {% endif %}
+    <p class="more-history"><a href="{{object.get_history_url}}">{% trans "Full History" %}</a></p>
+    </form>
+</div>
+

@@ -24,6 +24,11 @@
             {% csrf_token %}
             {% block fieldsets %}
             {% endblock %}
+
+            <div class="well control-group">
+                <label for="id_revision_comment">{% trans "Comment" %}</label>
+                <input type="text" name="revision_comment" id="id_revision_comment" />
+            </div>
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
                     {% if object %}{% trans "Update" %}{% else %}{% trans "Save" %}{% endif %}

@@ -1,0 +1,40 @@
+{% extends "site_base.html" %}
+
+{% load i18n %}
+{% load pagination_tags %}
+{% load portal_tags %}
+
+{% block body %}
+
+    <div class="row object-version-history">
+        <form action="{{object.get_diff_url}}" class="compare-form form-horizontal">
+            <h2>{{object.name}}: {% trans "Revision History" %}</h2>
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>{% trans "Date" %}</th>
+                        <th>{% trans "User" %}</th>
+                        <th>{% trans "Comment" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for version in object_list %}
+                    <tr>
+                        <td>
+                            <label for="id_r{{version.id}}" class="revision-num checkbox inline">
+                                <input type="checkbox" name="r" value="{{version.id}}" id="id_r{{version.id}}" />
+                            </label>
+                        </td>
+                        <td>{{version.revision.date_created|date:"r"}}</td>
+                        <td><a href="{{version.user.get_absolute_url}}">{{version.revision.user.username}}</a></td>
+                        <td>{{version.revision.comment}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <input type="submit" class="btn btn-small" value="{%trans "Compare Revisions" %}" />
+        </form>
+    {% paginate 2 %}
+    </div>
+{% endblock %}

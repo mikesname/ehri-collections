@@ -353,6 +353,10 @@ class Repository(Resource):
     def get_diff_url(self):
         return ('repo_diff', [self.slug])
     
+    @models.permalink
+    def get_history_url(self):
+        return ('repo_history', [self.slug])
+    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -544,6 +548,10 @@ class Collection(Resource):
     def get_diff_url(self):
         return ('collection_diff', [self.slug])
     
+    @models.permalink
+    def get_history_url(self):
+        return ('collection_history', [self.slug])
+    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -626,6 +634,10 @@ class Authority(Resource):
     @models.permalink
     def get_diff_url(self):
         return ('authority_diff', [self.slug])
+    
+    @models.permalink
+    def get_history_url(self):
+        return ('authority_history', [self.slug])
     
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)

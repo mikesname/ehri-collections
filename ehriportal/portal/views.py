@@ -5,6 +5,7 @@ import datetime
 import json
 
 from django.utils.translation import ugettext_lazy as _
+from django.contrib import messages
 from django.views.generic import ListView
 from django.views.generic.edit import DeleteView, UpdateView, ProcessFormView
 from django.views.generic.detail import DetailView
@@ -242,6 +243,20 @@ class RepositoryDeleteView(DeleteView):
     model = models.Repository
 
 
+class PortalHistoryView(ListView):
+    model = None
+    template_name = "history_base.html"
+    paginate_by = 5
+    def get_queryset(self, *args, **kwargs):
+        self.object = get_object_or_404(self.model, slug=self.kwargs["slug"])
+        return reversion.get_for_object(self.object)
+
+    def get_context_data(self, **kwargs):
+        context = super(PortalHistoryView, self).get_context_data(**kwargs)
+        context["object"] = self.object
+        return context
+
+
 class AuthorityEditView(PortalUpdateView):
     """Generic form implementation for creating or updating a
     authority object."""
@@ -277,18 +292,13 @@ class AuthorityDeleteView(DeleteView):
 
 class PortalDetailView(DetailView):
     """Show information about an object."""
-    #def get_object(self, *args, **kwargs):
-    #    revision_id = self.request.GET.get("v")
-    #    if revision_id:
-
-
     def get_context_data(self, **kwargs):
         context = super(PortalDetailView, self).get_context_data(**kwargs)
         context["history"] = reversion.get_for_object(self.object)
         return context
 
 
-class PortalRevisionView(DetailView):
+class PortalRevisionView(PortalDetailView):
     """Show information about an object revision."""
     def get_context_data(self, **kwargs):
         context = super(PortalRevisionView, self).get_context_data(**kwargs)
@@ -297,6 +307,8 @@ class PortalRevisionView(DetailView):
                     id=self.kwargs["revision"])
         except reversion.revisions.Revision.DoesNotExist:
             raise Http404
+        messages.add_message(self.request, messages.WARNING, 
+                _("You are viewing revision") + " %s" % context["version"].id)
         return context
 
 
@@ -310,10 +322,10 @@ class PortalRevisionDiffView(DetailView):
                     id=revids[0])
             context["oldversion"] = reversion.get_for_object(self.object).get(
                     id=revids[1])
-        except IndexError:
-            raise Http404("oops, not found!")
-        except reversion.revisions.Revision.DoesNotExist:
-            raise Http404("oops, revisions not found!")
+        except reversion.revisions.Revision.DoesNotExist, IndexError:
+            raise Http404
+        messages.add_message(self.request, messages.WARNING, "You are comparing "
+            "revisions %s and %s" % (context["newversion"].id, context["oldversion"].id)) 
         return context
 
 
@@ -333,7 +345,7 @@ class PortalRestoreView(UpdateView):
         context = self.get_context_data()
         version = context["version"]
         with reversion.create_revision():
-            reversion.set_comment("Reverted revision '%s'" % version.id)
+            reversion.set_comment("Reverted to '%s'" % version.id)
             version.revert()
             return HttpResponseRedirect(self.object.get_absolute_url())
 

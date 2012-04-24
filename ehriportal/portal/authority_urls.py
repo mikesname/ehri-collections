@@ -60,6 +60,9 @@ urlpatterns = patterns('',
     url(r'^delete/(?P<slug>[-\w]+)/?$', 
             user_passes_test(permissions.is_staff)(
                 views.AuthorityDeleteView.as_view()), name='authority_delete'),
+    url(r'^history/(?P<slug>[-\w]+)/?$', views.PortalHistoryView.as_view(
+            model=models.Authority,
+        ), name='authority_history'),
     url(r'^restore/(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRestoreView.as_view(
             model=models.Authority,
         ), name='authority_restore'),

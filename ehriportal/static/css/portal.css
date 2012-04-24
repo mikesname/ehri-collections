@@ -170,3 +170,11 @@ a.openid-button:hover {
     font-size: 0.9em;
     font-weight: lighter;
 }
+
+.object-current-version {
+    background-color: #FCF8E3;
+}
+
+.more-history {
+    margin-top: 0.4em;
+}
