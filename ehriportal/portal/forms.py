@@ -2,13 +2,14 @@
 
 import string
 from django import forms
+from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis import geos
 from django.forms.models import modelformset_factory, inlineformset_factory
 
 from haystack.forms import EmptySearchQuerySet
 
-from portal import models
+from portal import models, data, utils
 
 
 def parse_point(pointstr):
@@ -40,6 +41,28 @@ class PortalSearchForm(forms.Form):
 class PortalAllSearchForm(PortalSearchForm):
     def no_query_found(self):
         return EmptySearchQuerySet()
+
+
+def get_language_choices(lang=None):
+    if lang is None:
+        lang = translation.get_language().split("-")[0]
+    for code, name in data.LANGUAGE_CODES:
+        yield (code, utils.language_name_from_code(code, locale=lang) or name) 
+
+
+class LanguageSelectWidget(forms.SelectMultiple):
+    choices = get_language_choices()
+
+
+def get_script_choices(lang=None):
+    if lang is None:
+        lang = translation.get_language().split("-")[0]
+    for code, name in data.SCRIPT_CODES:
+        yield (code, utils.language_name_from_code(code, locale=lang) or name) 
+
+
+class ScriptSelectWidget(forms.SelectMultiple):
+    choices = get_script_choices()
 
 
 
@@ -108,7 +131,6 @@ class AuthorityEditForm(forms.ModelForm):
 
 class RestoreRevisionForm(forms.Form):
     """Restore a revision of an object."""
-
 
 def propertyformset_factory(topclass, propname):
     propcls = models.propertyproxy_factory(propname)
