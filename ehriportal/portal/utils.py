@@ -8,13 +8,13 @@ import babel
 from haystack.query import SearchQuerySet
 from django.core.paginator import Paginator, Page, InvalidPage, EmptyPage
 from django.contrib.gis import geos
+from django.utils import translation
 from haystack.models import SearchResult
 from haystack.query import SearchQuerySet
 
 
 def language_name_from_code(code, locale="en"):
     """Get lang display name."""
-    # TODO: Find the correct way to do this
     return babel.Locale(locale).languages.get(code, "")
 
 
