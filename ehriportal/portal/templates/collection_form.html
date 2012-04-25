@@ -16,11 +16,13 @@
 
         <div class="dynamic-formset" id="id_formset-{{formsets.othernames.prefix}}" data-prefix="{{formsets.othernames.prefix}}">
             {{formsets.othernames.management_form}}
-            {% for f in formsets.othernames %}
-                <div class="control-group form-inline {% if f.errors %}error{% endif %}"
-                        id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
-                    <label for="id_{{f.prefix}}-{{f.name.name}}">{% if forloop.first %}Alternate Name{% endif %}</label>
-                    <div class="controls inlinemulti">
+            <div class="control-group form-inline testing {% if f.errors %}error{% endif %}"
+                    id="id_form-{{formsets.othernames.prefix}}" data-prefix="{{f.prefix}}">
+                {% for f in formsets.othernames %}
+                    {% if forloop.first %}
+                        <label for="id_{{f.prefix}}-{{f.name.name}}">{% trans "Alternate Name(s)" %}</label>
+                    {% endif %}
+                    <div class="controls inlinemulti" id="{{f.prefix}}">
                         {{f.id}}
                         {{f.name}}
                         {{f.DELETE}}
@@ -29,17 +31,19 @@
                             <span class="help-inline">{{f.errors}}</span>
                         {% endif %}
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
 
         <div class="dynamic-formset" id="id_formset-{{formsets.dates.prefix}}" data-prefix="{{formsets.dates.prefix}}">
             {{formsets.dates.management_form}}
-            {% for f in formsets.dates %}
                 <div class="control-group form-inline date-field {% if f.errors %}error{% endif %}"
                         id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
-                    <label for="id_{{f.prefix}}-{{f.start_date.name}}">{% if forloop.first %}Date{% endif %}</label>
-                    <div class="controls inlinemulti" data-prefix="{{f.prefix}}">
+                {% for f in formsets.dates %}
+                    {% if forloop.first %}
+                        <label for="id_{{f.prefix}}-{{f.start_date.name}}">{% trans "Date(s)" %}</label>
+                    {% endif %}
+                    <div class="controls inlinemulti" id="{{f.prefix}}" data-prefix="{{f.prefix}}">
                         {{f.id}}
                         {{f.start_date}}
                         {{f.end_date}}
@@ -49,8 +53,8 @@
                             <span class="help-inline">{{f.errors}}</span>
                         {% endif %}
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
 
         {% include "_form_field.html" with field=form.lod %}

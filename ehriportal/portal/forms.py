@@ -85,6 +85,12 @@ class FuzzyDateForm(forms.ModelForm):
                 "end_date": forms.TextInput(attrs={'class':'input-small', 'placeholder': 'End Date'}),
         }
 
+class OtherNameForm(forms.ModelForm):
+    class Meta:
+        fields = ("name",)
+        widgets = {
+                "name": forms.TextInput(attrs={'placeholder': _("Type another name here...")}),
+        }
 
 class CollectionEditForm(forms.ModelForm):
     class Meta:
@@ -115,11 +121,11 @@ DateFormSet = inlineformset_factory(models.Collection, models.FuzzyDate,
 
 
 OtherNameFormSet = inlineformset_factory(models.Collection, models.OtherFormOfName,
-        exclude=("type",), extra=1)
+        form=OtherNameForm, extra=1)
 
 
 ParallelNameFormSet = inlineformset_factory(models.Collection, models.ParallelFormOfName,
-        exclude=("type",), extra=1)
+        form=OtherNameForm, extra=1)
 
 
 ContactFormSet = inlineformset_factory(models.Repository, models.Contact,

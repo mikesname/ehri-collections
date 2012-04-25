@@ -1,10 +1,12 @@
 <div class="dynamic-formset" id="id_formset-{{propform.prefix}}" data-prefix="{{propform.prefix}}">
     {{propform.management_form}}
-    {% for f in propform %}
-        <div class="control-group form-inline {% if f.errors %}error{% endif %}"
-                id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
-            <label for="id_{{f.prefix}}-{{f.value.name}}">{% if forloop.first %}{{name}}{% endif %}</label>
-            <div class="controls inlinemulti">
+    <div class="control-group form-inline {% if f.errors %}error{% endif %}"
+            id="id_form-{{propform.prefix}}" data-prefix="{{f.prefix}}">
+        {% for f in propform %}
+            {% if forloop.first %}
+            <label for="id_{{f.prefix}}-{{f.value.name}}">{{ name }}</label>
+            {% endif %}
+            <div class="controls inlinemulti" id="{{f.prefix}}">
                 {{f.id}}
                 {{f.value}}
                 {{f.DELETE}}
@@ -13,6 +15,6 @@
                     <span class="help-inline">{{f.errors}}</span>
                 {% endif %}
             </div>
-        </div>
-    {% endfor %}
+        {% endfor %}
+    </div>
 </div>

@@ -1,0 +1,14 @@
+/* 
+ * CSS Rules that deliberately override things bootstrap sets.
+ *
+ */
+
+input, textarea, select, .uneditable-input {
+    width: 24em;
+}
+
+textarea {
+    height: 6em;
+}
+
+

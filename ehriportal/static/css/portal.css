@@ -145,20 +145,27 @@ a.openid-button:hover {
     vertical-align: middle;
 }
 
-/* forms */
-.entity-field textarea {
-    height: 3em;
+.controls.stackedmulti input {
+    clear: left;
 }
 
-.inlinemulti li:hover {
-    list-style-image: url(../img/delete.png);
+.controls input.confirmed.inlinemulti {
+    border-color: #fff;
+    box-shadow: 0px;
 }
 
-.inlinemulti ul {
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-top: 0;
-    padding-bottom: 0;
+.controls .inline-proxy {
+    padding-top: 5px;
+    padding-left: 15px;
+    margin-bottom: 5px;
+    list-style-image: disc;
+}
+
+.controls .inline-proxy:hover {
+    background-image: url(../img/delete.png);
+    background-repeat: no-repeat;
+    background-position: 0px 10px;
+    cursor: default;
 }
 
 .alternate-name {
