@@ -8,6 +8,7 @@ import calendar
 from django.contrib.gis.db import models
 from django.db.models.base import ModelBase
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
 
 from taggit.managers import TaggableManager
 from autoslug import AutoSlugField
@@ -193,21 +194,22 @@ OtherNameManager = proxymanager_factory("OtherNameManager",
 
 
 class OtherName(models.Model):
+    OTHER, PARALLEL = range(2)
     TYPES = (
-            ("other", "Other"),
-            ("parallel", "Parallel"),
+            (OTHER, _("Other")),
+            (PARALLEL, "Parallel"),
     )
     name = models.CharField("Alternate name", max_length=255)
-    type = models.CharField("Type of name", max_length=10)
+    type = models.PositiveIntegerField(_("Type of name"), choices=TYPES)
     resource = models.ForeignKey(Resource)
     objects = OtherNameManager()
 reversion.register(OtherName)
 
 
 OtherFormOfName = proxymodel_factory("OtherFormOfName",
-        OtherName, OtherNameManager, "type", "other")
+        OtherName, OtherNameManager, "type", OtherName.OTHER)
 ParallelFormOfName = proxymodel_factory("ParallelFormOfName",
-        OtherName, OtherNameManager, "type", "parallel")
+        OtherName, OtherNameManager, "type", OtherName.PARALLEL)
 
 
 RelationManager = proxymanager_factory("RelationManager",
@@ -216,20 +218,21 @@ RelationManager = proxymanager_factory("RelationManager",
 
 class Relation(models.Model):
     """Relationship between two objects."""
+    NAME, PLACE = range(2)
     TYPES = (
-            ("name", "Name Access"),
-            ("place", "Place Access"),
+            (NAME, _("Name Access")),
+            (PLACE, _("Place Access")),
     )
     subject = models.ForeignKey(Resource, related_name="+")
     object = models.ForeignKey(Resource, related_name="+")
-    type = models.CharField(choices=TYPES, max_length=10)
+    type = models.PositiveIntegerField(_("Type of Relationship"), choices=TYPES)
     objects = RelationManager()
 
 
 NameAccess = proxymodel_factory("NameAccess", Relation, RelationManager,
-            "type", "name")
+            "type", Relation.NAME)
 PlaceAccess = proxymodel_factory("PlaceAccess", Relation, RelationManager,
-            "type", "place")
+            "type", Relation.PLACE)
 
 
 PropertyManager = proxymanager_factory("PropertyManager",
@@ -419,9 +422,10 @@ class CollectionManager(models.Manager):
 
 class Collection(Resource):
     """Model representing an archival description."""
+    COLLECTION, FONDS = range(2)
     LODS = (
-        ("fonds", "Fonds"),
-        ("collection", "Collection"),
+        (FONDS, _("Fonds")),
+        (COLLECTION, _("Collection")),
     )
 
     translatable_fields = (
@@ -450,8 +454,8 @@ class Collection(Resource):
     name = models.CharField("Title", max_length=255)
     slug = AutoSlugField(populate_from="name", unique=True)
     identifier = models.CharField(max_length=255)
-    lod = models.CharField("Level of Description", max_length=255,
-                choices=LODS, blank=True, null=True)
+    lod = models.PositiveIntegerField(_("Level of Description"), choices=LODS,
+                blank=True, null=True)
     creator = models.ForeignKey("Authority", null=True, blank=True)
     repository = models.ForeignKey(Repository)
     tags = TaggableManager(blank=True)
@@ -567,15 +571,18 @@ AuthorityManager.get_by_natural_key = lambda self, slug: self.get(slug=slug)
 
 class Authority(Resource):
     """Model representing an archival authority."""
+    FULL, PARTIAL, MINIMAL = range(3)
+    CORP, FAMILY, PERSON = range(3)
+
     LODS = (
-        ("full", "Full"),
-        ("partial", "Partial"),
-        ("minimal", "Minimal"),
+        (FULL, _("Full")),
+        (PARTIAL, _("Partial")),
+        (MINIMAL, _("Minimal")),
     )
     ENTITY_TYPES = (
-        ("corporate_body", "Corporate Body"),
-        ("family", "Family"),
-        ("person", "Person"),
+        (CORP, _("Corporate Body")),
+        (FAMILY, _("Family")),
+        (PERSON, _("Person")),
     )
 
     translatable_fields = (
@@ -595,8 +602,9 @@ class Authority(Resource):
     name = models.CharField("Authorized Form of Name", max_length=255)
     slug = AutoSlugField(populate_from="name", unique=True)
     identifier = models.CharField(max_length=255)
-    lod = models.CharField("Level of Description", max_length=255, choices=LODS, blank=True, null=True)
-    type_of_entity = models.CharField("Type of Entity", max_length=255,
+    lod = models.PositiveIntegerField(_("Level of Description"), choices=LODS,
+                blank=True, null=True)
+    type_of_entity = models.PositiveIntegerField(_("Type of Entity"), 
             choices=ENTITY_TYPES, blank=True, null=True)
     tags = TaggableManager(blank=True)
     objects = AuthorityManager()
@@ -649,11 +657,11 @@ reversion.register(Authority, follow=[
 
 # Proxy models for different types of authority
 Person = proxymodel_factory("Person", Authority, AuthorityManager,
-        "type_of_entity", "person")
+        "type_of_entity", Authority.PERSON)
 Family = proxymodel_factory("Family", Authority, AuthorityManager,
-        "type_of_entity", "family")
+        "type_of_entity", Authority.FAMILY)
 CorporateBody = proxymodel_factory("CorporateBody", Authority, AuthorityManager,
-        "type_of_entity", "corporate_body")
+        "type_of_entity", Authority.CORP)
 
 
 class FuzzyDate(models.Model):
