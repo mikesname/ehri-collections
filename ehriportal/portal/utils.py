@@ -15,19 +15,19 @@ from haystack.query import SearchQuerySet
 
 def language_name_from_code(code, locale="en"):
     """Get lang display name."""
-    return babel.Locale(locale).languages.get(code, "")
+    return babel.Locale(locale).languages.get(code, code)
 
 
 def get_country_name_from_code(code, locale="en"):
     """Get the country name from a 2 letter code
     defined in ISO 3166."""
-    return babel.Locale(locale).territories.get(code.upper())
+    return babel.Locale(locale).territories.get(code.upper(), code)
 
 
 def get_script_name_from_code(code, locale="en"):
     """Get the script name from a 4 letter code
     defined in ISO 15924."""
-    return babel.Locale(locale).scripts.get(code)
+    return babel.Locale(locale).scripts.get(code, code)
 
 
 class HaystackPaginationEncoder(json.JSONEncoder):

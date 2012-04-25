@@ -173,28 +173,24 @@ class CollectionEditView(PortalUpdateView):
     form_class = forms.CollectionEditForm
     model = models.Collection
     template_name = "collection_form.html"
-    properties = ["language", "script", "language_of_description", 
-            "script_of_description"]
+    formsets = {
+            "dates": forms.DateFormSet,
+            "othernames": forms.OtherNameFormSet,
+            "language": forms.LanguageFormSet, 
+            "script": forms.ScriptFormSet,
+            "language_of_description": forms.LanguageOfDescriptionFormSet, 
+            "script_of_description": forms.ScriptOfDescriptionFormSet,
+    }
 
     def get_formsets(self):
         formsets = {}
         if self.request.method == "POST":
-            formsets["dates"] = forms.DateFormSet(
-                    self.request.POST, self.request.FILES, instance=self.object)
-            formsets["othernames"] = forms.OtherNameFormSet(
-                    self.request.POST, self.request.FILES, instance=self.object)
-            for propname in self.properties:
-                formsets[propname] = forms.propertyformset_factory(
-                        self.model, propname)(
-                                self.request.POST, self.request.FILES,
-                                    instance=self.object, prefix=propname)
+            for name, formset in self.formsets.items():
+                formsets[name] = formset(self.request.POST, 
+                        self.request.FILES, instance=self.object, prefix=name)
         else:
-            formsets["dates"] = forms.DateFormSet(instance=self.object)
-            formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
-            for propname in self.properties:
-                formsets[propname] = forms.propertyformset_factory(
-                        self.model, propname)(
-                                instance=self.object, prefix=propname)
+            for name, formset in self.formsets.items():
+                formsets[name] = formset(instance=self.object, prefix=name)
         return formsets
 
 

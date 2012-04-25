@@ -50,20 +50,11 @@ def get_language_choices(lang=None):
         yield (code, utils.language_name_from_code(code, locale=lang) or name) 
 
 
-class LanguageSelectWidget(forms.SelectMultiple):
-    choices = get_language_choices()
-
-
 def get_script_choices(lang=None):
     if lang is None:
         lang = translation.get_language().split("-")[0]
     for code, name in data.SCRIPT_CODES:
         yield (code, utils.language_name_from_code(code, locale=lang) or name) 
-
-
-class ScriptSelectWidget(forms.SelectMultiple):
-    choices = get_script_choices()
-
 
 
 class MapSearchForm(PortalSearchForm):
@@ -115,6 +106,20 @@ class OtherNameForm(forms.ModelForm):
                 "name": forms.TextInput(attrs={'placeholder': _("Type another name here...")}),
         }
 
+class LanguagePropertyForm(forms.ModelForm):
+    class Meta:
+        fields = ("value",)
+        widgets = {
+            "value": forms.Select(blank=True, choices=get_language_choices()),
+        }
+
+class ScriptPropertyForm(forms.ModelForm):
+    class Meta:
+        fields = ("value",)
+        widgets = {
+            "value": forms.Select(blank=True, choices=get_script_choices()),
+        }
+
 class CollectionEditForm(forms.ModelForm):
     class Meta:
         model = models.Collection
@@ -132,12 +137,12 @@ class AuthorityEditForm(forms.ModelForm):
 class RestoreRevisionForm(forms.Form):
     """Restore a revision of an object."""
 
-def propertyformset_factory(topclass, propname):
+def propertyformset_factory(topclass, propname, form=None):
     propcls = models.propertyproxy_factory(propname)
     return inlineformset_factory(
-            topclass, propcls, fields=("value",), extra=1)
+            topclass, propcls, form=form, fields=("value",), extra=1)
 
-
+# FIXME: Should have collection hard-coded in here, although it seems to work okay?
 DateFormSet = inlineformset_factory(models.Collection, models.FuzzyDate,
         form=FuzzyDateForm, extra=1)
 
@@ -152,5 +157,18 @@ ParallelNameFormSet = inlineformset_factory(models.Collection, models.ParallelFo
 
 ContactFormSet = inlineformset_factory(models.Repository, models.Contact,
         extra=1)
+
+ScriptFormSet = propertyformset_factory(
+        models.Collection, "script", form=ScriptPropertyForm)
+
+LanguageFormSet = propertyformset_factory(
+        models.Collection, "language", form=LanguagePropertyForm)
+
+ScriptOfDescriptionFormSet = propertyformset_factory(
+        models.Collection, "script_of_description", form=ScriptPropertyForm)
+
+LanguageOfDescriptionFormSet = propertyformset_factory(
+        models.Collection, "language_of_description", form=LanguagePropertyForm)
+
 
 
