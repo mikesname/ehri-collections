@@ -42,51 +42,51 @@ class ListCollectionsView(ListView):
 
 
 urlpatterns = patterns('',
-    #url(r'^/?$', object_list, listinfo, name='repo_list'),
+    #url(r'^/?$', object_list, listinfo, name='repository_list'),
     url(r'^search/?$', views.PortalSearchListView.as_view(
         model=models.Repository,
         facetclasses=FACETS,
-        template_name="repository_search.html"), name='repo_search'),
+        template_name="repository_search.html"), name='repository_search'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
-        redirect='repo_search',
+        redirect='repository_search',
         form_class=forms.FacetListSearchForm,
         model=models.Repository,
         facetclasses=FACETS),
             name='collection_facets'),
-    url(r'^/?$', object_list, listinfo, name='repo_list'),
+    url(r'^/?$', object_list, listinfo, name='repository_list'),
     # Crud Actions
     url(r'^create/?$', 
             user_passes_test(permissions.is_staff)(
-                views.RepositoryEditView.as_view()), name='repo_create'),
+                views.RepositoryEditView.as_view()), name='repository_create'),
     url(r'^edit/(?P<slug>[-\w]+)/?$',
             user_passes_test(permissions.is_staff)(
-                views.RepositoryEditView.as_view()), name='repo_edit'),
+                views.RepositoryEditView.as_view()), name='repository_edit'),
     url(r'^delete/(?P<slug>[-\w]+)/?$', 
             user_passes_test(permissions.is_staff)(
-                views.RepositoryDeleteView.as_view()), name='repo_delete'),
+                views.RepositoryDeleteView.as_view()), name='repository_delete'),
     url(r'^history/(?P<slug>[-\w]+)/?$', views.PortalHistoryView.as_view(
             model=models.Repository,
-        ), name='repo_history'),
+        ), name='repository_history'),
     url(r'^restore/(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRestoreView.as_view(
             model=models.Repository,
-        ), name='repo_restore'),
+        ), name='repository_restore'),
     url(r'^diff/(?P<slug>[-\w]+)/?$', views.PortalRevisionDiffView.as_view(
             model=models.Repository,
             template_name="repository_diff.html",
-        ), name='repo_diff'),
+        ), name='repository_diff'),
     
     # these catch-all item must be at the bottom
     url(r'^(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRevisionView.as_view(
             model=models.Repository,
             template_name="repository_revision.html"
-        ), name='repo_revision'),
+        ), name='repository_revision'),
     url(r'^(?P<slug>[-\w]+)/?$', views.PortalDetailView.as_view(
             model=models.Repository,
             template_name="repository_detail.html"
-        ), name='repo_detail'),
+        ), name='repository_detail'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
             ListCollectionsView.as_view(
                 template_name="collection_list.html"    
-            ), name='repo_collections'),
+            ), name='repository_collections'),
 )
 

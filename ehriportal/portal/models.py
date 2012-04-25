@@ -331,31 +331,31 @@ class Repository(Resource):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('repo_detail', [self.slug])
+        return ('repository_detail', [self.slug])
 
     @models.permalink
     def get_edit_url(self):
-        return ('repo_edit', [self.slug])
+        return ('repository_edit', [self.slug])
 
     @models.permalink
     def get_delete_url(self):
-        return ('repo_delete', [self.slug])
+        return ('repository_delete', [self.slug])
 
     @models.permalink
     def get_revision_url(self, version_id):
-        return ('repo_revision', [self.slug, version_id])
+        return ('repository_revision', [self.slug, version_id])
     
     @models.permalink
     def get_restore_url(self, version_id):
-        return ('repo_restore', [self.slug, version_id])
+        return ('repository_restore', [self.slug, version_id])
     
     @models.permalink
     def get_diff_url(self):
-        return ('repo_diff', [self.slug])
+        return ('repository_diff', [self.slug])
     
     @models.permalink
     def get_history_url(self):
-        return ('repo_history', [self.slug])
+        return ('repository_history', [self.slug])
     
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)

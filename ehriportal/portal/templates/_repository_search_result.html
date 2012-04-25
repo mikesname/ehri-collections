@@ -1,11 +1,11 @@
 {% load highlight %}
 <h4>
     <i class="icon-home"></i>
-    <a title="{{result.name}}" href="{% url repo_detail slug=result.slug %}">
+    <a title="{{result.name}}" href="{% url repository_detail slug=result.slug %}">
         {{ result.name|truncatewords:10 }}
     </a>
     <span class="repository-country">
-        <a href="{% url repo_search %}?selected_facets=country_exact:{{result.country|urlencode}}">
+        <a href="{% url repository_search %}?selected_facets=country_exact:{{result.country|urlencode}}">
             {{ result.country|truncatewords:2 }}
         </a>
     </span>

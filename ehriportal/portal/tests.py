@@ -203,7 +203,7 @@ class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
         self.create_user_and_login()
         self.model = models.Repository
         self.slug = "wiener-library"
-        self.urlprefix = "repo"
+        self.urlprefix = "repository"
         self.testdata = {}
         self.updatedata = {
             "identifier": "Test",
@@ -218,7 +218,7 @@ class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
 
     def test_repo_collections(self):
         """Test repository's list of collections."""
-        response = self.client.get(reverse("repo_collections", kwargs={
+        response = self.client.get(reverse("repository_collections", kwargs={
             "slug": self.slug,
         }))
         self.assertEqual(response.status_code, 200)

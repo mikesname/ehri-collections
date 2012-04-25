@@ -239,7 +239,7 @@ class RepositoryEditView(PortalUpdateView):
 
 class RepositoryDeleteView(DeleteView):
     template_name = "repository_confirm_delete.html"
-    success_url = reverse_lazy("repo_search")
+    success_url = reverse_lazy("repository_search")
     model = models.Repository
 
 

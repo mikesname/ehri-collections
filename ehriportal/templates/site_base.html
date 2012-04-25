@@ -19,7 +19,7 @@
 {% block nav %}    
     <ul class="nav">{% spaceless %}
         <li id="tab_collections"><a href="{% url collection_search %}">{% trans "Collections" %}</a></li>
-        <li id="tab_repositories"><a href="{% url repo_search %}">{% trans "Repositories" %}</a></li>
+        <li id="tab_repositories"><a href="{% url repository_search %}">{% trans "Repositories" %}</a></li>
         <li id="tab_authorities"><a href="{% url authority_search %}">{% trans "Authorities" %}</a></li>
         <li id="tab_map"><a href="{% url map_search %}">{% trans "Map" %}</a></li>
         {% if user.is_authenticated %}

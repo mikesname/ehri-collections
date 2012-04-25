@@ -86,7 +86,7 @@ SearchListView = Backbone.View.extend(
     @model.bind "change", @render, this
 
   _renderObject: (repo) ->
-    url = dutils.urls.resolve("repo_detail",
+    url = dutils.urls.resolve("repository_detail",
       slug: repo.slug
     )
     @$el.append "<h4><a class='repo-link' href='" + url + "'>" + repo.name + "</a></h4>"

@@ -113,7 +113,7 @@
     },
     _renderObject: function(repo) {
       var url;
-      url = dutils.urls.resolve("repo_detail", {
+      url = dutils.urls.resolve("repository_detail", {
         slug: repo.slug
       });
       this.$el.append("<h4><a class='repo-link' href='" + url + "'>" + repo.name + "</a></h4>");

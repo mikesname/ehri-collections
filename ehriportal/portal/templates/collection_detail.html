@@ -10,7 +10,7 @@
 
 {% block sidebar_details %}
     <div class="repo-logo">
-        <a href="{%url repo_detail object.repository.slug %}">
+        <a href="{%url repository_detail object.repository.slug %}">
         {% if object.repository.logo %}
             <img  src="{{object.repository.logo.url}}" />
         {% else %}

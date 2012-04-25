@@ -9,7 +9,7 @@
 {% with object.collection_set.count as count %}
     {% if count %}
     <h3>
-        <a href={%url repo_collections object.slug %}>Browse {{count}} collection{{count|pluralize}}</a>
+        <a href={%url repository_collections object.slug %}>Browse {{count}} collection{{count|pluralize}}</a>
     </h3>
     {% else %}
         <p>No collection information is currently available.</p>
