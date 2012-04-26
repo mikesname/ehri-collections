@@ -173,8 +173,6 @@ class CollectionEditView(PortalUpdateView):
     form_class = forms.CollectionEditForm
     model = models.Collection
     template_name = "collection_form.html"
-    properties = ["language", "script", "language_of_description", 
-            "script_of_description"]
 
     def get_formsets(self):
         formsets = {}
@@ -183,18 +181,9 @@ class CollectionEditView(PortalUpdateView):
                     self.request.POST, self.request.FILES, instance=self.object)
             formsets["othernames"] = forms.OtherNameFormSet(
                     self.request.POST, self.request.FILES, instance=self.object)
-            for propname in self.properties:
-                formsets[propname] = forms.propertyformset_factory(
-                        self.model, propname)(
-                                self.request.POST, self.request.FILES,
-                                    instance=self.object, prefix=propname)
         else:
             formsets["dates"] = forms.DateFormSet(instance=self.object)
             formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
-            for propname in self.properties:
-                formsets[propname] = forms.propertyformset_factory(
-                        self.model, propname)(
-                                instance=self.object, prefix=propname)
         return formsets
 
 
@@ -210,7 +199,6 @@ class RepositoryEditView(PortalUpdateView):
     form_class = forms.RepositoryEditForm
     model = models.Repository
     template_name = "repository_form.html"
-    properties = ["language", "script"]
 
     def get_formsets(self):
         formsets = {}
@@ -221,19 +209,10 @@ class RepositoryEditView(PortalUpdateView):
                     self.request.POST, self.request.FILES, instance=self.object)
             formsets["othernames"] = forms.OtherNameFormSet(
                     self.request.POST, self.request.FILES, instance=self.object)
-            for propname in self.properties:
-                formsets[propname] = forms.propertyformset_factory(
-                        self.model, propname)(
-                                self.request.POST, self.request.FILES,
-                                    instance=self.object, prefix=propname)
         else:
             formsets["contacts"] = forms.ContactFormSet(instance=self.object)
             formsets["parallelnames"] = forms.ParallelNameFormSet(instance=self.object)
             formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
-            for propname in self.properties:
-                formsets[propname] = forms.propertyformset_factory(
-                        self.model, propname)(
-                                instance=self.object, prefix=propname)
         return formsets
 
 
@@ -263,24 +242,14 @@ class AuthorityEditView(PortalUpdateView):
     form_class = forms.AuthorityEditForm
     model = models.Authority
     template_name = "authority_form.html"
-    properties = ["language", "script"]
 
     def get_formsets(self):
         formsets = {}
         if self.request.method == "POST":
             formsets["othernames"] = forms.OtherNameFormSet(
                     self.request.POST, self.request.FILES, instance=self.object)
-            for propname in self.properties:
-                formsets[propname] = forms.propertyformset_factory(
-                        self.model, propname)(
-                                self.request.POST, self.request.FILES,
-                                    instance=self.object, prefix=propname)
         else:
             formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
-            for propname in self.properties:
-                formsets[propname] = forms.propertyformset_factory(
-                        self.model, propname)(
-                                instance=self.object, prefix=propname)
         return formsets
 
 

@@ -3,7 +3,7 @@
 import os
 import re
 import datetime
-import calendar
+import json
 
 from django.contrib.gis.db import models
 from django.db.models.base import ModelBase
@@ -12,6 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from taggit.managers import TaggableManager
 from autoslug import AutoSlugField
+from jsonfield import JSONField
 
 from portal import utils
 from portal.thumbs import ImageWithThumbsField
@@ -19,6 +20,8 @@ from portal.thumbs import ImageWithThumbsField
 import reversion
 
 from south.modelsinspector import add_introspection_rules
+
+EMPTY_JSON_LIST = json.dumps([])
 
 # get South to play nice with ImageWithThumbsField
 add_introspection_rules(
@@ -139,16 +142,6 @@ class Resource(models.Model):
         return [(p.name, p.value) for p in self.property_set.all()]
 
     @property
-    def languages(self):
-        """Short cut for fetching language properties."""
-        return self.get_property("language")
-
-    @property
-    def scripts(self):
-        """Short cut for fetching script properties."""
-        return self.get_property("script")
-
-    @property
     def tag_list(self):
         """Short cut for listing all tags."""
         return self.tags.all()
@@ -161,7 +154,8 @@ class Resource(models.Model):
         """Set a property.  This does NOT imply overwriting 
         existing ones, since multiple properties can have the
         same name, i.e. language: [en, de]."""
-        self.property_set.add(Property(resource=self, name=name, value=value))
+        prop, created = Property.objects.get_or_create(
+                    resource=self, name=name, value=value)
 
     def delete_property(self, name, withval=None):
         """Delete a property with the given name and (optionally)
@@ -308,6 +302,8 @@ class Repository(Resource):
             upload_to=lambda inst, fn: os.path.join(inst.slug,
                 "%s_logo%s" % (inst.slug,
                     os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
+    languages = JSONField(_("Language(s)"), default=EMPTY_JSON_LIST)
+    scripts = JSONField(_("Script(s)"), default=EMPTY_JSON_LIST)
     tags = TaggableManager(blank=True)
     objects = RepositoryManager()
 
@@ -330,7 +326,7 @@ class Repository(Resource):
         contact = self.primary_contact
         if contact is None or contact.country_code is None:
             return
-        return utils.get_country_name_from_code(contact.country_code)
+        return utils.country_name_from_code(contact.country_code)
 
     @models.permalink
     def get_absolute_url(self):
@@ -408,7 +404,7 @@ class Contact(models.Model):
             self.postal_code,
             self.city,
             self.region,
-            utils.get_country_name_from_code(self.country_code) \
+            utils.country_name_from_code(self.country_code) \
                     if self.country_code else None
         ] if e is not None]
         return "\n".join(elems).replace(", ", "\n")
@@ -458,6 +454,13 @@ class Collection(Resource):
                 blank=True, null=True)
     creator = models.ForeignKey("Authority", null=True, blank=True)
     repository = models.ForeignKey(Repository)
+    languages = JSONField(_("Language(s) of Materials"), default=EMPTY_JSON_LIST)
+    scripts = JSONField(_("Script(s) of Materials"), default=EMPTY_JSON_LIST)
+    languages_of_description = JSONField(
+                _("Language(s) of Description"), default=EMPTY_JSON_LIST)
+    scripts_of_description = JSONField(
+                _("Script(s) of Description"), default=EMPTY_JSON_LIST)
+    
     tags = TaggableManager(blank=True)
     objects = CollectionManager()
 
@@ -472,10 +475,6 @@ class Collection(Resource):
         # TODO: Find the proper way of doing this
         return [ne.subject for ne in NameAccess.objects.select_related()\
                     .filter(object=self).all()]
-
-    @property
-    def languages_of_description(self):
-        return self.get_property("languages_of_description")
 
     @property
     def start_date(self):
@@ -606,6 +605,8 @@ class Authority(Resource):
                 blank=True, null=True)
     type_of_entity = models.PositiveIntegerField(_("Type of Entity"), 
             choices=ENTITY_TYPES, blank=True, null=True)
+    languages = JSONField(_("Language(s)"), default=EMPTY_JSON_LIST)
+    scripts = JSONField(_("Script(s)"), default=EMPTY_JSON_LIST)
     tags = TaggableManager(blank=True)
     objects = AuthorityManager()
 

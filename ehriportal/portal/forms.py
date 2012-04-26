@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis import geos
 from django.forms.models import modelformset_factory, inlineformset_factory
 
+from jsonfield.forms import JSONFormField
 from haystack.forms import EmptySearchQuerySet
 
 from portal import models, data, utils
@@ -43,27 +44,15 @@ class PortalAllSearchForm(PortalSearchForm):
         return EmptySearchQuerySet()
 
 
-def get_language_choices(lang=None):
-    if lang is None:
-        lang = translation.get_language().split("-")[0]
-    for code, name in data.LANGUAGE_CODES:
-        yield (code, utils.language_name_from_code(code, locale=lang) or name) 
-
-
 class LanguageSelectWidget(forms.SelectMultiple):
-    choices = get_language_choices()
-
-
-def get_script_choices(lang=None):
-    if lang is None:
-        lang = translation.get_language().split("-")[0]
-    for code, name in data.SCRIPT_CODES:
-        yield (code, utils.language_name_from_code(code, locale=lang) or name) 
+    choices = utils.language_choices()
+    def __init__(self, *args, **kwargs):
+        print "Init Lang Select"
+        super(LanguageSelectWidget, self).__init__(*args, **kwargs)
 
 
 class ScriptSelectWidget(forms.SelectMultiple):
-    choices = get_script_choices()
-
+    choices = utils.script_choices()
 
 
 class MapSearchForm(PortalSearchForm):
@@ -99,6 +88,18 @@ class FacetListSearchForm(PortalSearchForm):
             choices=(("count",_("Count")), ("name", _("Name"))))
 
 
+class LanguageSelectFormField(JSONFormField):
+    def __init__(self, *args, **kwargs):
+        super(LanguageSelectFormField, self).__init__(*args, **kwargs)
+        self.widget = forms.SelectMultiple(choices=utils.language_choices())
+
+
+class ScriptSelectFormField(JSONFormField):
+    def __init__(self, *args, **kwargs):
+        super(ScriptSelectFormField, self).__init__(*args, **kwargs)
+        self.widget = forms.SelectMultiple(choices=utils.script_choices())
+
+
 class FuzzyDateForm(forms.ModelForm):
     class Meta:
         model = models.FuzzyDate
@@ -116,16 +117,24 @@ class OtherNameForm(forms.ModelForm):
         }
 
 class CollectionEditForm(forms.ModelForm):
+    languages = LanguageSelectFormField()
+    languages_of_description = LanguageSelectFormField()
+    scripts = ScriptSelectFormField()
+    scripts_of_description = ScriptSelectFormField()
     class Meta:
         model = models.Collection
 
 
 class RepositoryEditForm(forms.ModelForm):
+    languages = LanguageSelectFormField()
+    scripts = ScriptSelectFormField()
     class Meta:
         model = models.Repository
 
 
 class AuthorityEditForm(forms.ModelForm):
+    languages = LanguageSelectFormField()
+    scripts = ScriptSelectFormField()
     class Meta:
         model = models.Authority
 

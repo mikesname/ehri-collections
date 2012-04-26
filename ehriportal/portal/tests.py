@@ -94,7 +94,7 @@ class EntityCrudTestMixin(object):
         self.assertNotIn("de", c.languages)
         self.testdata.update(self.updatedata)
         self.testdata.update({
-            "language-0-value": "de",
+            "languages": c.languages + ["de"],
         })
         response = self.client.post(reverse(self.urlprefix + "_edit", kwargs={
             "slug": self.slug,
@@ -208,10 +208,9 @@ class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
         self.updatedata = {
             "identifier": "Test",
             "name": "Test",
-            "language-0-value": "en",
+            "languages": ["en", "fr"],
         }
-        for field in ["contact_set", "otherformofname_set", "parallelformofname_set",
-                "script", "language"]:
+        for field in ["contact_set", "otherformofname_set", "parallelformofname_set"]:
             self.testdata["%s-INITIAL_FORMS" % field] = 0 
             self.testdata["%s-MAX_NUM_FORMS" % field] = 1
             self.testdata["%s-TOTAL_FORMS" % field] = 1
@@ -237,11 +236,9 @@ class PortalCollectionTest(TestCase, EntityCrudTestMixin):
             "identifier": "GB Test 0001",
             "name": "Test Collection",
             "repository": self.model.objects.get(slug=self.slug).repository.pk,
-            "language-0-value": "en",
+            "languages": "en",
         }
-        for field in ["date_set", "otherformofname_set",
-                "script", "script_of_description",
-                "language", "language_of_description"]:
+        for field in ["date_set", "otherformofname_set"]:
             self.testdata["%s-INITIAL_FORMS" % field] = 0 
             self.testdata["%s-MAX_NUM_FORMS" % field] = 1
             self.testdata["%s-TOTAL_FORMS" % field] = 1
@@ -259,9 +256,9 @@ class PortalAuthorityTest(TestCase, EntityCrudTestMixin):
         self.updatedata = {
             "identifier": "GB Test 0001",
             "name": "Auth Test",
-            "language-0-value": "en",
+            "languages": "en",
         }
-        for field in ["otherformofname_set", "script", "language"]:
+        for field in ["otherformofname_set"]:
             self.testdata["%s-INITIAL_FORMS" % field] = 0 
             self.testdata["%s-MAX_NUM_FORMS" % field] = 1
             self.testdata["%s-TOTAL_FORMS" % field] = 1

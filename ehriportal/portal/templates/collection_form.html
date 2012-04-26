@@ -80,8 +80,8 @@
         <legend>Conditions of Access &amp; Use Area</legend>
         {% include "_form_field.html" with field=form.access_conditions %}
         {% include "_form_field.html" with field=form.reproduction_conditions %}
-        {% include "_property_form_field.html" with propform=formsets.language name="Language of Materials" %}
-        {% include "_property_form_field.html" with propform=formsets.script name="Script of Materials" %}
+        {% include "_form_field.html" with field=form.languages %}
+        {% include "_form_field.html" with field=form.scripts %}
         {% include "_form_field.html" with field=form.physical_characteristics %}
         {% include "_form_field.html" with field=form.finding_aids %}
     </fieldset>
@@ -99,8 +99,8 @@
         {% include "_form_field.html" with field=form.description_identifier %}
         {% include "_form_field.html" with field=form.institution_identifier %}
         {% include "_form_field.html" with field=form.rules %}
-        {% include "_property_form_field.html" with propform=formsets.language_of_description name="Language of Description" %}
-        {% include "_property_form_field.html" with propform=formsets.script_of_description name="Script of Description" %}
+        {% include "_form_field.html" with field=form.languages_of_description %}
+        {% include "_form_field.html" with field=form.scripts_of_description %}
         {% include "_form_field.html" with field=form.sources %}
     </fieldset>
 {% endblock %}

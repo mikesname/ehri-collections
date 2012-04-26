@@ -12,22 +12,38 @@ from django.utils import translation
 from haystack.models import SearchResult
 from haystack.query import SearchQuerySet
 
+from portal import data
+
 
 def language_name_from_code(code, locale="en"):
     """Get lang display name."""
     return babel.Locale(locale).languages.get(code, "")
 
 
-def get_country_name_from_code(code, locale="en"):
+def country_name_from_code(code, locale="en"):
     """Get the country name from a 2 letter code
     defined in ISO 3166."""
     return babel.Locale(locale).territories.get(code.upper())
 
 
-def get_script_name_from_code(code, locale="en"):
+def script_name_from_code(code, locale="en"):
     """Get the script name from a 4 letter code
     defined in ISO 15924."""
     return babel.Locale(locale).scripts.get(code)
+
+
+def language_choices(lang=None):
+    if lang is None:
+        lang = translation.get_language().split("-")[0]
+    for code, name in data.LANGUAGE_CODES:
+        yield (code, language_name_from_code(code, locale=lang) or name) 
+
+
+def script_choices(lang=None):
+    if lang is None:
+        lang = translation.get_language().split("-")[0]
+    for code, name in data.SCRIPT_CODES:
+        yield (code, language_name_from_code(code, locale=lang) or name) 
 
 
 class HaystackPaginationEncoder(json.JSONEncoder):
