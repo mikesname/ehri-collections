@@ -3,6 +3,10 @@
 {% load i18n %}
 {% load staticfiles %}
 
+{% block extra_style %}
+    <link rel="stylesheet" href="{% static "css/bootstrap-subnav.css" %}">
+{% endblock %}
+
 {% block head_title %}
     {% if object %}
         {% trans "Edit" %} - {{object.name}}

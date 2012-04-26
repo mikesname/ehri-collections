@@ -61,10 +61,6 @@ $(function($) {
     // Wire up 
     $("body").each(function() {
         var $spy = $(this).scrollspy({
-            offset: 100,
-            activate: function() {
-                console.log(arguments);
-            }    
         });
     });
         // fix sub nav on scroll
