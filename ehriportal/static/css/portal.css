@@ -10,6 +10,19 @@ a:hover {
     min-height: 50px;
 }
 
+.subnav-fixed {
+    position: fixed;
+    top: 40px;
+    left:0px;
+    right: 0px;
+    z-index: 1020;
+}
+
+.subnav-fixed.nav {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .tag-list a, .selected-facet {
     display: inline-block;
     color: #3E6D8E;

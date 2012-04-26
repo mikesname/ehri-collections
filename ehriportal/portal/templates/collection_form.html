@@ -8,8 +8,17 @@
 {% block body_class %}collections{% endblock %}
 {% block modelname %}{% trans "Collection" %}{% endblock %}
 
+{% block fieldset_links %}
+    <li><a href="#identity-area">Identity Area</a></li>
+    <li><a href="#context-area">Context Area</a></li>
+    <li><a href="#content-area">Content Area</a></li>
+    <li><a href="#access-area">Access Area</a></li>
+    <li><a href="#materials-area">Materials Area</a></li>
+    <li><a href="#control-area">Control Area</a></li>
+{% endblock %}
+
 {% block fieldsets %}
-    <fieldset>
+    <fieldset id="identity-area">
         <legend>Identity Area</legend>
         {% include "_form_field.html" with field=form.identifier %}
         {% include "_form_field.html" with field=form.name %}
@@ -60,7 +69,7 @@
         {% include "_form_field.html" with field=form.lod %}
         {% include "_form_field.html" with field=form.extent_and_medium %}
     </fieldset>
-    <fieldset>
+    <fieldset id="context-area">
         <legend>Context Area</legend>
         {% include "_form_field.html" with field=form.creator %}
         {% include "_form_field.html" with field=form.repository %}
@@ -68,7 +77,7 @@
         {% include "_form_field.html" with field=form.acquisition %}
     </fieldset>
 
-    <fieldset>
+    <fieldset id="content-area">
         <legend>Content &amp; Structure Area</legend>
         {% include "_form_field.html" with field=form.scope_and_content %}
         {% include "_form_field.html" with field=form.appraisal %}
@@ -76,7 +85,7 @@
         {% include "_form_field.html" with field=form.system_of_arrangement %}
     </fieldset>
 
-    <fieldset>
+    <fieldset id="access-area">
         <legend>Conditions of Access &amp; Use Area</legend>
         {% include "_form_field.html" with field=form.access_conditions %}
         {% include "_form_field.html" with field=form.reproduction_conditions %}
@@ -86,7 +95,7 @@
         {% include "_form_field.html" with field=form.finding_aids %}
     </fieldset>
 
-    <fieldset>
+    <fieldset id="materials-area">
         <legend>Allied Material Area</legend>
         {% include "_form_field.html" with field=form.location_of_originals %}
         {% include "_form_field.html" with field=form.location_of_copies %}
@@ -94,7 +103,7 @@
         {% include "_form_field.html" with field=form.publication_notes %}
     </fieldset>
 
-    <fieldset>
+    <fieldset id="control-area">
         <legend>Control Area</legend>
         {% include "_form_field.html" with field=form.description_identifier %}
         {% include "_form_field.html" with field=form.institution_identifier %}
