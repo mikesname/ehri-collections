@@ -302,8 +302,8 @@ class Repository(Resource):
             upload_to=lambda inst, fn: os.path.join(inst.slug,
                 "%s_logo%s" % (inst.slug,
                     os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
-    languages = JSONField(_("Language(s)"), default=EMPTY_JSON_LIST)
-    scripts = JSONField(_("Script(s)"), default=EMPTY_JSON_LIST)
+    languages = JSONField(_("Language(s)"), blank=True, default=EMPTY_JSON_LIST)
+    scripts = JSONField(_("Script(s)"), blank=True, default=EMPTY_JSON_LIST)
     tags = TaggableManager(blank=True)
     objects = RepositoryManager()
 
@@ -454,12 +454,12 @@ class Collection(Resource):
                 blank=True, null=True)
     creator = models.ForeignKey("Authority", null=True, blank=True)
     repository = models.ForeignKey(Repository)
-    languages = JSONField(_("Language(s) of Materials"), default=EMPTY_JSON_LIST)
-    scripts = JSONField(_("Script(s) of Materials"), default=EMPTY_JSON_LIST)
+    languages = JSONField(_("Language(s) of Materials"), blank=True, default=EMPTY_JSON_LIST)
+    scripts = JSONField(_("Script(s) of Materials"), blank=True, default=EMPTY_JSON_LIST)
     languages_of_description = JSONField(
-                _("Language(s) of Description"), default=EMPTY_JSON_LIST)
+                _("Language(s) of Description"), blank=True, default=EMPTY_JSON_LIST)
     scripts_of_description = JSONField(
-                _("Script(s) of Description"), default=EMPTY_JSON_LIST)
+                _("Script(s) of Description"), blank=True, default=EMPTY_JSON_LIST)
     
     tags = TaggableManager(blank=True)
     objects = CollectionManager()
@@ -605,8 +605,8 @@ class Authority(Resource):
                 blank=True, null=True)
     type_of_entity = models.PositiveIntegerField(_("Type of Entity"), 
             choices=ENTITY_TYPES, blank=True, null=True)
-    languages = JSONField(_("Language(s)"), default=EMPTY_JSON_LIST)
-    scripts = JSONField(_("Script(s)"), default=EMPTY_JSON_LIST)
+    languages = JSONField(_("Language(s)"), blank=True, default=EMPTY_JSON_LIST)
+    scripts = JSONField(_("Script(s)"), blank=True, default=EMPTY_JSON_LIST)
     tags = TaggableManager(blank=True)
     objects = AuthorityManager()
 
@@ -615,10 +615,6 @@ class Authority(Resource):
 
     def natural_key(self):
         return (self.slug,)
-
-    @property
-    def languages_of_description(self):
-        return self.get_property("languages_of_description")
 
     @models.permalink
     def get_absolute_url(self):
