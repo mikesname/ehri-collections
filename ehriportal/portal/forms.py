@@ -123,7 +123,14 @@ class OtherNameForm(forms.ModelForm):
                 "name": forms.TextInput(attrs={'placeholder': _("Type another name here...")}),
         }
 
-class CollectionEditForm(forms.ModelForm):
+class PortalEntityForm(forms.ModelForm):
+    # extra (non-model) field for revision comment
+    revision_comment = forms.CharField(required=False, widget=forms.TextInput(attrs={
+                "placeholder": _("Summary of changes (optional)"),
+            }))
+
+
+class CollectionEditForm(PortalEntityForm):
     languages = LanguageSelectFormField()
     languages_of_description = LanguageSelectFormField()
     scripts = ScriptSelectFormField()
@@ -132,14 +139,14 @@ class CollectionEditForm(forms.ModelForm):
         model = models.Collection
 
 
-class RepositoryEditForm(forms.ModelForm):
+class RepositoryEditForm(PortalEntityForm):
     languages = LanguageSelectFormField()
     scripts = ScriptSelectFormField()
     class Meta:
         model = models.Repository
 
 
-class AuthorityEditForm(forms.ModelForm):
+class AuthorityEditForm(PortalEntityForm):
     languages = LanguageSelectFormField()
     scripts = ScriptSelectFormField()
     class Meta:

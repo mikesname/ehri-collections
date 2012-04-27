@@ -150,7 +150,10 @@ class PortalUpdateView(UpdateView):
             # run update in a reversion 
             with reversion.create_revision():
                 reversion.set_user(self.request.user)
-                reversion.set_comment("Created" if not self.object else "Updated")
+                comment = form.cleaned_data["revision_comment"].strip()
+                if not comment:
+                    comment = "Created" if not self.object else "Updated"
+                reversion.set_comment(comment)
                 self.object = form.save()
                 for formset in formsets.values():
                     formset.instance = self.object
