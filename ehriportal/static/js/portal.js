@@ -1,4 +1,4 @@
-$(function($) {
+jQuery(function($) {
 
     $(".more-facets").each(function(i, elem) {
         $(elem).modal({backdrop:true,
@@ -41,8 +41,51 @@ $(function($) {
         $("input[type='submit']", $(".object-version-history")).prop(
                 "disabled", checked.length != 2);
     });
+});
 
-    var slider = $('.slide-out-div').tabSlideOut({
+
+jQuery(function($) {
+    // fix sub nav on scroll - this is all
+    // nicked from Bootstraps (nice looking) docs and needs
+    // to be done properly at some point
+
+    // Wire up body for scrollspy
+    $("body").scrollspy({
+        offset: 300,
+    });
+
+    var $win = $(window)
+      , $nav = $('.subnav')
+      , navTop = $('.subnav').length && $('.subnav').offset().top - 40
+      , isFixed = false;
+
+    processScroll();
+
+    // hack sad times - holdover until rewrite for 2.1
+    $nav.on('click', function () {
+      if (!isFixed) setTimeout(function () {  $win.scrollTop($win.scrollTop() - 47) }, 100);
+    })
+
+    $win.on('scroll', processScroll);
+
+    function processScroll() {
+      var i, scrollTop = $win.scrollTop();
+      if (scrollTop >= navTop && !isFixed) {
+        isFixed = true;
+        $nav.addClass('subnav-fixed');
+      } else if (scrollTop <= navTop && isFixed) {
+        isFixed = false;
+        $nav.removeClass('subnav-fixed');
+      }
+    }
+});
+
+
+jQuery(function($) {
+
+    // Handle slide-out suggestions form
+    //
+    var $slider = $('.slide-out-div').tabSlideOut({
         tabHandle: '.handle',                              
         pathToTabImage: TAB_PATH, 
         imageHeight: '75px',                               
@@ -58,75 +101,42 @@ $(function($) {
         },
     });
 
-    // Wire up 
-    $("body").each(function() {
-        var $spy = $(this).scrollspy({
-        });
-    });
-        // fix sub nav on scroll
-    var $win = $(window)
-      , $nav = $('.subnav')
-      , navTop = $('.subnav').length && $('.subnav').offset().top - 40
-      , isFixed = 0;
-
-    processScroll();
-
-    // hack sad times - holdover until rewrite for 2.1
-    //$nav.on('click', function () {
-    //  if (!isFixed) setTimeout(function () {  $win.scrollTop($win.scrollTop() - 47) }, 10)
-    //})
-
-    $win.on('scroll', processScroll);
-
-    function processScroll() {
-      var i, scrollTop = $win.scrollTop();
-      if (scrollTop >= navTop && !isFixed) {
-        isFixed = 1;
-        $nav.addClass('subnav-fixed');
-      } else if (scrollTop <= navTop && isFixed) {
-        isFixed = 0;
-        $nav.removeClass('subnav-fixed');
-      }
-    }
-
-
-
     // handle suggestion form submission... this is a bit
     // gross and fragile.
-    var form = $("#suggestion-form"),
-        submit = $("button[type='submit']", form),
-        thanks = $(".alert-success", form),
-        name = $("#id_suggestion-name", form),
-        text = $("#id_suggestion-text", form),
-        email = $("#id_suggestion-email", form),
-        emailregexp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-
-    name.add(text).add(email).keyup(function(event) {
-        var nameval = $.trim(name.val());
-        var textval = $.trim(text.val());
-        var emailval = $.trim(email.val());
+    var $form = $("#suggestion-form"),
+        $submit = $("button[type='submit']", $form),
+        $thanks = $(".alert-success", $form),
+        $name = $("#id_suggestion-name", $form),
+        $text = $("#id_suggestion-text", $form),
+        $email = $("#id_suggestion-email", $form),
+        $emailregexp = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    $(".slide-out-div").show();
+    $name.add($text).add($email).keyup(function(event) {
+        var nameval = $.trim($name.val());
+        var textval = $.trim($text.val());
+        var emailval = $.trim($email.val());
         // email is not reqired, so only check it if filled in
-        var emailvalid = (emailval === "" || emailval !== "" && emailval.match(emailregexp));
+        var emailvalid = (emailval === "" || emailval !== "" && emailval.match($emailregexp));
         var ok = nameval !== "" && textval !== "" && emailvalid;
-        submit.prop("disabled", !ok);
+        $submit.prop("disabled", !ok);
     });
 
-    $(".modal-close", form).click(function() {
+    $(".modal-close", $form).click(function() {
         $(".slide-out-div > .handle").click(); 
     });
 
-    submit.prop("disabled", true).click(function(event) {
+    $submit.prop("disabled", true).click(function(event) {
         event.preventDefault();
-        submit.prop("disabled", true);
-        var formele = $(this).closest("form");
-        $.post(formele.attr("action"), formele.serialize(), function(data, textStatus) {
+        $submit.prop("disabled", true);
+        var $formele = $(this).closest("form");
+        $.post($formele.attr("action"), $formele.serialize(), function(data, textStatus) {
             // FIXME: This is rubbish.
-            thanks.width(thanks.parent().width() - (thanks.outerWidth(true) - thanks.width()));
-            thanks.slideDown(500, function() {
+            $thanks.width($thanks.parent().width() - ($thanks.outerWidth(true) - $thanks.width()));
+            $thanks.slideDown(500, function() {
                 setTimeout(function() {
                     $(".slide-out-div > .handle").click();
-                    text.val("");
-                    thanks.slideUp(500); 
+                    $text.val("");
+                    $thanks.slideUp(500); 
                 }, 1000);
             });
         });

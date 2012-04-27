@@ -13,7 +13,6 @@ jQuery(document).ready(function($) {
     $.fn.multiSelect = function(options) {
 
         function handleOption($option, name, $list) {
-            console.log($list.length);
             $option.prop("disabled", true);
             $("<li/>")
                 .html($option.html())
@@ -40,7 +39,6 @@ jQuery(document).ready(function($) {
                 .removeAttr("multiple")
                 .bind("blur click keydown", function(event) {
                     // only handle TAB events on keydown
-                    console.log("EVENT", event.type);
                     if ($(this).val() && (event.type != "keydown" || event.keyCode != 9)) {
                         var $opt = $(this).find("option:selected");
                         event.preventDefault();

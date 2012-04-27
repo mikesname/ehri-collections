@@ -78,10 +78,10 @@
 
 @media (min-width: 1210px)
 .subnav-fixed .nav {
+    margin: 0 auto;
     width: 1168px;
 }
 
-@media (min-width: 980px)
 .subnav-fixed .nav {
     width: 938px;
     margin: 0 auto;
