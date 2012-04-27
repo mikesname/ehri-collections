@@ -23,7 +23,7 @@ class FacetMultiValueDateField(indexes.FacetMultiValueField):
     field_type = "date"
 
 
-class RepositoryIndex(indexes.SearchIndex, indexes.Indexable):
+class RepositoryIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name', default=True, boost=1.1)
     slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)
     description = indexes.CharField(model_attr='general_context', null=True)
@@ -63,7 +63,7 @@ class RepositoryIndex(indexes.SearchIndex, indexes.Indexable):
         return self.get_model().objects.filter(created_on__lte=datetime.datetime.now())
 
 
-class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
+class AuthorityIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name', default=True, boost=1.1)
     slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)
     history = indexes.CharField(model_attr='history', null=True, stored=True)
@@ -87,7 +87,7 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
         return self.get_model().objects.filter(created_on__lte=datetime.datetime.now())
 
 
-class CollectionIndex(indexes.SearchIndex, indexes.Indexable):
+class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name', default=True, boost=1.1)
     slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)
     description = indexes.CharField(model_attr='scope_and_content', null=True)
