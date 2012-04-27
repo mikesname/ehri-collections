@@ -1,4 +1,4 @@
-from __future__ import with_statement
+import os
 from fabric.api import *
 from fabric.contrib.console import confirm
 from contextlib import contextmanager as _contextmanager
@@ -51,6 +51,20 @@ def setup():
                 "shared/production_settings.py") 
     deploy()
 
+def copy_media():
+    """
+    Copy site_media/media/* from local to remote.
+    """
+    require('path')
+    with cd(env.path):
+        localpath = "%(project_name)s/site_media/media" % env
+        for root, folders, files in os.walk(localpath):
+            remotepath = root.replace("%s/" % env.project_name, "")
+            for folder in folders:
+                run("mkdir -p %s/%s" % (remotepath, folder))
+            for file in files:
+                put("%s/%s" % (root, file), remotepath, file)
+
 def deploy():
     """
     Deploy the latest version of the site to the servers, install any
@@ -91,7 +105,7 @@ def rollback():
 def upload_tar_from_git():
     "Create an archive from the current Git master branch and upload it"
     require("path", "release")
-    local('git archive --format=tar mapping | gzip > %(release)s.tar.gz' % env)
+    local('git archive --format=tar master | gzip > %(release)s.tar.gz' % env)
     run('mkdir %(path)s/releases/%(release)s' % env)
     put('%(release)s.tar.gz' % env, '%(path)s/packages/' % env)
     with cd("%(path)s/releases/%(release)s" % env):
@@ -135,7 +149,7 @@ def collectstatic():
     "Save static files to serve location."
     with virtualenv():
         with cd("%(path)s/releases/%(release)s/%(project_name)s" % env):
-            run('python manage.py js_urls')
+            #run('python manage.py js_urls')
             run('python manage.py collectstatic --noinput')
 
 def update_solr_schema():
