@@ -187,7 +187,43 @@ class EntityCrudTestMixin(object):
         }))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(len(reversion.get_for_object(obj)), revcount + 1)
+
+    def test_revision_update(self):
+        """Test comparing revisions."""
+        import reversion
+        obj = self.model.objects.get(slug=self.slug)
+        histcount = reversion.get_for_object(obj).count()
+        self.testdata.update(self.updatedata)
+        response = self.client.post(reverse(self.urlprefix + "_edit", kwargs={
+            "slug": self.slug,
+        }), self.testdata)
+        self.assertEqual(reversion.get_for_object(obj).count(), histcount + 1)
         
+    def test_revision_comment(self):
+        """Test that a revision comment ends up in the history correctly."""
+        import reversion
+        obj = self.model.objects.get(slug=self.slug)
+        self.testdata.update(self.updatedata)
+        comment = "This is a test comment"
+        self.testdata.update(revision_comment=comment)
+        response = self.client.post(reverse(self.urlprefix + "_edit", kwargs={
+            "slug": self.slug,
+        }), self.testdata)
+        hist = reversion.get_for_object(obj)[0]
+        self.assertEqual(hist.revision.comment, comment)
+        
+    def test_diff_update(self):
+        """Test comparing revisions."""
+        import reversion
+        obj = self.model.objects.get(slug=self.slug)
+        # call the update test
+        self.test_revision_update()
+        history = reversion.get_for_object(obj)
+        response = self.client.get(reverse(self.urlprefix + "_diff", kwargs={
+            "slug": self.slug,
+        }), dict(r=[hist.id for hist in history[:2]]))
+        self.assertEqual(response.status_code, 200)
+
     def test_history(self):
         """Test viewing history."""
         response = self.client.get(reverse(self.urlprefix + "_history", kwargs={
