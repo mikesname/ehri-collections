@@ -257,7 +257,31 @@ class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
             "slug": self.slug,
         }))
         self.assertEqual(response.status_code, 200)
-        
+    
+    def test_create_collection_get(self):
+        """Test create-collection form for this repository."""
+        response = self.client.get(reverse("repository_collection_create", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 200)
+
+    def test_create_collection_post(self):
+        """Test create-collection form for this repository."""
+        obj = self.model.objects.get(slug=self.slug)
+        collectiondata = {
+            "identifier": "test0001",
+            "name": "Test Name",
+            "repository": obj.id,
+        }
+        for field in ["date_set", "otherformofname_set"]:
+            collectiondata["%s-INITIAL_FORMS" % field] = 0 
+            collectiondata["%s-MAX_NUM_FORMS" % field] = 1
+            collectiondata["%s-TOTAL_FORMS" % field] = 1
+        response = self.client.post(reverse("repository_collection_create", kwargs={
+            "slug": self.slug,
+        }), collectiondata)
+        self.assertEqual(response.status_code, 302)
+
 
 class PortalCollectionTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "repository.json", "collection.json"]
