@@ -15,10 +15,10 @@ ADMINS = [
     ("Mike", "michael.bryant@kcl.ac.uk"),
 ]
 
-STATIC_ROOT = os.path.join(PROJECT_ROOT, "../../..", PROJECT_NAME, "static")
-MEDIA_ROOT = os.path.join(PROJECT_ROOT, "../../..", PROJECT_NAME, "media")
-MEDIA_URL = "/%s/media/" % PROJECT_NAME
+STATIC_ROOT = os.path.join(PROJECT_ROOT, "../../..", "site_media/static")
 STATIC_URL = "/%s/static/" % PROJECT_NAME
+MEDIA_ROOT = os.path.join(PROJECT_ROOT, "../../..", "site_media/media")
+MEDIA_URL = "/%s/media/" % PROJECT_NAME
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
