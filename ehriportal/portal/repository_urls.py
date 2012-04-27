@@ -74,6 +74,9 @@ urlpatterns = patterns('',
             model=models.Repository,
             template_name="repository_diff.html",
         ), name='repository_diff'),
+    url(r'^(?P<slug>[-\w]+)/collections/create/?$', 
+            views.RepositoryCollectionCreateView.as_view(), 
+                name='repository_collection_create'),
     
     # these catch-all item must be at the bottom
     url(r'^(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRevisionView.as_view(

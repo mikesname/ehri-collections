@@ -11,6 +11,12 @@
     {% include "_repository_info.html" %}
 {% endblock %}
 
+{% block extra_admin_actions %}
+    <li><a class="btn btn-primary" href="{% url repository_collection_create slug=object.slug %}">
+        {% trans "Create New Collection" %}
+    </a></li>
+{% endblock %}
+
 {% block body_description %}
     {% include "_repository_description.html" %}
 {% endblock %}

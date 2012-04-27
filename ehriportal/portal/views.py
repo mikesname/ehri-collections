@@ -189,6 +189,27 @@ class CollectionEditView(PortalUpdateView):
             formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
         return formsets
 
+class RepositoryCollectionCreateView(CollectionEditView):
+    """Specialisation of collection edit view for 
+    creating a collection in the context of a
+    particular repository."""
+    def get_object(self):
+        # this view only works for creating 
+        # new collections
+        return
+
+    def get_initial(self, *args, **kwargs):
+        initial = super(RepositoryCollectionCreateView, self)\
+                .get_initial(*args, **kwargs)
+        initial["repository"] = get_object_or_404(
+                models.Repository, slug=self.kwargs["slug"])
+        return initial
+
+    def get_context_data(self, **kwargs):
+        context = super(RepositoryCollectionCreateView, self)\
+                .get_context_data(**kwargs)
+        return context
+
 
 class CollectionDeleteView(DeleteView):
     template_name = "collection_confirm_delete.html"

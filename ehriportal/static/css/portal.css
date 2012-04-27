@@ -190,3 +190,7 @@ a.openid-button:hover {
 .more-history {
     margin-top: 0.4em;
 }
+
+.admin-actions li {
+    padding: 5px;    
+}

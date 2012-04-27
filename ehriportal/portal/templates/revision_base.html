@@ -8,13 +8,14 @@
 {% endblock %}
 
 {% block sidebar_admin %}
-    <div class="well">
+    <div class="admin-actions well">
         <h4>{% trans "Administration Actions" %}</h4>
-        <p>
-        <a class="btn btn-warning" href="{{ object|restore_url:version.id}}">
-            {% trans "Restore Version" %}
-        </a>
-        </p>
+        <ul class="unstyled">
+            <li>
+                <a class="btn btn-warning" href="{{ object|restore_url:version.id}}">
+                    {% trans "Restore Version" %}</a>
+            </li>
+        </ul>
     </div>
 {% endblock %}
 

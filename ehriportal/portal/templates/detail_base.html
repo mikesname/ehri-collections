@@ -22,12 +22,13 @@
             {% endif %}
             {% if user.is_staff %}
                 {% block sidebar_admin %}
-                    <div class="well">
+                    <div class="admin-actions well">
                         <h4>{% trans "Administration Actions" %}</h4>
-                        <p>
-                            <a class="btn" href="{{object.get_edit_url}}">Edit</a>
-                            <a class="btn btn-danger" href="{{object.get_delete_url}}">Delete</a>
-                        </p>
+                        <ul class="unstyled">
+                            <li><a class="btn" href="{{object.get_edit_url}}">{% trans "Edit Description" %}</a></li>
+                            <li><a class="btn btn-danger" href="{{object.get_delete_url}}">{% trans "Delete" %}</a></li>
+                            {% block extra_admin_actions %}{% endblock %}
+                        </ul>
                     </div>
                 {% endblock %}
             {% endif %}
