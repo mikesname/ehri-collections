@@ -1,6 +1,7 @@
 from django.conf import settings
+from django.core.urlresolvers import reverse_lazy
 from django.conf.urls.defaults import *
-from django.views.generic.simple import direct_to_template
+from django.views.generic.simple import direct_to_template, redirect_to
 
 from django.contrib import admin
 admin.autodiscover()
@@ -15,6 +16,9 @@ urlpatterns = patterns("",
     url(r"^$", direct_to_template, {
         "template": "homepage.html",
     }, name="home"),
+    # this bare URL crops up mysteriously in production... 
+    # redirect it to the account login page.
+    url(r"^openid/?$", redirect_to, {"url": reverse_lazy("acct_login"), "permanent": True}),
     url(r"^admin/invite_user/$", "pinax.apps.signup_codes.views.admin_invite_user", name="admin_invite_user"),
     url(r"^admin/", include(admin.site.urls)),
     url(r"^about/", include("about.urls")),
