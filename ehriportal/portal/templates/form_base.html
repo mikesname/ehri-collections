@@ -21,7 +21,7 @@
 {% else %}
 <h2>{% trans "New" %} {% block modelname %}{% endblock %}</h2>
 {% endif %}
-<div class="subnav subnav-fixed">
+<div class="subnav">
     <ul class="nav nav-pills">
         {% block fieldset_links %}{% endblock %}
     </ul>
@@ -49,6 +49,8 @@
                 {% endif %}
             </div>
         </form>
+        <!-- Hack for extra footer height... -->
+        <div style="height=200px;">&nbsp;</div>
     </div>
 </div>
 {% endblock %}

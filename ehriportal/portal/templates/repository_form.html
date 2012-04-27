@@ -9,9 +9,18 @@
 {% block body_class %}repositories{% endblock %}
 {% block modelname %}{% trans "Repository" %}{% endblock %}
 
+{% block fieldset_links %}
+    <li><a href="#identity-area">{% trans "Identity Area" %}</a></li>
+    <li><a href="#contact-area">{% trans "Contact Area" %}</a></li>
+    <li><a href="#description-area">{% trans "Description Area" %}</a></li>
+    <li><a href="#access-area">{% trans "Access Area" %}</a></li>
+    <li><a href="#services-area">{% trans "Services Area" %}</a></li>
+    <li><a href="#control-area">{% trans "Control Area" %}</a></li>
+{% endblock %}
+
 {% block fieldsets %}
-    <fieldset>
-        <legend>Identity Area</legend>
+    <fieldset id="identity-area">
+        <legend>{% trans "Identity Area" %}</legend>
         {% include "_form_field.html" with field=form.identifier %}
         {% include "_form_field.html" with field=form.name %}
 
@@ -54,12 +63,12 @@
 
         {% include "_form_field.html" with field=form.type_of_entity %}
     </fieldset>
-    <fieldset>
-        <legend>Contact Area</legend>
+    <fieldset id="contact-area">
+        <legend>{% trans "Contact Area" %}</legend>
         <div class="contact-formset" id="id_formset-{{formsets.contacts.prefix}}" data-prefix="{{formsets.contacts.prefix}}">
             {{formsets.contacts.management_form}}
             {% for f in formsets.contacts %}
-                <div class="control-group form-inline {% if f.errors %}error{% endif %}"
+                <div class="control-group form-inline well {% if f.errors %}error{% endif %}"
                     id="id_form-{{f.prefix}}" data-prefix="{{f.prefix}}">
                     {{ f|as_bootstrap }}
                 </div>
@@ -67,8 +76,8 @@
         </div>
     </fieldset>
 
-    <fieldset>
-        <legend>Description Area</legend>
+    <fieldset id="description-area">
+        <legend>{% trans "Description Area" %}</legend>
         {% include "_form_field.html" with field=form.history %}
         {% include "_form_field.html" with field=form.geocultural_context %}
         {% include "_form_field.html" with field=form.mandates %}
@@ -79,22 +88,22 @@
         {% include "_form_field.html" with field=form.finding_aids %}
     </fieldset>
 
-    <fieldset>
-        <legend>Access Area</legend>
+    <fieldset id="access-area">
+        <legend>{% trans "Access Area" %}</legend>
         {% include "_form_field.html" with field=form.opening_times %}
         {% include "_form_field.html" with field=form.access_conditions %}
         {% include "_form_field.html" with field=form.accessibility %}
     </fieldset>
 
-    <fieldset>
-        <legend>Services Area</legend>
+    <fieldset id="services-area">
+        <legend>{% trans "Services Area" %}</legend>
         {% include "_form_field.html" with field=form.research_services %}
         {% include "_form_field.html" with field=form.reproduction_services %}
         {% include "_form_field.html" with field=form.public_areas %}
     </fieldset>
 
-    <fieldset>
-        <legend>Control Area</legend>
+    <fieldset id="control-area">
+        <legend>{% trans "Control Area" %}</legend>
         {% include "_form_field.html" with field=form.description_identifier %}
         {% include "_form_field.html" with field=form.institution_identifier %}
         {% include "_form_field.html" with field=form.rules %}

@@ -2,6 +2,7 @@
 
 import string
 from django import forms
+from django.contrib.admin import widgets
 from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.gis import geos
@@ -101,13 +102,19 @@ class ScriptSelectFormField(JSONFormField):
 
 
 class FuzzyDateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        attrs={
+            'class':'input-small',
+            'placeholder': 'Start Date'
+        }
+        super(FuzzyDateForm, self).__init__(*args, **kwargs)
+        self.fields["start_date"].widget = widgets.AdminDateWidget(attrs=attrs)
+        self.fields["end_date"].widget = widgets.AdminDateWidget(attrs=attrs)
+
     class Meta:
         model = models.FuzzyDate
         fields = ("start_date", "end_date",)
-        widgets = {
-                "start_date": forms.TextInput(attrs={'class':'input-small', 'placeholder': 'Start Date'}),
-                "end_date": forms.TextInput(attrs={'class':'input-small', 'placeholder': 'End Date'}),
-        }
+
 
 class OtherNameForm(forms.ModelForm):
     class Meta:

@@ -9,17 +9,17 @@
 {% block modelname %}{% trans "Collection" %}{% endblock %}
 
 {% block fieldset_links %}
-    <li><a href="#identity-area">Identity Area</a></li>
-    <li><a href="#context-area">Context Area</a></li>
-    <li><a href="#content-area">Content Area</a></li>
-    <li><a href="#access-area">Access Area</a></li>
-    <li><a href="#materials-area">Materials Area</a></li>
-    <li><a href="#control-area">Control Area</a></li>
+    <li><a href="#identity-area">{% trans "Identity Area" %}</a></li>
+    <li><a href="#context-area">{% trans "Context Area" %}</a></li>
+    <li><a href="#content-area">{% trans "Content and Structure Area" %}</a></li>
+    <li><a href="#access-area">{% trans "Conditions of Access and Use Area" %}</a></li>
+    <li><a href="#materials-area">{% trans "Allied Materials Area" %}</a></li>
+    <li><a href="#control-area">{% trans "Control Area" %}</a></li>
 {% endblock %}
 
 {% block fieldsets %}
     <fieldset id="identity-area">
-        <legend>Identity Area</legend>
+        <legend>{% trans "Identity Area" %}</legend>
         {% include "_form_field.html" with field=form.identifier %}
         {% include "_form_field.html" with field=form.name %}
 
@@ -70,7 +70,7 @@
         {% include "_form_field.html" with field=form.extent_and_medium %}
     </fieldset>
     <fieldset id="context-area">
-        <legend>Context Area</legend>
+        <legend>{% trans "Context Area" %}</legend>
         {% include "_form_field.html" with field=form.creator %}
         {% include "_form_field.html" with field=form.repository %}
         {% include "_form_field.html" with field=form.archival_history %}
@@ -78,7 +78,7 @@
     </fieldset>
 
     <fieldset id="content-area">
-        <legend>Content &amp; Structure Area</legend>
+        <legend>{% trans "Content and Structure Area" %}</legend>
         {% include "_form_field.html" with field=form.scope_and_content %}
         {% include "_form_field.html" with field=form.appraisal %}
         {% include "_form_field.html" with field=form.accruals %}
@@ -86,7 +86,7 @@
     </fieldset>
 
     <fieldset id="access-area">
-        <legend>Conditions of Access &amp; Use Area</legend>
+        <legend>{% trans "Conditions of Access and Use Area" %}</legend>
         {% include "_form_field.html" with field=form.access_conditions %}
         {% include "_form_field.html" with field=form.reproduction_conditions %}
         {% include "_form_field.html" with field=form.languages %}
@@ -96,7 +96,7 @@
     </fieldset>
 
     <fieldset id="materials-area">
-        <legend>Allied Material Area</legend>
+        <legend>{% trans "Allied Material Area" %}</legend>
         {% include "_form_field.html" with field=form.location_of_originals %}
         {% include "_form_field.html" with field=form.location_of_copies %}
         {% include "_form_field.html" with field=form.related_units_of_description %}
@@ -104,7 +104,7 @@
     </fieldset>
 
     <fieldset id="control-area">
-        <legend>Control Area</legend>
+        <legend>{% trans "Control Area" %}</legend>
         {% include "_form_field.html" with field=form.description_identifier %}
         {% include "_form_field.html" with field=form.institution_identifier %}
         {% include "_form_field.html" with field=form.rules %}

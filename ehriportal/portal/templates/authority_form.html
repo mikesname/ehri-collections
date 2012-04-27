@@ -9,9 +9,15 @@
 {% block body_class %}authorities{% endblock %}
 {% block modelname %}{% trans "Authority" %}{% endblock %}
 
+{% block fieldset_links %}
+    <li><a href="#identity-area">{% trans "Identity Area" %}</a></li>
+    <li><a href="#description-area">{% trans "Description Area" %}</a></li>
+    <li><a href="#control-area">{% trans "Control Area" %}</a></li>
+{% endblock %}
+
 {% block fieldsets %}
     <fieldset>
-        <legend>Identity Area</legend>
+        <legend id="identity-area">{% trans "Identity Area" %}</legend>
         {% include "_form_field.html" with field=form.identifier %}
         {% include "_form_field.html" with field=form.name %}
 
@@ -38,7 +44,7 @@
     </fieldset>
 
     <fieldset>
-        <legend>Description Area</legend>
+        <legend id="description-area">{% trans "Description Area" %}</legend>
         {% include "_form_field.html" with field=form.dates_of_existence %}
         {% include "_form_field.html" with field=form.history %}
         {% include "_form_field.html" with field=form.places %}
@@ -50,7 +56,7 @@
     </fieldset>
 
     <fieldset>
-        <legend>Control Area</legend>
+        <legend id="control-area">{% trans "Control Area" %}</legend>
         {% include "_form_field.html" with field=form.description_identifier %}
         {% include "_form_field.html" with field=form.institution_identifier %}
         {% include "_form_field.html" with field=form.rules %}
