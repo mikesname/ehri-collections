@@ -4,7 +4,7 @@
 <div class="repo-logo">
     <a href="{{object.get_absolute_url}}">
         {% if object.logo %}
-        <img width="220px" src="{% static object.logo.url %}" />
+        <img width="220px" src="{{object.logo.url }}" />
         {% else %}
         <img width="220px" height="220px" src="{% static "img/repository_placeholder.png" %}" />
         {% endif %}
@@ -17,7 +17,7 @@
     {% for img in object.images %}
     <div id="repo-images">
         <div class="item active">
-            <img title="{{img.caption|default_if_none:""}}" width="220px" src="{% static img.image.url_300x300 %}" />  
+            <img title="{{img.caption|default_if_none:""}}" width="220px" src="{{img.image.url_300x300}}" />  
     </div>
     {% endfor %}
   </div>

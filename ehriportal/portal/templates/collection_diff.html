@@ -12,7 +12,7 @@
     <div class="repo-logo">
         <a href="{%url repository_detail object.repository.slug %}">
         {% if object.repository.logo %}
-            <img  src="{% static object.repository.logo.url %}" />
+            <img  src="{{object.repository.logo.url}}" />
         {% else %}
         <div class="logo-placeholder"><h3>{{object.repository.name}}</h3></div>
         {% endif %}
