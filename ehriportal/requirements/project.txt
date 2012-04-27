@@ -15,10 +15,10 @@ pysolr
 south
 django-taggit
 django-autoslug
-django-jsonfield
 django-modeltranslation
  -e git+https://github.com/toastdriven/django-haystack.git#egg=django-haystack
  -e git+https://github.com/geopy/geopy.git#egg=geopy
+ -e git+https://github.com/bradjasper/django-jsonfield.git#egg=django-jsonfield
 django-piston
 django-reversion
 diff-match-patch
