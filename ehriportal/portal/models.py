@@ -46,12 +46,12 @@ add_introspection_rules(
 # Quite a lot of the time in this app we use 'Proxy' models that
 # provide a simplified interface to a given entity. For example,
 # the OtherName entity has the `type` field which tells us that
-# it is (for instance) either an `other` form of name or a 
+# it is (for instance) either an `other` form of name or a
 # `parallel` form of name. Creating a proxy model called
 # ParallelFormOfName that always sets type=`parallel` behind the
-# scenes simplifies the code that uses it quite a lot. This is 
+# scenes simplifies the code that uses it quite a lot. This is
 # especially true when dealing with the Property class, and with
-# types of reference such as NameAccess and PlaceAccess. 
+# types of reference such as NameAccess and PlaceAccess.
 # The two functions below abstract the boilerplate from creating
 # proxy classes that have a specific attribute with a particular
 # fixed value.
@@ -85,6 +85,7 @@ def proxymodel_factory(proxyname, modelcls, managercls, attrname, attrval):
                     modelcls.__name__, attrname, attrval),
                 objects=managercls(**{"filter_%s" % attrname: attrval})))
 
+
 class EntityUrlMixin(object):
     """Mixin for entity models  that have a slug and use
     revision control."""
@@ -103,19 +104,19 @@ class EntityUrlMixin(object):
     @models.permalink
     def get_revision_url(self, version_id):
         return (self._meta.verbose_name + '_revision', [self.slug, version_id])
-    
+
     @models.permalink
     def get_restore_url(self, version_id):
         return (self._meta.verbose_name + '_restore', [self.slug, version_id])
-    
+
     @models.permalink
     def get_diff_url(self):
         return (self._meta.verbose_name + '_diff', [self.slug])
-    
+
     @models.permalink
     def get_history_url(self):
         return (self._meta.verbose_name + '_history', [self.slug])
-    
+
 
 
 
@@ -184,7 +185,7 @@ class Resource(models.Model):
         return [p[1] for p in self.properties if p[0] == propname]
 
     def set_property(self, name, value):
-        """Set a property.  This does NOT imply overwriting 
+        """Set a property.  This does NOT imply overwriting
         existing ones, since multiple properties can have the
         same name, i.e. language: [en, de]."""
         prop, created = Property.objects.get_or_create(
@@ -277,7 +278,7 @@ reversion.register(Property)
 
 
 def propertyproxy_factory(propname):
-    """Get a class that represents a property of 
+    """Get a class that represents a property of
     a specific given name, i.e. script or language."""
     return proxymodel_factory("Property_%s" % propname, Property,
             PropertyManager, "name", propname)
@@ -465,7 +466,7 @@ class Collection(Resource, EntityUrlMixin):
                 _("Language(s) of Description"), blank=True, default=EMPTY_JSON_LIST)
     scripts_of_description = JSONField(
                 _("Script(s) of Description"), blank=True, default=EMPTY_JSON_LIST)
-    
+
     tags = TaggableManager(blank=True)
     objects = CollectionManager()
 
@@ -521,7 +522,7 @@ class Collection(Resource, EntityUrlMixin):
             return [self.start_date]
         return [datetime.date(y,1,1) for y in \
                 range(self.start_date.year, self.end_date.year + 1)]
-        
+
     @property
     def date_range_string(self):
         """List of years this collection covers."""
@@ -580,7 +581,7 @@ class Authority(Resource, EntityUrlMixin):
     identifier = models.CharField(max_length=255)
     lod = models.PositiveIntegerField(_("Level of Description"), choices=LODS,
                 blank=True, null=True)
-    type_of_entity = models.PositiveIntegerField(_("Type of Entity"), 
+    type_of_entity = models.PositiveIntegerField(_("Type of Entity"),
             choices=ENTITY_TYPES, blank=True, null=True)
     languages = JSONField(_("Language(s)"), blank=True, default=EMPTY_JSON_LIST)
     scripts = JSONField(_("Script(s)"), blank=True, default=EMPTY_JSON_LIST)
@@ -624,7 +625,7 @@ class FuzzyDate(models.Model):
     )
     collection = models.ForeignKey(Collection, related_name="date_set")
     start_date = models.DateField()
-    start_time = models.TimeField(blank=True, null=True)    
+    start_time = models.TimeField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)
     precision = models.CharField(max_length=20, choices=CHOICES)
