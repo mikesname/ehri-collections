@@ -616,6 +616,10 @@ class Authority(Resource):
     def natural_key(self):
         return (self.slug,)
 
+    @property
+    def type_name(self):
+        return self.ENTITY_TYPES[self.type_of_entity][1]
+
     @models.permalink
     def get_absolute_url(self):
         return ('authority_detail', [self.slug])
