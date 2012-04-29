@@ -85,6 +85,39 @@ def proxymodel_factory(proxyname, modelcls, managercls, attrname, attrval):
                     modelcls.__name__, attrname, attrval),
                 objects=managercls(**{"filter_%s" % attrname: attrval})))
 
+class EntityUrlMixin(object):
+    """Mixin for entity models  that have a slug and use
+    revision control."""
+    @models.permalink
+    def get_absolute_url(self):
+        return (self._meta.verbose_name + '_detail', [self.slug])
+
+    @models.permalink
+    def get_edit_url(self):
+        return (self._meta.verbose_name + '_edit', [self.slug])
+
+    @models.permalink
+    def get_delete_url(self):
+        return (self._meta.verbose_name + '_delete', [self.slug])
+
+    @models.permalink
+    def get_revision_url(self, version_id):
+        return (self._meta.verbose_name + '_revision', [self.slug, version_id])
+    
+    @models.permalink
+    def get_restore_url(self, version_id):
+        return (self._meta.verbose_name + '_restore', [self.slug, version_id])
+    
+    @models.permalink
+    def get_diff_url(self):
+        return (self._meta.verbose_name + '_diff', [self.slug])
+    
+    @models.permalink
+    def get_history_url(self):
+        return (self._meta.verbose_name + '_history', [self.slug])
+    
+
+
 
 class ResourceType(ModelBase):
     """Metaclass for archival resources. Don't fear the magic.
@@ -263,7 +296,7 @@ class RepositoryManager(models.Manager):
         return self.get(slug=slug)
 
 
-class Repository(Resource):
+class Repository(Resource, EntityUrlMixin):
     """Repository."""
     ENTITY_TYPES=()
     LODS = ()
@@ -328,34 +361,6 @@ class Repository(Resource):
             return
         return utils.country_name_from_code(contact.country_code)
 
-    @models.permalink
-    def get_absolute_url(self):
-        return ('repository_detail', [self.slug])
-
-    @models.permalink
-    def get_edit_url(self):
-        return ('repository_edit', [self.slug])
-
-    @models.permalink
-    def get_delete_url(self):
-        return ('repository_delete', [self.slug])
-
-    @models.permalink
-    def get_revision_url(self, version_id):
-        return ('repository_revision', [self.slug, version_id])
-    
-    @models.permalink
-    def get_restore_url(self, version_id):
-        return ('repository_restore', [self.slug, version_id])
-    
-    @models.permalink
-    def get_diff_url(self):
-        return ('repository_diff', [self.slug])
-    
-    @models.permalink
-    def get_history_url(self):
-        return ('repository_history', [self.slug])
-    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -416,7 +421,7 @@ class CollectionManager(models.Manager):
         return self.get(slug=slug)
 
 
-class Collection(Resource):
+class Collection(Resource, EntityUrlMixin):
     """Model representing an archival description."""
     COLLECTION, FONDS = range(2)
     LODS = (
@@ -527,34 +532,6 @@ class Collection(Resource):
             return str(self.start_date.year)
         return "%s-%s" % (dates[0].year, dates[-1].year)
 
-    @models.permalink
-    def get_absolute_url(self):
-        return ('collection_detail', [self.slug])
-
-    @models.permalink
-    def get_edit_url(self):
-        return ('collection_edit', [self.slug])
-
-    @models.permalink
-    def get_delete_url(self):
-        return ('collection_delete', [self.slug])
-
-    @models.permalink
-    def get_revision_url(self, version_id):
-        return ('collection_revision', [self.slug, version_id])
-
-    @models.permalink
-    def get_restore_url(self, version_id):
-        return ('collection_restore', [self.slug, version_id])
-    
-    @models.permalink
-    def get_diff_url(self):
-        return ('collection_diff', [self.slug])
-    
-    @models.permalink
-    def get_history_url(self):
-        return ('collection_history', [self.slug])
-    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -568,7 +545,7 @@ AuthorityManager = proxymanager_factory("AuthorityManager",
 AuthorityManager.get_by_natural_key = lambda self, slug: self.get(slug=slug)
 
 
-class Authority(Resource):
+class Authority(Resource, EntityUrlMixin):
     """Model representing an archival authority."""
     FULL, PARTIAL, MINIMAL = range(3)
     CORP, FAMILY, PERSON = range(3)
@@ -620,34 +597,6 @@ class Authority(Resource):
     def type_name(self):
         return self.ENTITY_TYPES[self.type_of_entity][1]
 
-    @models.permalink
-    def get_absolute_url(self):
-        return ('authority_detail', [self.slug])
-
-    @models.permalink
-    def get_edit_url(self):
-        return ('authority_edit', [self.slug])
-
-    @models.permalink
-    def get_delete_url(self):
-        return ('authority_delete', [self.slug])
-
-    @models.permalink
-    def get_revision_url(self, version_id):
-        return ('authority_revision', [self.slug, version_id])
-    
-    @models.permalink
-    def get_restore_url(self, version_id):
-        return ('authority_restore', [self.slug, version_id])
-    
-    @models.permalink
-    def get_diff_url(self):
-        return ('authority_diff', [self.slug])
-    
-    @models.permalink
-    def get_history_url(self):
-        return ('authority_history', [self.slug])
-    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
