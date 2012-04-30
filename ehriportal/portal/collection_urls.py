@@ -8,7 +8,7 @@ from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required, user_passes_test
 from haystack.query import SearchQuerySet
 
-from portal import views, forms, models, permissions
+from portal import views, utils, forms, models, permissions
 from portal.haystack_util import QueryFacet, FacetClass, QueryFacetClass
 
 FACETS = [
@@ -32,17 +32,20 @@ FACETS = [
     FacetClass(
         "languages_of_description",
         "Language of Description",
-        paramname="langdesc"
+        paramname="langdesc",
+        renderfn=utils.language_name_from_code,
     ),
     FacetClass(
         "languages",
         "Language",
-        paramname="lang"
+        paramname="lang",
+        renderfn=utils.language_name_from_code,
     ),
     FacetClass(
         "location_of_materials",
         "Location of Materials",
         paramname="country",
+        renderfn=utils.country_name_from_code,
     ),
     FacetClass(
         "tags",

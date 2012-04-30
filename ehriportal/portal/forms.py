@@ -28,6 +28,8 @@ def parse_point(pointstr):
 
 
 class PortalSearchForm(forms.Form):
+    ENTITIES = [models.Repository, models.Collection, models.Authority]
+
     q = forms.CharField(required=False, label=_('Search'))
 
     def filter(self, sqs):
@@ -41,8 +43,9 @@ class PortalSearchForm(forms.Form):
         return self.sqs
 
 class PortalAllSearchForm(PortalSearchForm):
-    def no_query_found(self):
-        return EmptySearchQuerySet()
+    """Form representing the whole collection."""
+   # def no_query_found(self):
+   #     return EmptySearchQuerySet()
 
 
 class LanguageSelectWidget(forms.SelectMultiple):

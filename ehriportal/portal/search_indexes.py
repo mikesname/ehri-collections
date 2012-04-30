@@ -44,7 +44,7 @@ class RepositoryIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
         return prepared_data
 
     def prepare_country(self, desc):
-        return desc.country
+        return desc.country_code
 
     def prepare_address(self, desc):
         contact = desc.primary_contact
@@ -119,14 +119,6 @@ class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
         prepared_data = super(CollectionIndex, self).prepare(obj)
         prepared_data['suggestions'] = prepared_data['text']
         return prepared_data
-
-    def prepare_languages(self, desc):
-        """Get pretty name for language."""
-        return [utils.language_name_from_code(l) for l in desc.languages]
-
-    def prepare_languages_of_description(self, desc):
-        """Get pretty name for language of description."""
-        return [utils.language_name_from_code(l) for l in desc.languages_of_description]
 
     def index_queryset(self):
         """Used when the entire index for model is updated."""

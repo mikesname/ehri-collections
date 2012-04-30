@@ -5,7 +5,7 @@ from django.views.generic.list_detail import object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required, user_passes_test
 
-from portal import views, forms, models, permissions
+from portal import views, forms, utils, models, permissions
 from portal.haystack_util import FacetClass
 
 from haystack.query import SearchQuerySet
@@ -14,6 +14,7 @@ FACETS = [
     FacetClass(
         "country",
         "Country",
+        renderfn=utils.country_name_from_code,
     )
 ]
 

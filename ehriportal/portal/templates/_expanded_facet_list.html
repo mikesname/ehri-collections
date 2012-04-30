@@ -5,16 +5,16 @@
 {% block body %}
     <div class="btn-toolbar">
         <div class="btn-group">
-            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">Sort items by...
+            <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">{% trans "Sort items by..." %}
             <span class="caret"></span></a>
           <ul class="dropdown-menu">
               <li>
                 <a class="ajax sort-header"
-                      href="{{request.get_full_path|stripparam:"sort"|addparam:"sort=name"}}">Name</a>
+                    href="{{request.get_full_path|stripparam:"sort"|addparam:"sort=name"}}">{% trans "Name" %}</a>
               </li>
               <li>
                 <a class="ajax sort-header"
-                    href="{{request.get_full_path|stripparam:"sort"|addparam:"sort=count"}}">Count</a>
+                    href="{{request.get_full_path|stripparam:"sort"|addparam:"sort=count"}}">{% trans "Count" %}</a>
               </li>
           </ul>
         </div>
@@ -32,7 +32,7 @@
                     </a>
                 </span>
                 {% else %}
-                    <a href="{{redirect|addparam:facet.facet_param|stripparam:"page,sort"}}">{{facet.name}}</a>
+                    <a href="{{redirect|addparam:facet.facet_param|stripparam:"page,sort"}}">{{facet.prettyname}}</a>
                 {% endif %}
             </td>
             <td>{{facet.count}}</td>

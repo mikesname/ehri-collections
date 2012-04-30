@@ -14,22 +14,34 @@ from haystack.query import SearchQuerySet
 
 from portal import data
 
-
-def language_name_from_code(code, locale="en"):
+# 
+# Functions that convert from an ISO code into
+# the (localised) name. 
+# TODO: Possible optimisation to be had by
+# caching the language code, although I'm 
+# not sure it's a very expensive operation.
+#
+def language_name_from_code(code, locale=None):
     """Get lang display name."""
-    return babel.Locale(locale).languages.get(code, "")
+    if locale is None:
+        locale = translation.get_language().split("-")[0]
+    return babel.Locale(locale).languages.get(code, code)
 
 
-def country_name_from_code(code, locale="en"):
+def country_name_from_code(code, locale=None):
     """Get the country name from a 2 letter code
     defined in ISO 3166."""
-    return babel.Locale(locale).territories.get(code.upper())
+    if locale is None:
+        locale = translation.get_language().split("-")[0]
+    return babel.Locale(locale).territories.get(code.upper(), code)
 
 
-def script_name_from_code(code, locale="en"):
+def script_name_from_code(code, locale=None):
     """Get the script name from a 4 letter code
     defined in ISO 15924."""
-    return babel.Locale(locale).scripts.get(code)
+    if locale is None:
+        locale = translation.get_language().split("-")[0]
+    return babel.Locale(locale).scripts.get(code, code)
 
 
 def language_choices(lang=None):

@@ -356,11 +356,16 @@ class Repository(Resource, EntityUrlMixin):
             return None
 
     @property
+    def country_code(self):
+        contact = self.primary_contact
+        if contact:
+            return contact.country_code
+
+    @property
     def country(self):
         contact = self.primary_contact
-        if contact is None or contact.country_code is None:
-            return
-        return utils.country_name_from_code(contact.country_code)
+        if contact and contact.country_code:
+            return utils.country_name_from_code(contact.country_code)
 
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)

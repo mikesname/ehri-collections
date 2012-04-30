@@ -15,11 +15,12 @@ class FacetClass(object):
     FACET_SORT_NAME = 1
 
     def __init__(self, name, prettyname, sort=FACET_SORT_COUNT,
-                paramname=None):
+                paramname=None, renderfn=None):
         self.name = name
         self.prettyname = prettyname
         self.paramname = paramname if paramname else name
         self.sort = sort
+        self.renderfn = renderfn if renderfn else lambda v: str(v)
         self.facets = []
 
     def all_sorted_by_name(self):
@@ -123,7 +124,8 @@ class Facet(object):
         self._selected = selected
 
     def prettyname(self):
-        return self.desc if self.desc else self.name
+        name = self.desc if self.desc else self.name
+        return self.klass.renderfn(name)
 
     def selected(self):
         return self.filter_name() in self._selected

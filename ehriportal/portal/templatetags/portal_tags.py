@@ -54,6 +54,10 @@ def scriptcode2name(code):
     return utils.script_name_from_code(code)
 
 @register.filter
+def countrycode2name(code):
+    return utils.country_name_from_code(code)
+
+@register.filter
 def us2title(value):
     """Formats an object's nested attribute for display"""
     value = value.split(".")[-1]

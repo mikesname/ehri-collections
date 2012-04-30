@@ -1,8 +1,19 @@
 from django.conf.urls.defaults import *
+from django.utils import translation
+from django.utils.translation import ugettext_lazy as _
 
-from portal import views, forms
+from portal import views, forms, utils
 
 from portal.haystack_util import QueryFacet, FacetClass, QueryFacetClass
+
+def render_entity(entity):
+    if entity == "portal.collection":
+        return _("Collection")
+    elif entity == "portal.repository":
+        return _("Repository")
+    elif entity == "portal.authority":
+        return _("Authority")
+    return entity
 
 FACETS = [
     QueryFacetClass(
@@ -25,7 +36,14 @@ FACETS = [
     FacetClass(
         "languages_of_description",
         "Language of Description",
-        paramname="langdesc"
+        paramname="langdesc",
+        renderfn=utils.language_name_from_code,
+    ),
+    FacetClass(
+        "django_ct",
+        "Type",
+        paramname="type",
+        renderfn=render_entity,
     ),
     FacetClass(
         "type_of_entity",
@@ -34,16 +52,19 @@ FACETS = [
     FacetClass(
         "languages",
         "Language",
-        paramname="lang"
+        paramname="lang",
+        renderfn=utils.language_name_from_code,
     ),
     FacetClass(
         "location_of_materials",
         "Location of Materials",
         paramname="location",
+        renderfn=utils.country_name_from_code,
     ),
     FacetClass(
         "country",
         "Country",
+        renderfn=utils.country_name_from_code,
     ),
     FacetClass(
         "tags",
@@ -53,11 +74,11 @@ FACETS = [
 ]
 
 urlpatterns = patterns('',
-    url(r'^all/?$', views.PortalSearchListView.as_view(
+    url(r'^/?$', views.PortalSearchListView.as_view(
         form_class=forms.PortalAllSearchForm,
         facetclasses=FACETS,
         template_name="search.html"), name='search'),
-    url(r'^all/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
+    url(r'^/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
         redirect='search',
         form_class=forms.FacetListSearchForm,
         facetclasses=FACETS),
