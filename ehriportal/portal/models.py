@@ -46,12 +46,12 @@ add_introspection_rules(
 # Quite a lot of the time in this app we use 'Proxy' models that
 # provide a simplified interface to a given entity. For example,
 # the OtherName entity has the `type` field which tells us that
-# it is (for instance) either an `other` form of name or a 
+# it is (for instance) either an `other` form of name or a
 # `parallel` form of name. Creating a proxy model called
 # ParallelFormOfName that always sets type=`parallel` behind the
-# scenes simplifies the code that uses it quite a lot. This is 
+# scenes simplifies the code that uses it quite a lot. This is
 # especially true when dealing with the Property class, and with
-# types of reference such as NameAccess and PlaceAccess. 
+# types of reference such as NameAccess and PlaceAccess.
 # The two functions below abstract the boilerplate from creating
 # proxy classes that have a specific attribute with a particular
 # fixed value.
@@ -84,6 +84,40 @@ def proxymodel_factory(proxyname, modelcls, managercls, attrname, attrval):
                 __doc__="Proxy model for %s where `%s`='%s'." % (
                     modelcls.__name__, attrname, attrval),
                 objects=managercls(**{"filter_%s" % attrname: attrval})))
+
+
+class EntityUrlMixin(object):
+    """Mixin for entity models  that have a slug and use
+    revision control."""
+    @models.permalink
+    def get_absolute_url(self):
+        return (self._meta.verbose_name + '_detail', [self.slug])
+
+    @models.permalink
+    def get_edit_url(self):
+        return (self._meta.verbose_name + '_edit', [self.slug])
+
+    @models.permalink
+    def get_delete_url(self):
+        return (self._meta.verbose_name + '_delete', [self.slug])
+
+    @models.permalink
+    def get_revision_url(self, version_id):
+        return (self._meta.verbose_name + '_revision', [self.slug, version_id])
+
+    @models.permalink
+    def get_restore_url(self, version_id):
+        return (self._meta.verbose_name + '_restore', [self.slug, version_id])
+
+    @models.permalink
+    def get_diff_url(self):
+        return (self._meta.verbose_name + '_diff', [self.slug])
+
+    @models.permalink
+    def get_history_url(self):
+        return (self._meta.verbose_name + '_history', [self.slug])
+
+
 
 
 class ResourceType(ModelBase):
@@ -151,7 +185,7 @@ class Resource(models.Model):
         return [p[1] for p in self.properties if p[0] == propname]
 
     def set_property(self, name, value):
-        """Set a property.  This does NOT imply overwriting 
+        """Set a property.  This does NOT imply overwriting
         existing ones, since multiple properties can have the
         same name, i.e. language: [en, de]."""
         prop, created = Property.objects.get_or_create(
@@ -244,7 +278,7 @@ reversion.register(Property)
 
 
 def propertyproxy_factory(propname):
-    """Get a class that represents a property of 
+    """Get a class that represents a property of
     a specific given name, i.e. script or language."""
     return proxymodel_factory("Property_%s" % propname, Property,
             PropertyManager, "name", propname)
@@ -263,7 +297,7 @@ class RepositoryManager(models.Manager):
         return self.get(slug=slug)
 
 
-class Repository(Resource):
+class Repository(Resource, EntityUrlMixin):
     """Repository."""
     ENTITY_TYPES=()
     LODS = ()
@@ -328,34 +362,6 @@ class Repository(Resource):
             return
         return utils.country_name_from_code(contact.country_code)
 
-    @models.permalink
-    def get_absolute_url(self):
-        return ('repository_detail', [self.slug])
-
-    @models.permalink
-    def get_edit_url(self):
-        return ('repository_edit', [self.slug])
-
-    @models.permalink
-    def get_delete_url(self):
-        return ('repository_delete', [self.slug])
-
-    @models.permalink
-    def get_revision_url(self, version_id):
-        return ('repository_revision', [self.slug, version_id])
-    
-    @models.permalink
-    def get_restore_url(self, version_id):
-        return ('repository_restore', [self.slug, version_id])
-    
-    @models.permalink
-    def get_diff_url(self):
-        return ('repository_diff', [self.slug])
-    
-    @models.permalink
-    def get_history_url(self):
-        return ('repository_history', [self.slug])
-    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -416,7 +422,7 @@ class CollectionManager(models.Manager):
         return self.get(slug=slug)
 
 
-class Collection(Resource):
+class Collection(Resource, EntityUrlMixin):
     """Model representing an archival description."""
     COLLECTION, FONDS = range(2)
     LODS = (
@@ -460,7 +466,7 @@ class Collection(Resource):
                 _("Language(s) of Description"), blank=True, default=EMPTY_JSON_LIST)
     scripts_of_description = JSONField(
                 _("Script(s) of Description"), blank=True, default=EMPTY_JSON_LIST)
-    
+
     tags = TaggableManager(blank=True)
     objects = CollectionManager()
 
@@ -516,7 +522,7 @@ class Collection(Resource):
             return [self.start_date]
         return [datetime.date(y,1,1) for y in \
                 range(self.start_date.year, self.end_date.year + 1)]
-        
+
     @property
     def date_range_string(self):
         """List of years this collection covers."""
@@ -527,34 +533,6 @@ class Collection(Resource):
             return str(self.start_date.year)
         return "%s-%s" % (dates[0].year, dates[-1].year)
 
-    @models.permalink
-    def get_absolute_url(self):
-        return ('collection_detail', [self.slug])
-
-    @models.permalink
-    def get_edit_url(self):
-        return ('collection_edit', [self.slug])
-
-    @models.permalink
-    def get_delete_url(self):
-        return ('collection_delete', [self.slug])
-
-    @models.permalink
-    def get_revision_url(self, version_id):
-        return ('collection_revision', [self.slug, version_id])
-
-    @models.permalink
-    def get_restore_url(self, version_id):
-        return ('collection_restore', [self.slug, version_id])
-    
-    @models.permalink
-    def get_diff_url(self):
-        return ('collection_diff', [self.slug])
-    
-    @models.permalink
-    def get_history_url(self):
-        return ('collection_history', [self.slug])
-    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -568,7 +546,7 @@ AuthorityManager = proxymanager_factory("AuthorityManager",
 AuthorityManager.get_by_natural_key = lambda self, slug: self.get(slug=slug)
 
 
-class Authority(Resource):
+class Authority(Resource, EntityUrlMixin):
     """Model representing an archival authority."""
     FULL, PARTIAL, MINIMAL = range(3)
     CORP, FAMILY, PERSON = range(3)
@@ -603,7 +581,7 @@ class Authority(Resource):
     identifier = models.CharField(max_length=255)
     lod = models.PositiveIntegerField(_("Level of Description"), choices=LODS,
                 blank=True, null=True)
-    type_of_entity = models.PositiveIntegerField(_("Type of Entity"), 
+    type_of_entity = models.PositiveIntegerField(_("Type of Entity"),
             choices=ENTITY_TYPES, blank=True, null=True)
     languages = JSONField(_("Language(s)"), blank=True, default=EMPTY_JSON_LIST)
     scripts = JSONField(_("Script(s)"), blank=True, default=EMPTY_JSON_LIST)
@@ -616,34 +594,10 @@ class Authority(Resource):
     def natural_key(self):
         return (self.slug,)
 
-    @models.permalink
-    def get_absolute_url(self):
-        return ('authority_detail', [self.slug])
+    @property
+    def type_name(self):
+        return self.ENTITY_TYPES[self.type_of_entity][1]
 
-    @models.permalink
-    def get_edit_url(self):
-        return ('authority_edit', [self.slug])
-
-    @models.permalink
-    def get_delete_url(self):
-        return ('authority_delete', [self.slug])
-
-    @models.permalink
-    def get_revision_url(self, version_id):
-        return ('authority_revision', [self.slug, version_id])
-    
-    @models.permalink
-    def get_restore_url(self, version_id):
-        return ('authority_restore', [self.slug, version_id])
-    
-    @models.permalink
-    def get_diff_url(self):
-        return ('authority_diff', [self.slug])
-    
-    @models.permalink
-    def get_history_url(self):
-        return ('authority_history', [self.slug])
-    
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
@@ -671,7 +625,7 @@ class FuzzyDate(models.Model):
     )
     collection = models.ForeignKey(Collection, related_name="date_set")
     start_date = models.DateField()
-    start_time = models.TimeField(blank=True, null=True)    
+    start_time = models.TimeField(blank=True, null=True)
     end_date = models.DateField(blank=True, null=True)
     end_time = models.TimeField(blank=True, null=True)
     precision = models.CharField(max_length=20, choices=CHOICES)
