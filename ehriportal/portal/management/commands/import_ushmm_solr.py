@@ -23,7 +23,7 @@ def gm(doc, attr):
     return [n.text for n in doc.xpath(".//field[@name='" + attr + "']")]
 
 def stripdot(text):
-    if text[-1] == ".":
+    if text and text[-1] == ".":
         return text[:-1]
     return text
 
