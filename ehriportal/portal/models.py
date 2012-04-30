@@ -12,7 +12,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from taggit.managers import TaggableManager
 from autoslug import AutoSlugField
-from jsonfield import JSONField
+import jsonfield
 
 from portal import utils
 from portal.thumbs import ImageWithThumbsField
@@ -336,8 +336,8 @@ class Repository(Resource, EntityUrlMixin):
             upload_to=lambda inst, fn: os.path.join(inst.slug,
                 "%s_logo%s" % (inst.slug,
                     os.path.splitext(fn)[1])), sizes=settings.THUMBNAIL_SIZES)
-    languages = JSONField(_("Language(s)"), blank=True, default=EMPTY_JSON_LIST)
-    scripts = JSONField(_("Script(s)"), blank=True, default=EMPTY_JSON_LIST)
+    languages = jsonfield.JSONField(_("Language(s)"), blank=True, default=EMPTY_JSON_LIST)
+    scripts = jsonfield.JSONField(_("Script(s)"), blank=True, default=EMPTY_JSON_LIST)
     tags = TaggableManager(blank=True)
     objects = RepositoryManager()
 
@@ -465,11 +465,11 @@ class Collection(Resource, EntityUrlMixin):
                 blank=True, null=True)
     creator = models.ForeignKey("Authority", null=True, blank=True)
     repository = models.ForeignKey(Repository)
-    languages = JSONField(_("Language(s) of Materials"), blank=True, default=EMPTY_JSON_LIST)
-    scripts = JSONField(_("Script(s) of Materials"), blank=True, default=EMPTY_JSON_LIST)
-    languages_of_description = JSONField(
+    languages = jsonfield.JSONField(_("Language(s) of Materials"), blank=True, default=EMPTY_JSON_LIST)
+    scripts = jsonfield.JSONField(_("Script(s) of Materials"), blank=True, default=EMPTY_JSON_LIST)
+    languages_of_description = jsonfield.JSONField(
                 _("Language(s) of Description"), blank=True, default=EMPTY_JSON_LIST)
-    scripts_of_description = JSONField(
+    scripts_of_description = jsonfield.JSONField(
                 _("Script(s) of Description"), blank=True, default=EMPTY_JSON_LIST)
 
     tags = TaggableManager(blank=True)
@@ -588,8 +588,8 @@ class Authority(Resource, EntityUrlMixin):
                 blank=True, null=True)
     type_of_entity = models.PositiveIntegerField(_("Type of Entity"),
             choices=ENTITY_TYPES, blank=True, null=True)
-    languages = JSONField(_("Language(s)"), blank=True, default=EMPTY_JSON_LIST)
-    scripts = JSONField(_("Script(s)"), blank=True, default=EMPTY_JSON_LIST)
+    languages = jsonfield.JSONField(_("Language(s)"), blank=True, default=EMPTY_JSON_LIST)
+    scripts = jsonfield.JSONField(_("Script(s)"), blank=True, default=EMPTY_JSON_LIST)
     tags = TaggableManager(blank=True)
     objects = AuthorityManager()
 
@@ -641,7 +641,7 @@ class FuzzyDate(models.Model):
         """Parse dates like "1939-1946", "c 1945" etc. This exists solely
         for importing dates from Aim25 web scrapes, and will go away some
         point in the future."""
-        m1 = re.search("^(?P<start>\d{4})-(?P<end>\d{4})(?P<ish>s)?$", datestr.strip())
+        m1 = re.search("^(?P<start>\d{4})\s*-\s*(?P<end>\d{4})(?P<ish>s)?$", datestr.strip())
         fdate = FuzzyDate()
         if m1:
             d1 = datetime.date(int(m1.group("start")), 1, 1)
@@ -658,7 +658,15 @@ class FuzzyDate(models.Model):
             fdate.circa = m2.group("circa") is not None
             fdate.precision = "year"
             return fdate
+        # fallback - try and parse with dateutil...
+        try:
+            from dateutil import parser
+            fdate.start_date = parser.parse(datestr, default=datetime.date(2012, 1, 1))
+            return fdate
+        except ValueError:
+            return None
 
+            
 
     def __unicode__(self):
         """Print a sensible representation."""
