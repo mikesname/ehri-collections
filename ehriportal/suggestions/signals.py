@@ -8,10 +8,10 @@ from django.core.mail import mail_admins
 from django.template.loader import get_template
 from django.template import Context
 
-from suggestions.models import Suggestion
+from suggestions import models
 
 
-@receiver(post_save, sender=Suggestion)
+@receiver(post_save, sender=models.Suggestion)
 def new_suggestion_mail(sender, **kwargs):
     """Send people an email when a suggestion is made."""
     instance = kwargs.pop("instance")
