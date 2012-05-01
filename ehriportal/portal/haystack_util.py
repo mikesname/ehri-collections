@@ -4,7 +4,7 @@
 
 import re
 import datetime
-from urllib import quote_plus
+from django.utils.http import urlquote_plus as quote_plus
 
 
 class FacetClass(object):
@@ -20,7 +20,7 @@ class FacetClass(object):
         self.prettyname = prettyname
         self.paramname = paramname if paramname else name
         self.sort = sort
-        self.renderfn = renderfn if renderfn else lambda v: str(v)
+        self.renderfn = renderfn if renderfn else lambda v: unicode(v)
         self.facets = []
 
     def all_sorted_by_name(self):
@@ -105,7 +105,7 @@ class QueryFacetClass(FacetClass):
             # the params, in which case they don't deserve any
             # results
             try:
-                point = [p for p in self.facets if str(p) == pname][0]
+                point = [p for p in self.facets if unicode(p) == pname][0]
             except IndexError:
                 continue
             queryset = queryset.narrow(point.query())
@@ -163,10 +163,10 @@ class QueryFacet(Facet):
             return u"[%s TO %s]" % (
                     self._qpoint(self.point[0]),
                         self._qpoint(self.point[1]))
-        return str(self.point)
+        return u"%d" % self.point
 
     def filter_name(self):
-        return "%s:%s" % (self.klass.name, str(self))
+        return u"%s:%s" % (self.klass.name, self)
 
     def _strpoint(self, p):
         if isinstance(p, basestring):
@@ -183,7 +183,7 @@ class QueryFacet(Facet):
             return u"%s_%s" % (
                     self._strpoint(self.point[0]),
                         self._strpoint(self.point[1]))
-        return str(self.point)
+        return u"%d" % self.point
 
 
 class DateQueryFacet(QueryFacet):
