@@ -55,7 +55,14 @@ def script_choices(lang=None):
     if lang is None:
         lang = translation.get_language().split("-")[0]
     for code, name in data.SCRIPT_CODES:
-        yield (code, language_name_from_code(code, locale=lang) or name) 
+        yield (code, script_name_from_code(code, locale=lang) or name) 
+
+
+def country_choices(lang=None):
+    if lang is None:
+        lang = translation.get_language().split("-")[0]
+    for code, name in data.COUNTRY_CODES:
+        yield (code, country_name_from_code(code, locale=lang) or name) 
 
 
 class HaystackPaginationEncoder(json.JSONEncoder):
