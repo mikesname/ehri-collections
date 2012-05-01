@@ -39,7 +39,7 @@ jQuery(document).ready(function($) {
                 .removeAttr("multiple")
                 .bind("blur click keydown", function(event) {
                     // only handle TAB events on keydown
-                    if ($(this).val() && (event.type != "keydown" || event.keyCode != 9)) {
+                    if ($(this).val() && (event.type != "keydown" || event.keyCode == 9)) {
                         var $opt = $(this).find("option:selected");
                         event.preventDefault();
                         handleOption($opt, name, $list);
