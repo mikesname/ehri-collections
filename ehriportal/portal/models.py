@@ -663,10 +663,8 @@ class FuzzyDate(models.Model):
             from dateutil import parser
             fdate.start_date = parser.parse(datestr, default=datetime.date(2012, 1, 1))
             return fdate
-        except ValueError:
+        except (ValueError, TypeError):
             return None
-
-            
 
     def __unicode__(self):
         """Print a sensible representation."""
