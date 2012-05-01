@@ -19,11 +19,10 @@ jQuery(document).ready(function($) {
                 .append($("<input type='hidden' name='" + name + "' />")
                         .attr("value", $option.val()))
                 .click(function(event) {
-                    // only handle TAB events on keydown
-                    $(this).hide(200, function() {
+                    $(this).hide("fast", function() {
                         $(this).remove();
                         $option.prop("disabled", false);
-                        $list.toggle($list.childen().length != 0);
+                        $list.toggle($list.children().length != 0);
                     });
                 })
                 .appendTo($list.show());
