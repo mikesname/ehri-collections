@@ -23,11 +23,11 @@ class FacetMultiValueDateField(indexes.FacetMultiValueField):
     field_type = "date"
 
 
-class RepositoryIndex(indexes.SearchIndex, indexes.Indexable):
+class RepositoryIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name', default=True, boost=1.1)
     slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)
     description = indexes.CharField(model_attr='general_context', null=True)
-    other_names = indexes.MultiValueField(model_attr='other_names')
+    other_names = indexes.MultiValueField(model_attr='other_names', stored=True, indexed=True)
     address = indexes.CharField(model_attr='primary_contact', null=True, stored=True, indexed=False)
     country = indexes.CharField(model_attr='country_code', faceted=True, null=True, stored=True)
     location = indexes.LocationField(null=True, faceted=True, stored=True)
@@ -59,8 +59,12 @@ class RepositoryIndex(indexes.SearchIndex, indexes.Indexable):
         """Used when the entire index for model is updated."""
         return self.get_model().objects.filter(created_on__lte=datetime.datetime.now())
 
+    def get_updated_field(self):
+        return "updated_on"
 
-class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
+
+
+class AuthorityIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name', default=True, boost=1.1)
     slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)
     history = indexes.CharField(model_attr='history', null=True, stored=True)
@@ -82,9 +86,12 @@ class AuthorityIndex(indexes.SearchIndex, indexes.Indexable):
     def index_queryset(self):
         """Used when the entire index for model is updated."""
         return self.get_model().objects.filter(created_on__lte=datetime.datetime.now())
+    
+    def get_updated_field(self):
+        return "updated_on"
 
 
-class CollectionIndex(indexes.SearchIndex, indexes.Indexable):
+class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name', default=True, boost=1.1)
     slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)
     description = indexes.CharField(model_attr='scope_and_content', null=True)
@@ -124,4 +131,8 @@ class CollectionIndex(indexes.SearchIndex, indexes.Indexable):
     def prepare_years(self, desc):
         """Turn dates into an integer for year."""
         return [d.year for d in desc.date_range]
+    
+    def get_updated_field(self):
+        return "updated_on"
+
 

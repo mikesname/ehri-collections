@@ -5,12 +5,14 @@ Import USHMM's
 import os
 import re
 import sys
-import json
+import datetime
 from lxml import etree
 
 import babel
 
 from django.db import transaction
+from django.db.models import signals
+from django.core import management
 from django.core.management.base import BaseCommand, CommandError
 
 from portal import models
@@ -42,16 +44,25 @@ class Command(BaseCommand):
         # lookup the repository
         self.repo = models.Repository.objects.filter(othername__name="USHMM")[0]
         count = 0
+
+        # disconnect Haystack realtime signals
+        signals.pre_save.disconnect(dispatch_uid="setup_index_signals")
+        signals.pre_delete.disconnect(dispatch_uid="setup_index_signals")
+
+        starttime = datetime.datetime.now()
+
         with transaction.commit_on_success():
-            sys.stderr.write("Clearing current collections...\n")
-            self.repo.collection_set.all().delete()
+            #sys.stderr.write("Clearing current collections...\n")
+            #self.repo.collection_set.all().delete()
             with file(args[0], "r") as infile:
                 for _, element in etree.iterparse(infile, tag="doc", strip_cdata=False):
                     for rectype in element.xpath(".//field[text()='Archives Collection ISAD(G)']"):
                         count += 1
-                        sys.stderr.write("Extracting %d: %s\n" % (count, 
-                                element.xpath(".//field[@name='irn']")[0].text))
-                        self.import_item(element)
+                        self.import_item(element, count)
+
+        # update the haystack index for Collections
+        management.call_command("update_index", "portal.Collection", interactive=False,
+                start_date=starttime.isoformat())
 
     def get_data(self, doc):
         """Extract XML doc node to a dictionary."""
@@ -101,7 +112,7 @@ class Command(BaseCommand):
         """Get related corporate bodies."""
         return self._get_subject_type(doc, "Topical Term")
         
-    def import_item(self, doc):
+    def import_item(self, doc, count):
         """Import scraped data."""
         data = self.get_data(doc)
         if not data.get("name"):
@@ -114,10 +125,16 @@ class Command(BaseCommand):
         subjects = self.get_subject_access(doc)
         dates = self.get_dates(doc)
 
-        coll, _ = models.Collection.objects.get_or_create(
+        coll, created = models.Collection.objects.get_or_create(
                 repository=self.repo,
-                **data
+                identifier=data.pop("identifier"), # must be unique with repo
         )
+        sys.stderr.write("%s %s (%s)\n" % ("Created" if created else "Updated", 
+                    data.get("name"), coll.identifier))
+
+        for attr, val in data.items():
+            setattr(coll, attr, val)
+
         for sstr in subjects:
             coll.tags.add(*[stripdot(s) for s in sstr.split(" -- ")])
 
