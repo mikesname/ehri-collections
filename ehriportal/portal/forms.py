@@ -132,6 +132,11 @@ class PortalEntityForm(forms.ModelForm):
                 "placeholder": _("Summary of changes (optional)"),
             }))
 
+class ContactForm(forms.ModelForm):
+    class Meta:
+        model = models.Contact
+
+
 
 class CollectionEditForm(PortalEntityForm):
     languages = LanguageSelectFormField()
@@ -164,6 +169,14 @@ def propertyformset_factory(topclass, propname):
             topclass, propcls, fields=("value",), extra=1)
 
 
+# FIXME: !!! The OtherName formsets below are created using the Collection
+# as the primary model, but they're also used in the repository and
+# authority forms. This doesn't seem to matter, because when they're
+# constructed the primary model seems to be overridden by the instance 
+# argument given, but it's obviously still wrong and bug-prone.
+# The alternative is lots of ugly duplication or another exceedingly
+# meta 'factory' function, neither of which are nice options.
+
 DateFormSet = inlineformset_factory(models.Collection, models.FuzzyDate,
         form=FuzzyDateForm, extra=1)
 
@@ -177,6 +190,6 @@ ParallelNameFormSet = inlineformset_factory(models.Collection, models.ParallelFo
 
 
 ContactFormSet = inlineformset_factory(models.Repository, models.Contact,
-        extra=1)
+        form=ContactForm, extra=1)
 
 

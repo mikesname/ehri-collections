@@ -379,22 +379,22 @@ class Contact(models.Model):
     """Contact class."""
     CONTACT_TYPES = ()
 
-    primary = models.BooleanField()
-    repository = models.ForeignKey(
-            Repository, verbose_name="Contact addresses")
-    contact_person = models.CharField(max_length=255, null=True, blank=True)
-    street_address = models.TextField(null=True, blank=True)
-    city = models.CharField(max_length=100, null=True, blank=True)
-    region = models.CharField(max_length=100, null=True, blank=True)
-    postal_code = models.CharField(max_length=100, null=True, blank=True)
-    country_code = models.CharField(max_length=100, null=True, blank=True)
-    website = models.URLField(null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
-    telephone = models.CharField(max_length=100, null=True, blank=True)
-    fax = models.CharField(max_length=100, null=True, blank=True)
-    contact_type = models.CharField(
+    primary = models.BooleanField(_("Primary Contact"))
+    repository = models.ForeignKey(Repository, verbose_name="Contact addresses")
+    contact_person = models.CharField(_("Contact Person"), max_length=255, null=True, blank=True)
+    street_address = models.TextField(_("Street Address"), null=True, blank=True)
+    city = models.CharField(_("City"), max_length=100, null=True, blank=True)
+    region = models.CharField(_("Region"), max_length=100, null=True, blank=True)
+    postal_code = models.CharField(_("Postal Code"), max_length=100, null=True, blank=True)
+    country_code = models.CharField(_("Country"), max_length=100, null=True, blank=True,
+            choices=utils.country_choices())
+    website = models.URLField(_("Website"), null=True, blank=True)
+    email = models.EmailField(_("Email"), null=True, blank=True)
+    telephone = models.CharField(_("Telephone"), max_length=100, null=True, blank=True)
+    fax = models.CharField(_("Fax"), max_length=100, null=True, blank=True)
+    contact_type = models.CharField(_("Contact Type"),
             max_length=100, blank=True, null=True, choices=CONTACT_TYPES)
-    note = models.TextField(null=True, blank=True)
+    note = models.TextField(_("Notes"), null=True, blank=True)
     created_on = models.DateTimeField(editable=False)
     updated_on = models.DateTimeField(editable=False, null=True, blank=True)
 
