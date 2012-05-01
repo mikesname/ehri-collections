@@ -477,6 +477,7 @@ class Collection(Resource, EntityUrlMixin):
 
     class Meta:
         verbose_name_plural = "collections"
+        unique_together = (("identifier", "repository"),)
 
     def natural_key(self):
         return (self.slug,)
