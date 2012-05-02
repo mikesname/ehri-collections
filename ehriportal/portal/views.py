@@ -30,6 +30,12 @@ class PortalSearchListView(ListView):
     facetclasses = []
     form_class = forms.PortalSearchForm
 
+    def filter_queryset(self, qset):
+        """Apply model-specific filtering based
+        on request parameters."""
+        # abstract implementation
+        return qset
+
     def get_queryset(self):
         """Perform the appropriate Haystack search and return
         a SearchQuerySet with the obtained results."""

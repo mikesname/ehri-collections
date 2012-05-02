@@ -142,7 +142,15 @@ class Resource(models.Model):
     __metaclass__ = ResourceType
     translatable_fields = ()
 
+    DRAFT, PUBLISHED = range(2)
+    PUB_STATUS = (
+            (DRAFT, _("Draft")),
+            (PUBLISHED, _("Published")),
+    )
+
     type = models.CharField(editable=False, max_length=255)
+    publication_status = models.PositiveIntegerField(_("Publication Status"),
+            default=DRAFT, choices=PUB_STATUS)
     created_on = models.DateTimeField(editable=False)
     updated_on = models.DateTimeField(editable=False, null=True, blank=True)
 
@@ -440,12 +448,6 @@ class Collection(Resource, EntityUrlMixin):
         (ITEM, _("Item")),
     )
 
-    DRAFT, PUBLISHED = range(2)
-    PUB_STATUS = (
-            (DRAFT, _("Draft")),
-            (PUBLISHED, _("Published")),
-    )
-
     translatable_fields = (
         ("access_conditions", "Access Conditions", "TODO: Help text"),
         ("accruals", "Accruals", "TODO: Help text"),
@@ -483,8 +485,6 @@ class Collection(Resource, EntityUrlMixin):
                 _("Language(s) of Description"), blank=True, default=EMPTY_JSON_LIST)
     scripts_of_description = jsonfield.JSONField(
                 _("Script(s) of Description"), blank=True, default=EMPTY_JSON_LIST)
-    publication_status = models.PositiveIntegerField(_("Publication Status"),
-            default=DRAFT, choices=PUB_STATUS)
 
     tags = TaggableManager(blank=True)
     objects = CollectionManager()

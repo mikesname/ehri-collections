@@ -244,6 +244,7 @@ class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
         self.updatedata = {
             "identifier": "Test",
             "name": "Test",
+            "publication_status": models.Collection.DRAFT,
             "languages": ["en", "fr"],
         }
         for field in ["contact_set", "otherformofname_set", "parallelformofname_set"]:
@@ -297,8 +298,8 @@ class PortalCollectionTest(TestCase, EntityCrudTestMixin):
             "identifier": "GB Test 0001",
             "name": "Test Collection",
             "repository": self.model.objects.get(slug=self.slug).repository.pk,
-            "languages": "en",
             "publication_status": self.model.PUBLISHED,
+            "languages": ["en"],
         }
         for field in ["date_set", "otherformofname_set"]:
             self.testdata["%s-INITIAL_FORMS" % field] = 0 
@@ -318,7 +319,8 @@ class PortalAuthorityTest(TestCase, EntityCrudTestMixin):
         self.updatedata = {
             "identifier": "GB Test 0001",
             "name": "Auth Test",
-            "languages": "en",
+            "publication_status": models.Collection.DRAFT,
+            "languages": ["en"],
         }
         for field in ["otherformofname_set"]:
             self.testdata["%s-INITIAL_FORMS" % field] = 0 
