@@ -38,12 +38,13 @@ class PortalSearchListView(ListView):
         sqs = self.searchqueryset
         if self.model:
             sqs = sqs.models(self.model)
-        for facet in self.facetclasses:
-            sqs = facet.apply(sqs)
-
+        
         # FIXME: Move somewhere more sensible
         if not self.request.user.is_staff:
             sqs = sqs.filter(publication_status=models.Resource.PUBLISHED)
+
+        for facet in self.facetclasses:
+            sqs = facet.apply(sqs)
 
         # apply the query
         self.form = self.form_class(self.request.GET)
