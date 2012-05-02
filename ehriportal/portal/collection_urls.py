@@ -54,12 +54,6 @@ FACETS = [
     ),
 ]
 
-infolist = dict(
-        queryset=models.Collection.objects.all(),
-        paginate_by=20,
-        template_name="collection_list.html",
-)
-
 
 urlpatterns = patterns('',
     url(r'^search/?$', views.PortalSearchListView.as_view(
@@ -73,7 +67,10 @@ urlpatterns = patterns('',
         model=models.Collection,
         facetclasses=FACETS),
             name='collection_facets'),
-    url(r'^/?$', object_list, infolist, name='collection_list'),
+    url(r'^/?$', views.PortalListView.as_view(
+        model=models.Collection,
+        template_name="collection_list.html",
+        ), name='collection_list'),
 
     # Crud Actions
     url(r'^create/?$', 

@@ -30,12 +30,6 @@ class PortalSearchListView(ListView):
     facetclasses = []
     form_class = forms.PortalSearchForm
 
-    def filter_queryset(self, qset):
-        """Apply model-specific filtering based
-        on request parameters."""
-        # abstract implementation
-        return qset
-
     def get_queryset(self):
         """Perform the appropriate Haystack search and return
         a SearchQuerySet with the obtained results."""
@@ -46,6 +40,10 @@ class PortalSearchListView(ListView):
             sqs = sqs.models(self.model)
         for facet in self.facetclasses:
             sqs = facet.apply(sqs)
+
+        # FIXME: Move somewhere more sensible
+        if not self.request.user.is_staff:
+            sqs = sqs.filter(publication_status=models.Resource.PUBLISHED)
 
         # apply the query
         self.form = self.form_class(self.request.GET)
@@ -125,6 +123,39 @@ class PaginatedFacetView(PortalSearchListView):
         if self.redirect:
             extra["redirect"] = "%s?%s" % (reverse(self.redirect),
                     self.request.META.get("QUERY_STRING",""))
+        return extra
+
+
+class PortalListView(ListView):
+    """Filter items depending on whether the user is
+    logged in."""
+    paginate_by = 20
+
+    def get_queryset(self, *args, **kwargs):
+        qs = super(PortalListView, self).get_queryset(*args, **kwargs)
+        if not self.request.user.is_staff:
+            qs = qs.filter(publication_status=models.Resource.PUBLISHED)
+        return qs
+
+
+class ListCollectionsView(PortalListView):
+    """View which displays the collections for a particular 
+    repository, and added that repository to the template
+    context."""
+    model = models.Collection
+    related_item_attr = None
+    related_item_model = None
+    def get_queryset(self, *args, **kwargs):
+        qs = super(ListCollectionsView, self).get_queryset(*args, **kwargs)
+        if self.related_item_model is not None:
+            self.item = get_object_or_404(
+                    self.related_item_model, slug=self.kwargs["slug"])
+        return qs.filter(**{self.related_item_attr: self.item})
+
+    def get_context_data(self, *args, **kwargs):
+        extra = super(ListCollectionsView, self).get_context_data(*args, **kwargs)
+        if self.related_item_model is not None:
+            extra[self.related_item_attr] = self.item
         return extra
 
 

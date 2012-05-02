@@ -17,28 +17,8 @@ FACETS = [
     )
 ]
 
-listinfo = dict(
-        queryset=models.Authority.objects.all().order_by("name"),
-        paginate_by=20,
-        template_name="authority_list.html"
-)
-
-class ListCollectionsView(ListView):
-    paginate_by = 20
-    def get_queryset(self, *args, **kwargs):
-        self.authority = get_object_or_404(
-                models.Authority, slug=self.kwargs["slug"])
-        return models.Collection.objects.filter(creator=self.authority)
-
-    def get_context_data(self, *args, **kwargs):
-        extra = super(ListCollectionsView, self).get_context_data(*args, **kwargs)
-        extra["authority"] = self.authority
-        return extra
-
-
 
 urlpatterns = patterns('',
-    #url(r'^/?$', object_list, listinfo, name='authority_list'),
     url(r'^search/?$', views.PortalSearchListView.as_view(
         model=models.Authority,
         facetclasses=FACETS,
@@ -49,7 +29,10 @@ urlpatterns = patterns('',
         model=models.Authority,
         facetclasses=FACETS),
             name='authority_facets'),
-    url(r'^/?$', object_list, listinfo, name='authority_list'),
+    url(r'^/?$', views.PortalListView.as_view(
+        model=models.Authority,
+        template_name="authority_list.html",
+        ), name='authority_list'),
     # Crud Actions
     url(r'^create/?$', 
             user_passes_test(permissions.is_staff)(
@@ -81,8 +64,10 @@ urlpatterns = patterns('',
             template_name="authority_detail.html"
         ), name='authority_detail'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
-            ListCollectionsView.as_view(
-                template_name="collection_list.html"    
+            views.ListCollectionsView.as_view(
+                template_name="collection_list.html",
+                related_item_model=models.Authority,
+                related_item_attr="creator",
             ), name='authority_collections'),
 )
 

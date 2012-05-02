@@ -32,7 +32,9 @@ class RepositoryIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     country = indexes.CharField(model_attr='country_code', faceted=True, null=True, stored=True)
     location = indexes.LocationField(null=True, faceted=True, stored=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
-    pub_date = indexes.DateTimeField(model_attr='created_on')
+    publication_date = indexes.DateTimeField(model_attr='created_on')
+    publication_status = indexes.IntegerField(model_attr='publication_status', 
+                faceted=True, stored=True)
     suggestions = indexes.CharField()
 
     def get_model(self):
@@ -70,9 +72,12 @@ class AuthorityIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     history = indexes.CharField(model_attr='history', null=True, stored=True)
     general_context = indexes.CharField(model_attr='general_context', null=True)
     other_names = indexes.MultiValueField(model_attr='other_names')
+    # FIXME: Make an integer field for i18n-niceness...
     type_of_entity = indexes.CharField(model_attr='type_name', faceted=True, stored=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
-    pub_date = indexes.DateTimeField(model_attr='created_on')
+    publication_date = indexes.DateTimeField(model_attr='created_on')
+    publication_status = indexes.IntegerField(model_attr='publication_status', 
+                faceted=True, stored=True)
     suggestions = indexes.CharField()
 
     def get_model(self):
@@ -115,7 +120,7 @@ class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     text = indexes.CharField(document=True, use_template=True, stored=False)
     #ngram = indexes.EdgeNgramField(use_template=True, template_name="search/indexes/portal/collection_text.txt",
     #        stored=False)
-    pub_date = indexes.DateTimeField(model_attr='created_on')
+    publication_date = indexes.DateTimeField(model_attr='created_on')
     suggestions = indexes.CharField()
 
     def get_model(self):
