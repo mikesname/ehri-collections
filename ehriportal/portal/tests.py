@@ -272,6 +272,7 @@ class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
             "identifier": "test0001",
             "name": "Test Name",
             "repository": obj.id,
+            "publication_status": models.Collection.DRAFT,
         }
         for field in ["date_set", "otherformofname_set"]:
             collectiondata["%s-INITIAL_FORMS" % field] = 0 
@@ -297,6 +298,7 @@ class PortalCollectionTest(TestCase, EntityCrudTestMixin):
             "name": "Test Collection",
             "repository": self.model.objects.get(slug=self.slug).repository.pk,
             "languages": "en",
+            "publication_status": self.model.PUBLISHED,
         }
         for field in ["date_set", "otherformofname_set"]:
             self.testdata["%s-INITIAL_FORMS" % field] = 0 
