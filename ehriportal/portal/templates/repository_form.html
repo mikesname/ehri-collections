@@ -10,17 +10,17 @@
 {% block modelname %}{% trans "Repository" %}{% endblock %}
 
 {% block fieldset_links %}
-    <li><a href="#identity-area">{% trans "Identity Area" %}</a></li>
-    <li><a href="#contact-area">{% trans "Contact Area" %}</a></li>
-    <li><a href="#description-area">{% trans "Description Area" %}</a></li>
-    <li><a href="#access-area">{% trans "Access Area" %}</a></li>
-    <li><a href="#services-area">{% trans "Services Area" %}</a></li>
-    <li><a href="#control-area">{% trans "Control Area" %}</a></li>
+    <li><a href="#identity-area">{% trans "Identity" %}</a></li>
+    <li><a href="#contact-area">{% trans "Contact" %}</a></li>
+    <li><a href="#description-area">{% trans "Description" %}</a></li>
+    <li><a href="#access-area">{% trans "Access" %}</a></li>
+    <li><a href="#services-area">{% trans "Services" %}</a></li>
+    <li><a href="#control-area">{% trans "Control" %}</a></li>
 {% endblock %}
 
 {% block fieldsets %}
     <fieldset id="identity-area">
-        <legend>{% trans "Identity Area" %}</legend>
+        <legend>{% trans "Identity" %}</legend>
         {% include "_form_field.html" with field=form.identifier %}
         {% include "_form_field.html" with field=form.name %}
 
@@ -72,7 +72,7 @@
         {% include "_form_field.html" with field=form.type_of_entity %}
     </fieldset>
     <fieldset id="contact-area">
-        <legend>{% trans "Contact Area" %}</legend>
+        <legend>{% trans "Contact" %}</legend>
         <div class="contact-formset" id="id_formset-{{formsets.contacts.prefix}}" data-prefix="{{formsets.contacts.prefix}}">
             {{formsets.contacts.management_form}}
             {% for f in formsets.contacts %}
@@ -85,7 +85,7 @@
     </fieldset>
 
     <fieldset id="description-area">
-        <legend>{% trans "Description Area" %}</legend>
+        <legend>{% trans "Description" %}</legend>
         {% include "_form_field.html" with field=form.history %}
         {% include "_form_field.html" with field=form.geocultural_context %}
         {% include "_form_field.html" with field=form.mandates %}
@@ -97,21 +97,21 @@
     </fieldset>
 
     <fieldset id="access-area">
-        <legend>{% trans "Access Area" %}</legend>
+        <legend>{% trans "Access" %}</legend>
         {% include "_form_field.html" with field=form.opening_times %}
         {% include "_form_field.html" with field=form.access_conditions %}
         {% include "_form_field.html" with field=form.accessibility %}
     </fieldset>
 
     <fieldset id="services-area">
-        <legend>{% trans "Services Area" %}</legend>
+        <legend>{% trans "Services" %}</legend>
         {% include "_form_field.html" with field=form.research_services %}
         {% include "_form_field.html" with field=form.reproduction_services %}
         {% include "_form_field.html" with field=form.public_areas %}
     </fieldset>
 
     <fieldset id="control-area">
-        <legend>{% trans "Control Area" %}</legend>
+        <legend>{% trans "Control" %}</legend>
         {% include "_form_field.html" with field=form.description_identifier %}
         {% include "_form_field.html" with field=form.institution_identifier %}
         {% include "_form_field.html" with field=form.rules %}

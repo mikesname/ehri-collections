@@ -9,17 +9,18 @@
 {% block modelname %}{% trans "Collection" %}{% endblock %}
 
 {% block fieldset_links %}
-    <li><a href="#identity-area">{% trans "Identity Area" %}</a></li>
-    <li><a href="#context-area">{% trans "Context Area" %}</a></li>
-    <li><a href="#content-area">{% trans "Content and Structure Area" %}</a></li>
-    <li><a href="#access-area">{% trans "Conditions of Access and Use Area" %}</a></li>
-    <li><a href="#materials-area">{% trans "Allied Materials Area" %}</a></li>
-    <li><a href="#control-area">{% trans "Control Area" %}</a></li>
+    <li><a href="#identity-area">{% trans "Identity" %}</a></li>
+    <li><a href="#context-area">{% trans "Context" %}</a></li>
+    <li><a href="#content-area">{% trans "Content and Structure" %}</a></li>
+    <li><a href="#access-area">{% trans "Conditions of Access and Use" %}</a></li>
+    <li><a href="#materials-area">{% trans "Allied Materials" %}</a></li>
+    <li><a href="#notes-area">{% trans "Notes" %}</a></li>
+    <li><a href="#control-area">{% trans "Control" %}</a></li>
 {% endblock %}
 
 {% block fieldsets %}
     <fieldset id="identity-area">
-        <legend>{% trans "Identity Area" %}</legend>
+        <legend>{% trans "Identity" %}</legend>
         {% include "_form_field.html" with field=form.identifier %}
         {% include "_form_field.html" with field=form.name %}
 
@@ -70,7 +71,7 @@
         {% include "_form_field.html" with field=form.extent_and_medium %}
     </fieldset>
     <fieldset id="context-area">
-        <legend>{% trans "Context Area" %}</legend>
+        <legend>{% trans "Context" %}</legend>
         {% include "_form_field.html" with field=form.creator %}
         {% include "_form_field.html" with field=form.repository %}
         {% include "_form_field.html" with field=form.archival_history %}
@@ -78,7 +79,7 @@
     </fieldset>
 
     <fieldset id="content-area">
-        <legend>{% trans "Content and Structure Area" %}</legend>
+        <legend>{% trans "Content and Structure" %}</legend>
         {% include "_form_field.html" with field=form.scope_and_content %}
         {% include "_form_field.html" with field=form.appraisal %}
         {% include "_form_field.html" with field=form.accruals %}
@@ -86,7 +87,7 @@
     </fieldset>
 
     <fieldset id="access-area">
-        <legend>{% trans "Conditions of Access and Use Area" %}</legend>
+        <legend>{% trans "Conditions of Access and Use" %}</legend>
         {% include "_form_field.html" with field=form.access_conditions %}
         {% include "_form_field.html" with field=form.reproduction_conditions %}
         {% include "_form_field.html" with field=form.languages %}
@@ -96,15 +97,20 @@
     </fieldset>
 
     <fieldset id="materials-area">
-        <legend>{% trans "Allied Material Area" %}</legend>
+        <legend>{% trans "Allied Material" %}</legend>
         {% include "_form_field.html" with field=form.location_of_originals %}
         {% include "_form_field.html" with field=form.location_of_copies %}
         {% include "_form_field.html" with field=form.related_units_of_description %}
         {% include "_form_field.html" with field=form.publication_notes %}
     </fieldset>
 
+    <fieldset id="notes-area">
+        <legend>{% trans "Notes" %}</legend>
+        {% include "_form_field.html" with field=form.notes %}
+    </fieldset>
+
     <fieldset id="control-area">
-        <legend>{% trans "Control Area" %}</legend>
+        <legend>{% trans "Control" %}</legend>
         {% include "_form_field.html" with field=form.description_identifier %}
         {% include "_form_field.html" with field=form.institution_identifier %}
         {% include "_form_field.html" with field=form.rules %}

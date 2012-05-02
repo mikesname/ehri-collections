@@ -429,10 +429,15 @@ class CollectionManager(models.Manager):
 
 class Collection(Resource, EntityUrlMixin):
     """Model representing an archival description."""
-    COLLECTION, FONDS = range(2)
+    COLLECTION, FONDS, SUBFONDS, SERIES, SUBSERIES, FILE, ITEM = range(7)
     LODS = (
-        (FONDS, _("Fonds")),
         (COLLECTION, _("Collection")),
+        (FONDS, _("Fonds")),
+        (SUBFONDS, _("Sub-fonds")),
+        (SERIES, _("Series")),
+        (SUBSERIES, _("Sub-series")),
+        (FILE, _("File")),
+        (ITEM, _("Item")),
     )
 
     translatable_fields = (
@@ -449,6 +454,7 @@ class Collection(Resource, EntityUrlMixin):
         ("institution_responsible_identifier", "Institution Responsible Identifier", "TODO: Help text"),
         ("location_of_copies", "Location of Copies", "TODO: Help text"),
         ("location_of_originals", "Location of Originals", "TODO: Help text"),
+        ("notes", _("Notes"), "TODO: Help text"),
         ("physical_characteristics", "Physical Characteristics", "TODO: Help text"),
         ("related_units_of_description", "Related Units of Description", "TODO: Help text"),
         ("reproduction_conditions", "Reproduction Conditions", "TODO: Help text"),
