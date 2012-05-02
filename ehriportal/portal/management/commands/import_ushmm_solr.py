@@ -57,12 +57,15 @@ class Command(BaseCommand):
             with file(args[0], "r") as infile:
                 for _, element in etree.iterparse(infile, tag="doc", strip_cdata=False):
                     for rectype in element.xpath(".//field[text()='Archives Collection ISAD(G)']"):
-                        count += 1
-                        self.import_item(element, count)
+                        # for the time being, only collection-level items
+                        leveldesc = gs(element, "level_desc")
+                        if leveldesc and leveldesc == "Collection":
+                            count += 1
+                            self.import_item(element, count)
 
         # update the haystack index for Collections
         management.call_command("update_index", "portal.Collection", interactive=False,
-                start_date=starttime.isoformat())
+                start_date=starttime.isoformat(), remove=True)
 
     def get_data(self, doc):
         """Extract XML doc node to a dictionary."""
@@ -125,15 +128,21 @@ class Command(BaseCommand):
         subjects = self.get_subject_access(doc)
         dates = self.get_dates(doc)
 
-        coll, created = models.Collection.objects.get_or_create(
-                repository=self.repo,
-                identifier=data.pop("identifier"), # must be unique with repo
-        )
+        identifier = data.pop("identifier")
+        created = False
+        try:
+            coll = models.Collection.objects.get(repository=self.repo,
+                    identifier=identifier)
+        except models.Collection.DoesNotExist:
+            created = True
+            coll = models.Collection(identifier=identifier, repository=self.repo)
+
         sys.stderr.write("%s %s (%s)\n" % ("Created" if created else "Updated", 
                     data.get("name"), coll.identifier))
 
         for attr, val in data.items():
             setattr(coll, attr, val)
+        coll.save()
 
         for sstr in subjects:
             coll.tags.add(*[stripdot(s) for s in sstr.split(" -- ")])
