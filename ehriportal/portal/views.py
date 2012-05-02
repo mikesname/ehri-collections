@@ -328,6 +328,20 @@ class PortalDetailView(DetailView):
         context["history"] = reversion.get_for_object(self.object)
         return context
 
+class PortalCollectionHolderDetailView(DetailView):
+    """Add the number of viewable collections to the
+    context."""
+    def get_context_data(self, **kwargs):
+        context = super(PortalCollectionHolderDetailView, self)\
+                .get_context_data(**kwargs)
+        
+        viewcols = self.object.collection_set.all()
+        if not self.request.user.is_staff:
+                viewcols = viewcols.filter(
+                    publication_status=models.Resource.PUBLISHED)
+        context["collection_count"] = viewcols.count()
+        return context
+
 
 class PortalRevisionView(PortalDetailView):
     """Show information about an object revision."""

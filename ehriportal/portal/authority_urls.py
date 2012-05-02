@@ -59,7 +59,7 @@ urlpatterns = patterns('',
         ), name='authority_diff'),
     
     # these catch-all item must be at the bottom
-    url(r'^(?P<slug>[-\w]+)/?$', views.PortalDetailView.as_view(
+    url(r'^(?P<slug>[-\w]+)/?$', views.PortalCollectionHolderDetailView.as_view(
             model=models.Authority,
             template_name="authority_detail.html"
         ), name='authority_detail'),

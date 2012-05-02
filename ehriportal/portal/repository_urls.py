@@ -65,7 +65,7 @@ urlpatterns = patterns('',
             model=models.Repository,
             template_name="repository_revision.html"
         ), name='repository_revision'),
-    url(r'^(?P<slug>[-\w]+)/?$', views.PortalDetailView.as_view(
+    url(r'^(?P<slug>[-\w]+)/?$', views.PortalCollectionHolderDetailView.as_view(
             model=models.Repository,
             template_name="repository_detail.html"
         ), name='repository_detail'),
