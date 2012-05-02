@@ -16,7 +16,6 @@
     <li><a href="#materials-area">{% trans "Allied Materials" %}</a></li>
     <li><a href="#notes-area">{% trans "Notes" %}</a></li>
     <li><a href="#control-area">{% trans "Control" %}</a></li>
-    <li><a href="#admin-area">{% trans "Administration" %}</a></li>
 {% endblock %}
 
 {% block fieldsets %}
@@ -119,10 +118,4 @@
         {% include "_form_field.html" with field=form.scripts_of_description %}
         {% include "_form_field.html" with field=form.sources %}
     </fieldset>
-
-    <fieldset id="admin-area">
-        <legend>{% trans "Administration" %}</legend>
-        {% include "_form_field.html" with field=form.publication_status %}
-    </fieldset>
-    
 {% endblock %}
