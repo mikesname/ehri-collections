@@ -64,7 +64,7 @@ class Command(BaseCommand):
                             self.import_item(element, count)
 
         # update the haystack index for Collections
-        management.call_command("update_index", "portal.Collection", interactive=False,
+        management.call_command("update_index", "portal.Collection", "portal.Authority",
                 start_date=starttime.isoformat(), remove=True)
 
     def get_data(self, doc):
