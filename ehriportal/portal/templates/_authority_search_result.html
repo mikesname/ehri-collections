@@ -5,6 +5,13 @@
         {{ result.name|truncatewords:10 }}
     </a>
 </h4>                
+{% if result.other_names %}
+<h5 class="alternate-name">
+    {% for name in result.other_names %}
+        {% if forloop.counter0 > 0 %}, {% endif %}{{name}}
+    {% endfor %}
+</h5>
+{% endif %}
 <p>
 {% with form.q.value|default_if_none:"" as query %}
 {% if result.history %}
