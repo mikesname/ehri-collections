@@ -11,6 +11,7 @@ from django.views.generic.edit import DeleteView, UpdateView, ProcessFormView
 from django.views.generic.detail import DetailView
 from django import forms
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404, render
@@ -323,12 +324,24 @@ class AuthorityDeleteView(DeleteView):
 
 class PortalDetailView(DetailView):
     """Show information about an object."""
+    def get_object(self, *args, **kwargs):
+        """Enforce visibility constrains."""
+        object = super(PortalDetailView, self).get_object(*args, **kwargs)
+        # FIXME: Move this check somewhere nicer...
+        if settings.PORTAL_HIDE_DRAFTS:
+            if not self.request.user.is_staff \
+                    and not object.published:
+                # FIXME: Find a way to redirect to somewhere else
+                raise PermissionDenied()
+        return object
+
     def get_context_data(self, **kwargs):
         context = super(PortalDetailView, self).get_context_data(**kwargs)
         context["history"] = reversion.get_for_object(self.object)
         return context
 
-class PortalCollectionHolderDetailView(DetailView):
+
+class PortalCollectionHolderDetailView(PortalDetailView):
     """Add the number of viewable collections to the
     context."""
     def get_context_data(self, **kwargs):
@@ -357,7 +370,7 @@ class PortalRevisionView(PortalDetailView):
         return context
 
 
-class PortalRevisionDiffView(DetailView):
+class PortalRevisionDiffView(PortalDetailView):
     """Show information about an object revision."""
     def get_context_data(self, **kwargs):
         context = super(PortalRevisionDiffView, self).get_context_data(**kwargs)
