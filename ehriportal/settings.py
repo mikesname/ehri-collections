@@ -268,6 +268,9 @@ THUMBNAIL_SIZES = (
         (300,300),
 )
 
+# Hide draft descriptions from non-staff users
+PORTAL_HIDE_DRAFTS = True
+
 # OpenID discovery URLs
 OPENID_PROVIDERS = (
         ("google", "https://www.google.com/accounts/o8/id"),

@@ -41,7 +41,7 @@ class PortalSearchListView(ListView):
             sqs = sqs.models(self.model)
         
         # FIXME: Move somewhere more sensible
-        if not self.request.user.is_staff:
+        if settings.PORTAL_HIDE_DRAFTS and not self.request.user.is_staff:
             sqs = sqs.filter(publication_status=models.Resource.PUBLISHED)
 
         for facet in self.facetclasses:
@@ -135,7 +135,7 @@ class PortalListView(ListView):
 
     def get_queryset(self, *args, **kwargs):
         qs = super(PortalListView, self).get_queryset(*args, **kwargs)
-        if not self.request.user.is_staff:
+        if settings.PORTAL_HIDE_DRAFTS and not self.request.user.is_staff:
             qs = qs.filter(publication_status=models.Resource.PUBLISHED)
         return qs
 
@@ -349,7 +349,7 @@ class PortalCollectionHolderDetailView(PortalDetailView):
                 .get_context_data(**kwargs)
         
         viewcols = self.object.collection_set.all()
-        if not self.request.user.is_staff:
+        if settings.PORTAL_HIDE_DRAFTS and not self.request.user.is_staff:
                 viewcols = viewcols.filter(
                     publication_status=models.Resource.PUBLISHED)
         context["collection_count"] = viewcols.count()

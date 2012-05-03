@@ -5,6 +5,7 @@ Portal model unit tests.
 # TODO: Factor out duplication here.
 
 from django.test import TestCase
+from django.test.utils import override_settings
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 from django.core import management
@@ -230,6 +231,38 @@ class EntityCrudTestMixin(object):
             "slug": self.slug,
         }))
         self.assertEqual(response.status_code, 200)
+
+    @override_settings(PORTAL_HIDE_DRAFTS=True)
+    def test_publication_permissions_detail(self):
+        """Test non-staff users can't view draft items."""
+        self.client.logout()
+        user = User.objects.create_user("random", password="password")
+        user.is_staff = False
+        user.save()
+        self.client.login(username=user.username, password="password")
+        response = self.client.get(reverse(self.urlprefix + "_detail", kwargs={
+            "slug": self.slug,
+        }))
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(PORTAL_HIDE_DRAFTS=True)
+    def test_publication_permissions_list(self):
+        """Test non-staff users can't view draft items."""
+        # since none of our fixture items are published (yet) we
+        # shouldn't have any items in the list after we log out
+        response = self.client.get(reverse(self.urlprefix + "_list"))
+        objcount1 = response.context["paginator"].count
+        self.client.logout()
+        user = User.objects.create_user("random", password="password")
+        user.is_staff = False
+        user.save()
+        self.client.login(username=user.username, password="password")
+        response = self.client.get(reverse(self.urlprefix + "_list"))
+        self.assertEqual(response.status_code, 200)
+        objcount2 = response.context["paginator"].count
+        self.assertGreater(objcount1, objcount2)
+
+
         
 
 class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
