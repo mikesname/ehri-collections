@@ -2,6 +2,16 @@
 {% load portal_tags %}
 
 <table class="table table-striped well">
+    {% if object.identifier %}    
+        <tr>
+            <td>
+                <strong>{% trans "Local ID" %}</strong>
+            </td>
+            <td>
+                {{object.identifier}}
+            </td>
+        </tr>
+    {% endif %}
     {% if object.date_set.count %}    
         <tr>
             <td>
