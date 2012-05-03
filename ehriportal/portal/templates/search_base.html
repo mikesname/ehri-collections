@@ -45,8 +45,12 @@
                         {% endif %}
                     {% else %}
                         {% if form.q.value %}
-                        {% trans "Nothing found for" %} <i id="result-query">{{form.q.value}}</i>{% if suggestion %}.&nbsp;{% trans "Did you mean" %} <a               
-                                href="{{request.path}}?q={{suggestion|urlencode}}"><i>{{suggestion}}</i></a>?{% endif %}
+                            {% trans "Nothing found for" %} <i id="result-query">{{form.q.value}}</i>
+                            {% if suggestion %}.&nbsp;{% trans "Did you mean" %} 
+                                <a href="{{request.path}}?q={{suggestion|urlencode}}">
+                                    <i>{{suggestion}}</i>
+                                </a>?
+                            {% endif %}
                         {% endif %}
                     {% endif %}
                     </h3>
