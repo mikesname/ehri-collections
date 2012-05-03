@@ -174,6 +174,14 @@ class Resource(models.Model):
         return [on.name for on in self.othername_set.all()]
 
     @property
+    def published(self):
+        return self.publication_status == self.PUBLISHED
+
+    @property
+    def publication_status_name(self):
+        return self.PUB_STATUS[self.publication_status][1]
+
+    @property
     def images(self):
         """Shortcut for fetching associated images."""
         return self.resourceimage_set.all()
