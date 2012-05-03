@@ -505,12 +505,6 @@ class Collection(Resource, EntityUrlMixin):
         return (self.slug,)
 
     @property
-    def name_access(self):
-        # TODO: Find the proper way of doing this
-        return [ne.subject for ne in NameAccess.objects.select_related()\
-                    .filter(object=self).all()]
-
-    @property
     def start_date(self):
         """Shortcut for getting the earliest date to which
         this collection relates."""
@@ -560,6 +554,12 @@ class Collection(Resource, EntityUrlMixin):
         if len(dates) == 1:
             return str(self.start_date.year)
         return "%s-%s" % (dates[0].year, dates[-1].year)
+
+    @property
+    def name_access(self):
+        # TODO: Find the proper way of doing this
+        return [ne.subject for ne in NameAccess.objects.select_related()\
+                    .filter(object_id=self.id).all()]
 
     def __repr__(self):
         return "<%s: %s>" % (self.__class__.__name__, self.slug)

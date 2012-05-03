@@ -38,8 +38,7 @@
     <h4>{% trans "Name Access Points" %}</h4>
     <p class="tag-list">
         {% for name in object.name_access %}
-        {# FIXME: The url here will break for tags with a space in them. #}
-        <a href="{{name.get_instance.get_absolute_url}}">{{name.get_instance.name}}</a>
+        <a href="{%url authority_collections slug=name.get_instance.slug %}">{{name.get_instance.name}}</a>
         {% endfor %}
     </p>
     {% endif %}
