@@ -10,7 +10,7 @@ register = template.Library()
 @register.simple_tag(name="vdiff")
 def version_diff(v1, v2, field):
     """Return HTML showing the differences between two fields."""
-    return generate_patch_html(v1, v2, field, cleanup="semantic")
+    return generate_patch_html(v2, v1, field, cleanup="semantic")
 
 @register.simple_tag(name="list_test")
 def list_test():
