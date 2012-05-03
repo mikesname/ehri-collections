@@ -15,16 +15,16 @@
                 {% if version and version.id == v.id %}
                 <a class="object-current-version" href="{% if forloop.first %}{{object.get_absolute_url}}{% else %}
                     {{object|revision_url:v.id }}{% endif %}">
-                    {{v.revision.date_created|date:"D M Y"}}
+                    {{v.revision.date_created|date:"D d M Y H:m"}}
                 </a>
                 {% elif not version and forloop.first %}
                 <a class="object-current-version" href="{{object.get_absolute_url}}">
-                    {{v.revision.date_created|date:"D M Y"}}
+                    {{v.revision.date_created|date:"D d M Y H:m"}}
                 </a>
                 {% else %}
                 <a href="{% if forloop.first %}{{object.get_absolute_url}}{% else %}
                     {{object|revision_url:v.id }}{% endif %}">
-                    {{v.revision.date_created|date:"D M Y"}}
+                    {{v.revision.date_created|date:"D d M Y H:m"}}
                 </a>
                 {% endif %}
                 <span class="object-version-user">
