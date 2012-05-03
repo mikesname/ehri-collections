@@ -36,7 +36,12 @@
     </div>
     <div class="span9 columns">
         {% block body_title %}
-        <h2>{{object.name}}</h2>
+        <h2>
+            {{object.name}}
+            {% if not object.published %}
+                <span class="label">{% trans "Draft Description" %}</span>
+            {% endif %}
+        </h2>
         {% if object.other_names %}
             <h3 class="alternate-name">
             {% for on in object.other_names %}

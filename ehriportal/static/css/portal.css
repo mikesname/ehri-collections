@@ -34,6 +34,18 @@ legend {
     margin-top: 0.4em;
 }
 
+.search-result {
+    padding: 3px;
+}
+
+.search-result.draft {
+    background-color: #FFFDFD;
+}
+
+.search-result.draft h4 a.search-item-title {
+    font-weight: 100;
+}
+
 .tag-list a:hover {
     text-decoration: none;
     background-color: #D0D9E1;

@@ -1,24 +1,18 @@
+{% extends "_search_result_base.html" %}
 {% load highlight %}
-<h4>
+{% block resultheading %}
     <i class="icon-user"></i>
-    <a title="{{result.name}}" href="{% url authority_detail slug=result.slug %}">
+    <a class="search-item-title" title="{{result.name}}" href="{% url authority_detail slug=result.slug %}">
         {{ result.name|truncatewords:10 }}
     </a>
-</h4>                
-{% if result.other_names %}
-<h5 class="alternate-name">
-    {% for name in result.other_names %}
-        {% if forloop.counter0 > 0 %}, {% endif %}{{name}}
-    {% endfor %}
-</h5>
-{% endif %}
-<p>
-{% with form.q.value|default_if_none:"" as query %}
-{% if result.history %}
-    {% highlight result.history with query max_length 200 %}
-{% else %}
-    No description available.
-    {% endif %}
-{% endwith %}
-</p>
+{% endblock %}
 
+{% block resultbody %}
+    {% with form.q.value|default_if_none:"" as query %}
+    {% if result.history %}
+        {% highlight result.history with query max_length 200 %}
+    {% else %}
+        No description available.
+        {% endif %}
+    {% endwith %}
+{% endblock %}

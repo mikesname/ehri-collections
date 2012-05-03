@@ -1,0 +1,20 @@
+{# FIXME: Hard-coded integer for publication status should be a constant #}
+{% load i18n %}
+<div class="search-result{% if result.publication_status == 0 %} draft{% endif %}">
+    {% block result %}
+    <h4>{% block resultheading %}{% endblock %}</h4>
+    {% if result.other_names %}
+    <h5 class="alternate-name">
+        {% for name in result.other_names %}
+            {% if forloop.counter0 > 0 %}, {% endif %}{{name}}
+        {% endfor %}
+    </h5>
+    {% endif %}
+    <p>
+        {% if result.publication_status == 0 %}
+            <span class="label">{% trans "Draft" %}</span>
+        {% endif %}
+        {% block resultbody %}{% endblock %}
+    </p>
+    {% endblock %}
+</div>
