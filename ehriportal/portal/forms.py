@@ -15,7 +15,6 @@ from portal import models, data, utils
 
 
 def parse_point(pointstr):
-    print "PARSING", pointstr
     """Parse a GEOS point from a two-float string."""
     try:
         y, x = string.split(pointstr, ",")
@@ -29,12 +28,20 @@ def parse_point(pointstr):
 
 class PortalSearchForm(forms.Form):
     ENTITIES = [models.Repository, models.Collection, models.Authority]
-
+    SORTFIELDS = (
+            ("", _("Relevance")),
+            ("name", _("Title/Name")),
+            ("publication_date", _("Publication Date")),
+            ("django_ct", _("Type")),
+    )
     q = forms.CharField(required=False, label=_('Search'))
+    sort = forms.ChoiceField(required=False, choices=SORTFIELDS, label=_("Order By"))
 
     def filter(self, sqs):
         """Filter a search queryset."""
         self.sqs = sqs
+        if self.cleaned_data["sort"]:
+            self.sqs = self.sqs.order_by(self.cleaned_data["sort"])
         if not self.cleaned_data["q"]:
             return self.no_query_found()
         return sqs.auto_query(self.cleaned_data["q"])
@@ -51,7 +58,6 @@ class PortalAllSearchForm(PortalSearchForm):
 class LanguageSelectWidget(forms.SelectMultiple):
     choices = utils.language_choices()
     def __init__(self, *args, **kwargs):
-        print "Init Lang Select"
         super(LanguageSelectWidget, self).__init__(*args, **kwargs)
 
 
