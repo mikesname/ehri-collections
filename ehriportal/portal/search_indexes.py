@@ -118,7 +118,7 @@ class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     start_date = indexes.DateField(model_attr='start_date', faceted=True, null=True)
     years = MultiValueIntegerField(model_attr='date_range', faceted=True, null=True)
     dates = MultiValueDateField(model_attr='date_range', null=True)
-    dates_exact = FacetMultiValueDateField(facet_for=dates, model_attr='date_range', null=True)
+    dates_exact = FacetMultiValueDateField(facet_for="dates", model_attr='date_range', null=True)
     date_range = indexes.CharField(model_attr='date_range_string', stored=True, indexed=False, null=True)
     end_date = indexes.DateField(model_attr='end_date', faceted=True, null=True)
     publication_status = indexes.IntegerField(model_attr='publication_status', 
