@@ -10,6 +10,5 @@ class Command(LoadDataCommand):
         # disconnect Haystack realtime signals
         signals.pre_save.disconnect(dispatch_uid="setup_index_signals")
         signals.pre_delete.disconnect(dispatch_uid="setup_index_signals")
-        super(Command, self).handle(*args, **kwargs)
-        self.stdout.write("Haystack index not updated.\n")
+        return super(Command, self).handle(*args, **kwargs)
 
