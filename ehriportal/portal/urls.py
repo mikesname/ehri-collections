@@ -44,6 +44,7 @@ FACETS = [
         "Type",
         paramname="type",
         renderfn=render_entity,
+        raw=True,
     ),
     FacetClass(
         "type_of_entity",
