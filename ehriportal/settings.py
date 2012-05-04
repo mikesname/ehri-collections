@@ -243,13 +243,15 @@ HAYSTACK_CONNECTIONS = {
         "TIMEOUT": 60 * 5,
         "INCLUDE_SPELLING": True,
         "BATCH_SIZE": 100,
+        "SILENTLY_FAIL": False,
     },
 }
 
 if TESTING:
     HAYSTACK_CONNECTIONS["default"] = {
         "ENGINE": "haystack.backends.whoosh_backend.WhooshEngine",
-        "PATH": "portal.index"
+        "PATH": "portal.index",
+        "SILENTLY_FAIL": False,
     }
 
 # translation

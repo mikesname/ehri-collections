@@ -79,12 +79,12 @@ urlpatterns = patterns('',
         form_class=forms.PortalAllSearchForm,
         facetclasses=FACETS,
         template_name="search.html"), name='search'),
-    url(r'^/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
+    url(r'^map/?$', views.PortalSearchListView.as_view(
+        form_class=forms.MapSearchForm,
+        template_name="map.html"), name='map_search'),
+    url(r'^/?(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
         redirect='search',
         form_class=forms.FacetListSearchForm,
         facetclasses=FACETS),
             name='search_facets'),
-    url(r'^search/?$', views.PortalSearchListView.as_view(
-        form_class=forms.MapSearchForm,
-        template_name="map.html"), name='map_search'),
 )

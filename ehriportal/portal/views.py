@@ -3,11 +3,12 @@
 import re
 import datetime
 import json
+import socket
 
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import messages
 from django.views.generic import ListView
-from django.views.generic.edit import DeleteView, UpdateView, ProcessFormView
+from django.views.generic.edit import FormMixin, DeleteView, UpdateView, ProcessFormView
 from django.views.generic.detail import DetailView
 from django import forms
 from django.conf import settings
@@ -17,11 +18,12 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.shortcuts import get_object_or_404, render
 
 from haystack.query import SearchQuerySet
+from haystack.forms import EmptySearchQuerySet
 from portal import models, forms, utils
 import reversion
 
 
-class PortalSearchListView(ListView):
+class PortalSearchListView(ListView, FormMixin):
     """A view which performs a search using Haystack and parses
     the facet information into a form that is easily manageable
     for display within the template."""
@@ -34,12 +36,26 @@ class PortalSearchListView(ListView):
     def get_queryset(self):
         """Perform the appropriate Haystack search and return
         a SearchQuerySet with the obtained results."""
-        if self.searchqueryset is None:
-            self.searchqueryset = SearchQuerySet()
-        sqs = self.searchqueryset
+        # check this for Solr connection errors.
+        self.form = self.get_form(self.form_class)
+        try:
+            return self.get_searchqueryset(self.form)
+        except socket.error:
+            msg = _("We're terribly sorry but it looks like the search engine is "
+                    "not working at the moment. We've been notified of this error "
+                    "so please try again or check back soon.")
+            messages.add_message(self.request, messages.ERROR, msg)
+        return EmptySearchQuerySet()
+
+    def get_form_kwargs(self):
+        return dict(data=self.request.GET)
+
+    def get_searchqueryset(self, form):
+        """Get the Haystack searchqueryset (which we treat as
+        a regular Django queryset."""
+        sqs = SearchQuerySet()
         if self.model:
             sqs = sqs.models(self.model)
-        
         # FIXME: Move somewhere more sensible
         if settings.PORTAL_HIDE_DRAFTS and not self.request.user.is_staff:
             sqs = sqs.filter(publication_status=models.Resource.PUBLISHED)
@@ -48,9 +64,8 @@ class PortalSearchListView(ListView):
             sqs = facet.apply(sqs)
 
         # apply the query
-        self.form = self.form_class(self.request.GET)
-        if self.form.is_valid():
-            sqs = self.form.filter(sqs)
+        if form.is_valid():
+            sqs = form.filter(sqs)
         for facetclass in self.facetclasses:
             sqs = facetclass.narrow(sqs, self.request.GET.getlist(
                 facetclass.paramname))
@@ -58,17 +73,15 @@ class PortalSearchListView(ListView):
         current = sqs.query.narrow_queries
         for facetclass in self.facetclasses:
             facetclass.parse(counts, current)
-
-        self.searchqueryset = sqs
-        return self.searchqueryset
+        return sqs
 
     def get_context_data(self, *args, **kwargs):
         extra = super(PortalSearchListView, self).get_context_data(*args, **kwargs)
         extra["facet_classes"] = self.facetclasses
         extra["form"] = self.form
         # FIXME: Find out why spelling suggestions aren't handled properly
-        extra["suggestion"] = re.sub("[\W-]", "", self.searchqueryset\
-                    .spelling_suggestion() or "")
+        #extra["suggestion"] = re.sub("[\W-]", "", self.get_queryset()\
+        #            .spelling_suggestion() or "")
         extra["querystring"] = self.request.META.get("QUERY_STRING", "")
         return extra
 
@@ -96,18 +109,18 @@ class PaginatedFacetView(PortalSearchListView):
         super(PaginatedFacetView, self).__init__(*args, **kwargs)
         self.fclass = None
 
-    def get_queryset(self):
-        sqs = super(PaginatedFacetView, self).get_queryset()
+    def get_searchqueryset(self, form):
+        sqs = super(PaginatedFacetView, self).get_searchqueryset(form)
         # look for the active facet
-        counts = self.searchqueryset.facet_counts()
-        current = self.searchqueryset.query.narrow_queries
+        counts = sqs.facet_counts()
+        current = sqs.query.narrow_queries
         try:
            self.fclass = [fc for fc in self.facetclasses \
                     if fc.name == self.kwargs["facet"]][0]
         except IndexError:
             raise Http404
         self.fclass.parse(counts, current)
-        if self.form.cleaned_data["sort"] == "count":
+        if form.cleaned_data["sort"] == "count":
             return self.fclass.sorted_by_count()
         return self.fclass.sorted_by_name()
 
