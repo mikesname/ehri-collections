@@ -63,7 +63,7 @@ class FacetClass(object):
         """Narrow the queryset appropriately if one if
         our points is in the params."""
         for facet in active:
-            queryset = queryset.narrow('%s:"%s"' % (self.name,
+            queryset = queryset.narrow('%s_exact:"%s"' % (self.name,
                 queryset.query.clean(facet)))
         return queryset
 
@@ -139,7 +139,7 @@ class Facet(object):
             for char in ['(', ')', '-']:
                 val = val.replace(char, '\\%s' % char)
             return val
-        return clean('%s:"%s"' % (self.klass.name, self.name))
+        return clean('%s_exact:"%s"' % (self.klass.name, self.name))
 
     def facet_param(self):
         return "%s=%s" % (self.klass.paramname, quote_plus(self.name))
@@ -166,7 +166,7 @@ class QueryFacet(Facet):
         return u"%d" % self.point
 
     def filter_name(self):
-        return u"%s:%s" % (self.klass.name, self)
+        return u"%s_exact:%s" % (self.klass.name, self)
 
     def _strpoint(self, p):
         if isinstance(p, basestring):
