@@ -23,21 +23,13 @@ class FacetMultiValueDateField(indexes.FacetMultiValueField):
     field_type = "date"
 
 
-#  FIXME: There seems to be a weird bug (or something confusing)
-#  in Haystack where a field with faceted=True but NOT indexed=False
-#  will default to field_type='text_en' (instead of 'string'), which 
-#  breaks things like indexing language codes because it removes
-#  stopwords (like, or example, 'it' (Italian)). So, all code fields
-#  that are faceted have indexed=False. Haystack generates another
-#  faceted field with the suffix _exact, which is then indexed.
-
 class RepositoryIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     name = indexes.CharField(model_attr='name', default=True, boost=1.1)
     slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)
     description = indexes.CharField(model_attr='general_context', null=True)
     other_names = indexes.MultiValueField(model_attr='other_names', stored=True, indexed=True)
     address = indexes.CharField(model_attr='primary_contact', null=True, stored=True, indexed=False)
-    country = indexes.CharField(model_attr='country_code', indexed=False, faceted=True, null=True, stored=True)
+    country = indexes.CharField(model_attr='country_code', faceted=True, null=True, stored=True)
     location = indexes.LocationField(null=True, faceted=True, stored=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
     publication_date = indexes.DateTimeField(model_attr='created_on')
@@ -79,7 +71,7 @@ class AuthorityIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)
     history = indexes.CharField(model_attr='history', null=True, stored=True)
     general_context = indexes.CharField(model_attr='general_context', null=True)
-    other_names = indexes.MultiValueField(model_attr='other_names')
+    other_names = indexes.MultiValueField(model_attr='other_names', stored=True, indexed=True)
     # FIXME: Make an integer field for i18n-niceness...
     type_of_entity = indexes.CharField(model_attr='type_name', faceted=True, stored=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
@@ -112,19 +104,19 @@ class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     repository = indexes.CharField(model_attr='repository__name')
     repository_slug = indexes.CharField(model_attr='repository__slug', stored=True, indexed=False)
     repository_other_names = indexes.MultiValueField(model_attr='repository__other_names')
-    location_of_materials = indexes.CharField(model_attr='repository__country_code', indexed=False, faceted=True, null=True)
-    languages = indexes.MultiValueField(model_attr='languages', faceted=True, indexed=False)
+    location_of_materials = indexes.CharField(model_attr='repository__country_code', faceted=True, null=True)
+    languages = indexes.MultiValueField(model_attr='languages', faceted=True)
     tags = indexes.MultiValueField(model_attr='tag_list', faceted=True)
     start_date = indexes.DateField(model_attr='start_date', faceted=True, null=True)
     years = MultiValueIntegerField(model_attr='date_range', faceted=True, null=True)
     dates = MultiValueDateField(model_attr='date_range', null=True)
     dates_exact = FacetMultiValueDateField(facet_for="dates", model_attr='date_range', null=True)
-    date_range = indexes.CharField(model_attr='date_range_string', stored=True, indexed=False, null=True)
+    date_range = indexes.CharField(model_attr='date_range_string', stored=True, null=True)
     end_date = indexes.DateField(model_attr='end_date', faceted=True, null=True)
     publication_status = indexes.IntegerField(model_attr='publication_status', 
                 faceted=True, stored=True)
     languages_of_description = indexes.MultiValueField(model_attr='languages_of_description', 
-            faceted=True, indexed=False)
+            faceted=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
     #ngram = indexes.EdgeNgramField(use_template=True, template_name="search/indexes/portal/collection_text.txt",
     #        stored=False)
