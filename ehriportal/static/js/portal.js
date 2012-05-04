@@ -7,7 +7,7 @@ jQuery(function($) {
     });
 
     // add Ajax behaviour on pagination links
-    $(".ajax, #facet-popup > .pagination ul li a").live("click", function(event) {
+    $(document).on("click", ".ajax, #facet-popup > .pagination ul li a", function(event) {
         // MASSIVE HACK - extract the facet class from the fclass data attribute
         // that is written into the modal-body div and alter the various
         // links to point the the particular facet list page.  This is deeply
@@ -15,7 +15,7 @@ jQuery(function($) {
         var klass = $("#facet-popup").data("fclass");
         if (klass && this.href) {
             event.preventDefault();
-            $("#modal-popup").load(this.href.replace(/search\?/, "search/" + klass + "/?"));
+            $("#modal-popup").load(this.href.replace(/search\/?\?/, "search/" + klass + "/?"));
         }
     });
 
