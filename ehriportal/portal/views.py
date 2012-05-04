@@ -58,7 +58,7 @@ class PortalSearchListView(ListView, FormMixin):
             sqs = sqs.models(self.model)
         # FIXME: Move somewhere more sensible
         if settings.PORTAL_HIDE_DRAFTS and not self.request.user.is_staff:
-            sqs = sqs.filter(publication_status=models.Resource.PUBLISHED)
+            sqs = sqs.narrow("publication_status:%d" % models.Resource.PUBLISHED)
 
         for facet in self.facetclasses:
             sqs = facet.apply(sqs)
@@ -73,15 +73,32 @@ class PortalSearchListView(ListView, FormMixin):
         current = sqs.query.narrow_queries
         for facetclass in self.facetclasses:
             facetclass.parse(counts, current)
+
+        # FIXME: Find way around assigning the sqs to the instance,
+        # but it seems to be difficult to prevent it from running
+        # multiple times otherwise, e.g. when checking for a spelling
+        # suggestion.
+        self.searchqueryset = sqs
         return sqs
 
     def get_context_data(self, *args, **kwargs):
         extra = super(PortalSearchListView, self).get_context_data(*args, **kwargs)
         extra["facet_classes"] = self.facetclasses
         extra["form"] = self.form
-        # FIXME: Find out why spelling suggestions aren't handled properly
-        #extra["suggestion"] = re.sub("[\W-]", "", self.get_queryset()\
-        #            .spelling_suggestion() or "")
+
+        # FIXME: This spelling suggestion stuff could be improved:
+        # 1. it relies on the instance searchqueryset (which may not
+        #    be re-entrant.)
+        # 2. It uses a hacky method to extract the 'query' param from
+        #    others that were applied with filter() (such as publication
+        #    status). This assumes that the query (plain text) param is
+        #    always last after any OR or AND clauses.
+        if self.searchqueryset is not None:
+            suggestion = self.searchqueryset.spelling_suggestion()
+            if suggestion:
+                qmatch = re.match(".*(?:(?:AND|OR) )?\((?P<query>[^\)]+)\)", suggestion)
+                if qmatch:
+                    extra["suggestion"] = qmatch.group("query")
         extra["querystring"] = self.request.META.get("QUERY_STRING", "")
         return extra
 
