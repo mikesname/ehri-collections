@@ -102,7 +102,7 @@ class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     description = indexes.CharField(model_attr='scope_and_content', null=True)
     other_names = indexes.MultiValueField(model_attr='other_names')
     repository = indexes.CharField(model_attr='repository__name')
-    repository_uri = indexes.CharField(model_attr='repository__get_absolute_url', stored=True, indexed=False)
+    repository_slug = indexes.CharField(model_attr='repository__slug', stored=True, indexed=False)
     repository_other_names = indexes.MultiValueField(model_attr='repository__other_names')
     location_of_materials = indexes.CharField(model_attr='repository__country_code', faceted=True, null=True)
     languages = indexes.MultiValueField(model_attr='languages', faceted=True)

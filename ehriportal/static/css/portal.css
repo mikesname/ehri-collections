@@ -42,6 +42,10 @@ legend {
     background-color: #FFFDFD;
 }
 
+.search-item-title, .search-item-date {
+    margin-right: 0.2em;
+}
+
 .search-result.draft h4 a.search-item-title {
     font-weight: 100;
 }
@@ -65,7 +69,6 @@ legend {
 }
 
 .collection-repo a {
-    padding-left: 0.2em;
     color: #777;
     font-weight: lighter;
 }
