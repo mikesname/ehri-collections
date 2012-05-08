@@ -193,6 +193,9 @@ INSTALLED_APPS = [
     # history/audit log
     "reversion",
 
+    # api
+    "tastypie",
+
     # our apps
     "portal",
     "suggestions",
