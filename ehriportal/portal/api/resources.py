@@ -2,7 +2,6 @@
 Tastypie resources for notable models.
 """
 
-
 from django.conf.urls.defaults import *
 from django.core.urlresolvers import reverse
 from tastypie import resources, serializers
@@ -45,6 +44,19 @@ class SlugResource(resources.ModelResource):
             'slug': bundle.data['slug'],
             'api_name': 'v1', # FIXME: Hard-coded api name...
         })
+    def dehydrate_languages(self, bundle):
+        return bundle.obj.languages
+
+    def dehydrate_scripts(self, bundle):
+        return bundle.obj.scripts
+
+    def dehydrate_languages_of_description(self, bundle):
+        return bundle.obj.languages_of_description
+
+    def dehydrate_scripts_of_description(self, bundle):
+        return bundle.obj.scripts_of_description
+
+
 
 # Yes, the name is all sorts of wrong
 class ResourceResource(resources.ModelResource):
