@@ -1,0 +1,17 @@
+{% load portal_tags %}
+
+{% if object %}
+    <address>
+        {% if object.street_address %}<addressline>{{object.street_address}}</addressline>{% endif %}
+        {% if object.city %}<addressline>{{object.city}}</addressline>{% endif %}
+        {% if object.region %}<addressline>{{object.region}}</addressline>{% endif %}
+        {% if object.country_code %}
+            <addressline>{{object.country_code|countrycode2name}}</addressline>
+        {% endif %}
+        {% if object.telephone %}<addressline>{{object.telephone}}</addressline>{% endif %}
+        {% if object.fax %}<addressline>{{object.fax}}</addressline>{% endif %}
+        {% if object.email %}<addressline>{{object.email}}</addressline>{% endif %}
+        {% if object.website %}<addressline>{{object.website}}</addressline>{% endif %}
+    </address>
+{% endif %}
+
