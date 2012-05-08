@@ -410,7 +410,7 @@ class PortalRevisionDiffView(PortalDetailView):
                     id=revids[0])
             context["oldversion"] = reversion.get_for_object(self.object).get(
                     id=revids[1])
-        except reversion.revisions.Revision.DoesNotExist, IndexError:
+        except (reversion.revisions.Revision.DoesNotExist, IndexError):
             raise Http404
         messages.add_message(self.request, messages.WARNING, "You are comparing "
             "revisions %s and %s" % (context["newversion"].id, context["oldversion"].id)) 
