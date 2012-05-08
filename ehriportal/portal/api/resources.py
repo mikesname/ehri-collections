@@ -3,6 +3,8 @@ Tastypie resources for notable models.
 """
 
 
+from django.conf.urls.defaults import *
+from django.core.urlresolvers import reverse
 from tastypie import resources, serializers
 from portal import models
 
@@ -30,22 +32,34 @@ class CollectionSerializer(serializers.Serializer):
         pass
 
 
+class SlugResource(resources.ModelResource):
+    def override_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/(?P<slug>[\w\d_.-]+)/$" % self._meta.resource_name, 
+                    self.wrap_view('dispatch_detail'), name="api_dispatch_detail"),
+        ]
 
+    def get_resource_uri(self, bundle):
+        return reverse("api_dispatch_detail", kwargs={
+            'resource_name': self._meta.resource_name,
+            'slug': bundle.data['slug'],
+            'api_name': 'v1', # FIXME: Hard-coded api name...
+        })
 
 # Yes, the name is all sorts of wrong
 class ResourceResource(resources.ModelResource):
     class Meta:
         queryset = models.Resource.objects.all()
 
-class RepositoryResource(resources.ModelResource):
+class RepositoryResource(SlugResource):
     class Meta:
         queryset = models.Repository.objects.all()
 
-class CollectionResource(resources.ModelResource):
+class CollectionResource(SlugResource):
     class Meta:
         queryset = models.Collection.objects.all()
 
-class AuthorityResource(resources.ModelResource):
+class AuthorityResource(SlugResource):
     class Meta:
         queryset = models.Authority.objects.all()
 
