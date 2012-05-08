@@ -12,6 +12,7 @@ babel
 incf.countryutils
 markdown
 pysolr
+lxml
 south
 django-taggit
 django-autoslug
