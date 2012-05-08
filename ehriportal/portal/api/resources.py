@@ -4,7 +4,7 @@ Tastypie resources for notable models.
 
 from django.conf.urls.defaults import *
 from django.core.urlresolvers import reverse
-from tastypie import resources, serializers
+from tastypie import fields, resources, serializers
 from portal import models
 
 # Unused/unfinished collection exporter/importer that
@@ -67,22 +67,42 @@ class ResourceResource(resources.ModelResource):
     class Meta:
         queryset = models.Resource.objects.all()
 
-class RepositoryResource(SlugResource):
-    class Meta:
-        queryset = models.Repository.objects.all()
-
-class CollectionResource(SlugResource):
-    class Meta:
-        queryset = models.Collection.objects.all()
-
-class AuthorityResource(SlugResource):
-    class Meta:
-        queryset = models.Authority.objects.all()
-
-class FuzzyDateResource(resources.ModelResource):
+class DateResource(resources.ModelResource):
     class Meta:
         queryset = models.FuzzyDate.objects.all()
 
+class OtherNameResource(resources.ModelResource):
+    class Meta:
+        queryset = models.OtherName.objects.all()
+
+class RepositoryResource(SlugResource):
+    other_names = fields.ListField()
+    class Meta:
+        queryset = models.Repository.objects.all()
+    
+    def dehydrate_other_names(self, bundle):
+        return bundle.obj.other_names
+
+class CollectionResource(SlugResource):
+    repository = fields.ForeignKey(RepositoryResource, 'repository')
+    other_names = fields.ListField()
+    dates = fields.CharField()
+    class Meta:
+        queryset = models.Collection.objects.select_related().all()
+
+    def dehydrate_dates(self, bundle):
+        return bundle.obj.date_range_string
+
+    def dehydrate_other_names(self, bundle):
+        return bundle.obj.other_names
+
+class AuthorityResource(SlugResource):
+    other_names = fields.ListField()
+    class Meta:
+        queryset = models.Authority.objects.all()
+
+    def dehydrate_other_names(self, bundle):
+        return bundle.obj.other_names
 
 
 

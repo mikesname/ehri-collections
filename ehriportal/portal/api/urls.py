@@ -12,7 +12,8 @@ v1_api.register(resources.ResourceResource())
 v1_api.register(resources.RepositoryResource())
 v1_api.register(resources.CollectionResource())
 v1_api.register(resources.AuthorityResource())
-v1_api.register(resources.FuzzyDateResource())
+v1_api.register(resources.OtherNameResource())
+v1_api.register(resources.DateResource())
 
 urlpatterns = patterns('',
    url(r'^', include(v1_api.urls)),
