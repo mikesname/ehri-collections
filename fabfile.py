@@ -37,9 +37,7 @@ def setup():
     # PIL requirements
     sudo('yum install -y libjpeg-devel')
     sudo('yum install -y libpng-devel')
-    # NB: Requires libgeos >= 3.0, so this doesn't
-    # work.  
-    sudo('yum install -y geos-devel')
+    sudo('yum install -y libxslt-devel')
     sudo('easy_install pip')
     sudo('pip install virtualenv')
 
