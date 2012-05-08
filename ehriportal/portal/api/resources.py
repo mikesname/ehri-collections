@@ -39,11 +39,15 @@ class SlugResource(resources.ModelResource):
         ]
 
     def get_resource_uri(self, bundle):
+        # FIXME: There's a hack here - for some reason, on the Authority
+        # model, tastypie does not extract the slug field into the bundle
+        # properly. This is a nasty fix.
         return reverse("api_dispatch_detail", kwargs={
             'resource_name': self._meta.resource_name,
-            'slug': bundle.data['slug'],
+            'slug': bundle.data.get('slug', bundle.obj.pk),
             'api_name': 'v1', # FIXME: Hard-coded api name...
         })
+
     def dehydrate_languages(self, bundle):
         return bundle.obj.languages
 
