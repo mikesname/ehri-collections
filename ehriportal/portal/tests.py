@@ -2,7 +2,7 @@
 Portal model unit tests.
 """
 
-# TODO: Factor out duplication here.
+import json
 
 from django.test import TestCase
 from django.test.utils import override_settings
@@ -261,6 +261,33 @@ class EntityCrudTestMixin(object):
         self.assertEqual(response.status_code, 200)
         objcount2 = response.context["paginator"].count
         self.assertGreater(objcount1, objcount2)
+
+    def test_api_list(self):
+        """Test listing objects using the Tastypie API."""
+        response = self.client.get(reverse("api_dispatch_list", kwargs={
+            "resource_name": self.urlprefix,
+            "api_name": "v1",
+        }), {
+            "format": "json",
+        })
+        self.assertEqual(response.status_code, 200)
+        # check we've got some objects
+        data = json.loads(response.content)
+        self.assertGreater(len(data["objects"]), 0)
+
+    def test_api_detail(self):
+        """Test object detail using the Tastypie API."""
+        response = self.client.get(reverse("api_dispatch_detail", kwargs={
+            "resource_name": self.urlprefix,
+            "slug": self.slug,
+            "api_name": "v1",
+        }), {
+            "format": "json",
+        })
+        self.assertEqual(response.status_code, 200)
+        data = json.loads(response.content)
+        self.assertEqual(data["slug"], self.slug)
+
 
 
         
