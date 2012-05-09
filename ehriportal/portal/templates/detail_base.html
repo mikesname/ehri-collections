@@ -20,6 +20,19 @@
                     {% include "_object_version_history.html" %}
                 {% endblock %}
             {% endif %}
+            <div class="export-actions well">
+                <h4>{% trans "Export Resource" %}</h4>
+                <ul class="unstyled">
+                    <li>
+                        <a class="export-link" title="{% trans "Export description as XML" %}" target="_blank"  
+                            href="{% url api_dispatch_detail slug=object.slug resource_name=object.resource_type api_name="v1" %}?format=xml" />XML</a>
+                   </li>
+                    <li>
+                    <a class="export-link" title="{% trans "Export description as JSON" %}" target="_blank" 
+                            href="{% url api_dispatch_detail slug=object.slug resource_name=object.resource_type api_name="v1" %}?format=json" />JSON</a>
+                   </li>
+                </ul>
+            </div>
             {% if user.is_staff %}
                 {% block sidebar_admin %}
                     <div class="admin-actions well">

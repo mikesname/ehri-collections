@@ -169,6 +169,10 @@ class Resource(models.Model):
         return globals()[self.type].objects.get(pk=self.pk)
 
     @property
+    def resource_type(self):
+        return self._meta.verbose_name
+
+    @property
     def other_names(self):
         """Get a list of other names."""
         return [on.name for on in self.othername_set.all()]
