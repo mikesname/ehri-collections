@@ -111,10 +111,10 @@ class Repository(model.Node):
     scripts = property.List(name=_("Script(s)"))
 
     def natural_key(self):
-        return (self.slug,)
+        return (self.name,)
 
     def __repr__(self):
-        return "<%s: %s>" % (self.__class__.__name__, self.slug)
+        return "<%s: %s>" % (self.__class__.__name__, self.name)
 
     def __unicode__(self):
         return self.name
@@ -157,7 +157,7 @@ class Collection(model.Node):
     scripts_of_description = property.List(name=_("Script(s) of Description"))
 
     def natural_key(self):
-        return (self.slug,)
+        return (self.name,)
 
 class Authority(model.Node):
     """Model representing an archival authority."""
@@ -185,10 +185,10 @@ class Authority(model.Node):
     scripts = property.List(name=_("Script(s)"))
 
     def natural_key(self):
-        return (self.slug,)
+        return (self.name,)
 
     def __repr__(self):
-        return "<%s: %s>" % (self.__class__.__name__, self.slug)
+        return "<%s: %s>" % (self.__class__.__name__, self.name)
 
     def __unicode__(self):
         return self.name
