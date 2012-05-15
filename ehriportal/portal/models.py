@@ -21,6 +21,27 @@ import reversion
 
 from south.modelsinspector import add_introspection_rules
 
+from bulbs.model import Node, Relationship
+from bulbs.property import String, Integer, DateTime
+from bulbs.utils import current_datetime
+
+import bulbs
+
+class NeoPerson(bulbs.model.Node):
+    element_type = "neotest"
+    name = bulbs.property.String()
+    age = bulbs.property.Integer()
+
+    def __repr__(self):
+        return "<NeoPerson: %s>" % self.name
+
+class Created(bulbs.model.Relationship):
+    label = "created"
+    created = bulbs.property.DateTime(default=bulbs.utils.current_datetime,
+            nullable=False)
+
+
+
 EMPTY_JSON_LIST = json.dumps([])
 
 # get South to play nice with ImageWithThumbsField
