@@ -21,5 +21,6 @@ django-modeltranslation
  -e git+https://github.com/toastdriven/django-haystack.git#egg=django-haystack
  -e git+https://github.com/geopy/geopy.git#egg=geopy
  -e git+https://github.com/toastdriven/django-tastypie.git#egg=django-tastypie
+ -e git+https://github.com/espeed/bulbs.git#egg=bulbs
 django-reversion
 diff-match-patch

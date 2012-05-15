@@ -12,51 +12,24 @@ from django.utils.translation import ugettext as _
 
 from portal import utils
 
-from bulbs import model, property
+from bulbs import model, property as nodeprop
 from bulbs.utils import current_datetime
+from bulbs import neo4jserver
 
-# Publication status enum
-DRAFT, PUBLISHED = range(2)
-PUB_STATUS = (
-        (DRAFT, _("Draft")),
-        (PUBLISHED, _("Published")),
-)
+# FIXME: Do away with this global somehow
+GRAPH = neo4jserver.Graph() # FIXME: Handle non-default config
 
-FULL, PARTIAL, MINIMAL = range(3)
-LEVELS_OF_DETAIL = (
-    (FULL, _("Full")),
-    (PARTIAL, _("Partial")),
-    (MINIMAL, _("Minimal")),
-)
 
-CORPORATE_BODY, FAMILY, PERSON = range(3)
-AUTHORITY_TYPES = (
-    (CORPORATE_BODY, _("Corporate Body")),
-    (FAMILY, _("Family")),
-    (PERSON, _("Person")),
-)
+class HeldBy(model.Relationship):
+    label = "heldBy"
+GRAPH.add_proxy(HeldBy.label, HeldBy)
 
-COLLECTION, FONDS, SUBFONDS, SERIES, SUBSERIES, FILE, ITEM = range(7)
-LEVELS_OF_DESCRIPTION = (
-    (COLLECTION, _("Collection")),
-    (FONDS, _("Fonds")),
-    (SUBFONDS, _("Sub-fonds")),
-    (SERIES, _("Series")),
-    (SUBSERIES, _("Sub-series")),
-    (FILE, _("File")),
-    (ITEM, _("Item")),
-)
 
-INTERNATIONAL, NATIONAL, REGIONAL, PROVINCIAL, COMMUNITY, \
-        RELIGIOUS, UNIVERSITY, MUNICIPAL, ABORIGINAL, EDUCATIONAL = range(10)
-ENTITY_TYPES = (
-    (INTERNATIONAL, _("International")),
-    (NATIONAL, _("National")),
-    (REGIONAL, _("Regional")),
-    (PROVINCIAL, _("Provincial")),
-    (COMMUNITY, _("Community")),
-    # ... TODO
-)
+class CreatedBy(model.Relationship):
+    label = "createdBy"
+GRAPH.add_proxy(CreatedBy.label, CreatedBy)
+
+
 
 
 class ResourceType(model.ModelMeta):
@@ -69,8 +42,13 @@ class ResourceType(model.ModelMeta):
         if attrs.pop("abstract", None) or not attrs.get("autoregister", True):
             return new(cls, name, bases, attrs)
         for fname, vname, help in attrs.get("translatable_fields", []):
-            attrs[fname] = property.String(name=vname, nullable=True)
-        return new(cls, name, bases, attrs)
+            attrs[fname] = nodeprop.String(name=vname, nullable=True)
+
+        newtype = new(cls, name, bases, attrs)
+        # create a proxy in the graph for this type
+        if attrs.get("element_type"):
+            GRAPH.add_proxy(attrs.get("element_type"), newtype)
+        return newtype
 
     def __repr__(cls):
         return "<class %s>" % cls.__name__
@@ -104,11 +82,17 @@ class Repository(model.Node):
         ("sources", "Sources", "TODO: Help text"),
     )
 
-    name = property.String(name=_("Name"), nullable=False)
-    level_of_description = property.Integer(name=_("Level of Description"))
-    type_of_entity = property.Integer(name=_("Type of Entity"))
-    languages = property.List(name=_("Language(s)"))
-    scripts = property.List(name=_("Script(s)"))
+    name = nodeprop.String(name=_("Name"), nullable=False, unique=True)
+    level_of_description = nodeprop.Integer(name=_("Level of Description"))
+    type_of_entity = nodeprop.Integer(name=_("Type of Entity"))
+    languages = nodeprop.List(name=_("Language(s)"))
+    scripts = nodeprop.List(name=_("Script(s)"))
+
+    @property
+    def collections(self):
+        """Get all collections related by the heldBy edge."""
+        for edge in self.inE(HeldBy.label):
+            yield edge.outV()
 
     def natural_key(self):
         return (self.name,)
@@ -148,16 +132,35 @@ class Collection(model.Node):
         ("sources", "Sources", "TODO: Help text"),
     )
 
-    name = property.String(name=_("Title"), nullable=False)
-    identifier = property.String(indexed=True, name=_("Local Identifier"), nullable=False)
-    level_of_description = property.Integer(name=_("Level of Description"))
-    languages = property.List(name=_("Language(s)"))
-    scripts = property.List(name=_("Script(s)"))
-    languages_of_description = property.List(name=_("Language(s) of Description"))
-    scripts_of_description = property.List(name=_("Script(s) of Description"))
+    name = nodeprop.String(name=_("Title"), nullable=False, unique=True)
+    identifier = nodeprop.String(indexed=True, name=_("Local Identifier"), nullable=False)
+    level_of_description = nodeprop.Integer(name=_("Level of Description"))
+    languages = nodeprop.List(name=_("Language(s)"))
+    scripts = nodeprop.List(name=_("Script(s)"))
+    languages_of_description = nodeprop.List(name=_("Language(s) of Description"))
+    scripts_of_description = nodeprop.List(name=_("Script(s) of Description"))
+
+    @property
+    def repository(self):
+        try:
+            return self.outE(HeldBy.label).next().inV()
+        except StopIteration:
+            return
+
+    # FIXME: Can't make this a property setter (as would be nice)
+    # because the Bulbs node model overrides __setattr__.
+    def set_repository(self, repo):
+        try:
+            rel = self.outE(HeldBy.label).next().eid
+            GRAPH.heldBy.delete(rel)
+        except StopIteration:
+            # this should mean there is no existing repository
+            pass
+        GRAPH.heldBy.create(self, repo)
 
     def natural_key(self):
         return (self.name,)
+
 
 class Authority(model.Node):
     """Model representing an archival authority."""
@@ -177,12 +180,12 @@ class Authority(model.Node):
         ("sources", "Sources", "TODO: Help text"),
     )
 
-    name = property.String(name=_("Authorized Form of Name"), nullable=False)
-    level_of_detail = property.Integer(name=_("Level of Description"))
-    type_of_entity = property.Integer(name=_("Type of Entity"),
+    name = nodeprop.String(name=_("Authorized Form of Name"), nullable=False)
+    level_of_detail = nodeprop.Integer(name=_("Level of Description"))
+    type_of_entity = nodeprop.Integer(name=_("Type of Entity"),
             nullable=False)
-    languages = property.List(name=_("Language(s)"))
-    scripts = property.List(name=_("Script(s)"))
+    languages = nodeprop.List(name=_("Language(s)"))
+    scripts = nodeprop.List(name=_("Script(s)"))
 
     def natural_key(self):
         return (self.name,)
