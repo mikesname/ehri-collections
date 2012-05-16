@@ -9,6 +9,7 @@ import datetime
 import json
 
 from django.conf import settings
+from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext as _
 
 from portal import utils, terms
@@ -126,7 +127,6 @@ class GraphQuery(object):
         constraints. So low is added to the current low value and both will be
         clamped to any existing high value.
         """
-        print "Setting limits", low, high
         if high is not None:
             if self.high_mark is not None:
                 self.high_mark = min(self.high_mark, self.low_mark + high)
@@ -188,7 +188,7 @@ class GraphQuerySet(DjangoQuerySet):
     at the moment) the Django one."""
     def __init__(self, *args, **kwargs):
         super(GraphQuerySet, self).__init__(*args, **kwargs)
-        self.query = kwargs.get("query", GraphQuery(kwargs.get("model")))
+        self.query = kwargs.get("query", GraphQuery(self.model))
 
 
     def iterator(self):
@@ -208,8 +208,23 @@ class GraphQuerySet(DjangoQuerySet):
 
     def all(self):
         # TODO: Find a lazy way of doing this
-        return 
-        
+        return self.query
+
+
+from django.db.models.manager import Manager, ManagerDescriptor
+
+class GraphManager(Manager):
+    """Mock manager for graph models."""
+    def get_query_set(self):
+        return GraphQuerySet(self.model)
+
+    def contribute_to_class(self, model, name):
+        self.model = model
+        setattr(model, name, ManagerDescriptor(self))
+
+
+
+
 
 class ResourceType(model.ModelMeta):
     """Metaclass for archival resources. Don't fear the magic.
@@ -225,9 +240,18 @@ class ResourceType(model.ModelMeta):
 
         newtype = new(cls, name, bases, attrs)
         # create a proxy in the graph for this type
+
+        for name, obj in attrs.items():
+            newtype.add_to_class(name, obj)
+
         if attrs.get("element_type"):
             GRAPH.add_proxy(attrs.get("element_type"), newtype)
         return newtype
+
+    # Try and make some Django magic happy
+    def add_to_class(cls, name, value):
+        if hasattr(value, 'contribute_to_class'):
+            value.contribute_to_class(cls, name)
 
     def __repr__(cls):
         return "<class %s>" % cls.__name__
@@ -237,7 +261,9 @@ class ResourceBase(model.Node):
     """Mixin for resources holding common properties."""
     __metaclass__ = ResourceType
     __mode__ = model.STRICT
-    created_on = nodeprop.DateTime(name=_("Date Created"), nullable=True)
+    name = nodeprop.String(name=_("Name"), indexed=True, nullable=False)
+    slug = nodeprop.String(name=_("Slug"), indexed=True, nullable=False)
+    created_on = nodeprop.DateTime(name=_("Date Created"), nullable=False)
     updated_on = nodeprop.DateTime(name=_("Date Updated"), nullable=True)
     publication_status = nodeprop.Integer(name=_("Publication Status"),
             default=terms.DRAFT, indexed=True, nullable=True)
@@ -246,8 +272,24 @@ class ResourceBase(model.Node):
         super(ResourceBase, self).__init__(client)
         self.__dict__.update(**kwargs)
 
+    def _get_slug(self, name):
+        proxy = getattr(GRAPH, self.element_type)
+        initial = 1
+        base = slugify(name)
+        potential = base
+        while True:
+            ires = proxy.index.lookup(slug=potential)
+            if len(list(ires)) == 0:
+                break
+            potential = "%s-%d" % (base, initial)
+            initial += 1
+        return potential
+
+
     def _create(self, _data, kwds):
         kwds["created_on"] = kwds.get("created_on", current_datetime())
+        # get the slug from the name
+        kwds["slug"] = self._get_slug(kwds["name"])
         return super(ResourceBase, self)._create(_data, kwds)
 
     def _update(self, _id, _data, kwds):
@@ -289,11 +331,12 @@ class Repository(ResourceBase):
         ("sources", "Sources", "TODO: Help text"),
     )
 
-    name = nodeprop.String(name=_("Name"), nullable=False, unique=True)
     level_of_description = nodeprop.Integer(name=_("Level of Description"))
     type_of_entity = nodeprop.Integer(name=_("Type of Entity"))
     languages = nodeprop.List(name=_("Language(s)"))
     scripts = nodeprop.List(name=_("Script(s)"))
+
+    objects = GraphManager()
 
     @property
     def collections(self):
@@ -338,7 +381,8 @@ class Collection(ResourceBase):
         ("sources", "Sources", "TODO: Help text"),
     )
 
-    name = nodeprop.String(name=_("Title"), nullable=False, unique=True)
+    objects = GraphManager()
+
     identifier = nodeprop.String(indexed=True, name=_("Local Identifier"), nullable=False)
     level_of_description = nodeprop.Integer(name=_("Level of Description"))
     languages = nodeprop.List(name=_("Language(s)"))
@@ -385,12 +429,13 @@ class Authority(ResourceBase):
         ("sources", "Sources", "TODO: Help text"),
     )
 
-    name = nodeprop.String(name=_("Authorized Form of Name"), nullable=False)
     level_of_detail = nodeprop.Integer(name=_("Level of Description"))
     type_of_entity = nodeprop.Integer(name=_("Type of Entity"),
             nullable=False)
     languages = nodeprop.List(name=_("Language(s)"))
     scripts = nodeprop.List(name=_("Script(s)"))
+
+    objects = GraphManager()
 
     def natural_key(self):
         return (self.name,)
