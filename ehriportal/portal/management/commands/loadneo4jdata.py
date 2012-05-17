@@ -23,7 +23,6 @@ class Command(BaseCommand):
     def handle(self, *fixture_labels, **options):
         verbosity = int(options.get('verbosity'))
         show_traceback = options.get('traceback')        
-
         if not len(fixture_labels):
             self.stderr.write(
                 self.style.ERROR("No database fixture specified. Please provide "
@@ -40,10 +39,13 @@ class Command(BaseCommand):
         GRAPH.client.scripts.update(scripts_file)
 
         for fixture in fixture_labels:
+            sys.stderr.write("Loading fixture: %s\n" % fixture)
             objdata = []
             with open(fixture, "r") as fh:
-                objects = json.load(fh)
+                objects = json.load(fh, encoding="utf8")
                 for object in objects:
+                    if verbosity > 2:
+                        sys.stderr.write("Loading %s\n" % object.get("name"))
                     data = object["fields"]
                     # temp hacks
                     data["element_type"] = "repository"
@@ -54,5 +56,4 @@ class Command(BaseCommand):
                     objdata.append(data)
             params = dict(dataitems=objdata,index_name="repository",keys=None)
             script = GRAPH.client.scripts.get("create_multiple_indexed_vertex")
-            print GRAPH.client.gremlin(script, params).content
-                    
+            res = GRAPH.client.gremlin(script, params)        
