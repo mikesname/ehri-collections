@@ -5,7 +5,7 @@ from django.views.generic.list_detail import object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required, user_passes_test
 
-from portal import views, forms, utils, models, permissions
+from portal import views, forms, utils, models, nodes, permissions
 from portal.haystack_util import FacetClass
 
 from haystack.query import SearchQuerySet
@@ -32,7 +32,7 @@ urlpatterns = patterns('',
         facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', views.PortalListView.as_view(
-        model=models.Repository,
+        model=nodes.Repository,
         template_name="repository_list.html",
         ), name='repository_list'),
 
@@ -66,7 +66,7 @@ urlpatterns = patterns('',
             template_name="repository_revision.html"
         ), name='repository_revision'),
     url(r'^(?P<slug>[-\w]+)/?$', views.PortalCollectionHolderDetailView.as_view(
-            model=models.Repository,
+            model=nodes.Repository,
             template_name="repository_detail.html"
         ), name='repository_detail'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
