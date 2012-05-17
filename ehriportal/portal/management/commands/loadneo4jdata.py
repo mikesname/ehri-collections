@@ -9,10 +9,11 @@ from django.core.management.base import BaseCommand
 from django.core.management.commands.loaddata import Command as LoadDataCommand
 
 from bulbs import neo4jserver
+from bulbs.config import DEBUG
 
 # FIXME: Do away with this global somehow
 GRAPH = neo4jserver.Graph() # FIXME: Handle non-default config
-
+GRAPH.config.set_logger(DEBUG)
 
 class Command(BaseCommand):
 
@@ -44,7 +45,12 @@ class Command(BaseCommand):
                 objects = json.load(fh)
                 for object in objects:
                     data = object["fields"]
+                    # temp hacks
                     data["element_type"] = "repository"
+                    data["lod"] = None
+                    data["type_of_entity"] = None
+                    data.pop("languages")
+                    data.pop("scripts")
                     objdata.append(data)
             params = dict(dataitems=objdata,index_name="repository",keys=None)
             script = GRAPH.client.scripts.get("create_multiple_indexed_vertex")
