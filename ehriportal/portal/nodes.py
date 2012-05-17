@@ -331,7 +331,7 @@ class Repository(ResourceBase):
         ("sources", "Sources", "TODO: Help text"),
     )
 
-    level_of_description = nodeprop.Integer(name=_("Level of Description"))
+    lod = nodeprop.Integer(name=_("Level of Description"))
     type_of_entity = nodeprop.Integer(name=_("Type of Entity"))
     languages = nodeprop.List(name=_("Language(s)"))
     scripts = nodeprop.List(name=_("Script(s)"))
@@ -384,7 +384,7 @@ class Collection(ResourceBase):
     objects = GraphManager()
 
     identifier = nodeprop.String(indexed=True, name=_("Local Identifier"), nullable=False)
-    level_of_description = nodeprop.Integer(name=_("Level of Description"))
+    lod = nodeprop.Integer(name=_("Level of Description"))
     languages = nodeprop.List(name=_("Language(s)"))
     scripts = nodeprop.List(name=_("Script(s)"))
     languages_of_description = nodeprop.List(name=_("Language(s) of Description"))
@@ -429,7 +429,7 @@ class Authority(ResourceBase):
         ("sources", "Sources", "TODO: Help text"),
     )
 
-    level_of_detail = nodeprop.Integer(name=_("Level of Description"))
+    lod = nodeprop.Integer(name=_("Level of Description"))
     type_of_entity = nodeprop.Integer(name=_("Type of Entity"),
             nullable=False)
     languages = nodeprop.List(name=_("Language(s)"))

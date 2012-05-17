@@ -4,21 +4,24 @@
 //
 
 
-def create_multiple_indexed_vertex(data,index_name,keys) {
+def create_multiple_indexed_vertex(dataitems,index_name,keyitems) {
   neo4j = g.getRawGraph()
   manager = neo4j.index()
   g.setMaxBufferSize(0)
   g.startTransaction()
   try {
-    for (nodeentry in data) {
+    i = 0
+    for (data in dataitems) {
+      keys = keyitems[i]
       index = manager.forNodes(index_name)
       vertex = neo4j.createNode()
-      for (entry in nodeentry.entrySet()) {
+      for (entry in data.entrySet()) {
         if (entry.value == null) continue;
           vertex.setProperty(entry.key,entry.value)
         if (keys == null || keys.contains(entry.key))
           index.add(vertex,entry.key,String.valueOf(entry.value))
       }
+      i++
     }
     g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
     return true;

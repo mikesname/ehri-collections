@@ -45,8 +45,9 @@ class Command(BaseCommand):
                 objects = json.load(fh)
                 for object in objects:
                     objdata.append(object["fields"])
-            params = dict(data=objdata,index_name="repository")
+            params = dict(dataitems=objdata,index_name="repository",keyitems=["name", "slug"])
+            print params
             script = GRAPH.client.scripts.get("create_multiple_indexed_vertex")
             print script
-            GRAPH.client.gremlin(script, params)
+            print GRAPH.client.gremlin(script, params).content
                     
