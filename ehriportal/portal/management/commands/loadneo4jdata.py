@@ -37,17 +37,16 @@ class Command(BaseCommand):
 
         scripts_file = os.path.join(settings.PROJECT_ROOT, "portal", "gremlin.groovy")
         GRAPH.client.scripts.update(scripts_file)
-        print GRAPH.client.scripts
 
         for fixture in fixture_labels:
             objdata = []
             with open(fixture, "r") as fh:
                 objects = json.load(fh)
                 for object in objects:
-                    objdata.append(object["fields"])
-            params = dict(dataitems=objdata,index_name="repository",keyitems=["name", "slug"])
-            print params
+                    data = object["fields"]
+                    data["element_type"] = "repository"
+                    objdata.append(data)
+            params = dict(dataitems=objdata,index_name="repository",keys=None)
             script = GRAPH.client.scripts.get("create_multiple_indexed_vertex")
-            print script
             print GRAPH.client.gremlin(script, params).content
                     
