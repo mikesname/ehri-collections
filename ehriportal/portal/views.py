@@ -216,18 +216,11 @@ class PortalUpdateView(UpdateView):
         context = self.get_context_data()
         formsets = context["formsets"]
         if False not in [pf.is_valid() for pf in formsets.values()]:
-            # run update in a reversion 
-            with reversion.create_revision():
-                reversion.set_user(self.request.user)
-                comment = form.cleaned_data["revision_comment"].strip()
-                if not comment:
-                    comment = "Created" if not self.object else "Updated"
-                reversion.set_comment(comment)
-                self.object = form.save()
-                for formset in formsets.values():
-                    formset.instance = self.object
-                    formset.save()
-                return HttpResponseRedirect(self.object.get_absolute_url())
+            self.object = form.save()
+            for formset in formsets.values():
+                formset.instance = self.object
+                formset.save()
+            return HttpResponseRedirect(self.object.get_absolute_url())
         return self.form_invalid(form)
 
     def form_invalid(self, form):
@@ -364,11 +357,6 @@ class PortalDetailView(DetailView):
                 # FIXME: Find a way to redirect to somewhere else
                 raise PermissionDenied()
         return object
-
-    def get_context_data(self, **kwargs):
-        context = super(PortalDetailView, self).get_context_data(**kwargs)
-        context["history"] = reversion.get_for_object(self.object)
-        return context
 
 
 class PortalCollectionHolderDetailView(PortalDetailView):
