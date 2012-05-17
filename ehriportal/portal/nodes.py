@@ -34,6 +34,13 @@ class CreatedBy(model.Relationship):
 GRAPH.add_proxy(CreatedBy.label, CreatedBy)
 
 
+class MentionedIn(model.Relationship):
+    label - "mentionedIn"
+GRAPH.add_proxy(MentionedIn.label, MentionedIn)
+
+
+
+
 from django.db.models.query import QuerySet as DjangoQuerySet
 from django.db.models.sql import Query as DjangoQuery
 from django.db.models.sql.constants import ORDER_PATTERN
@@ -565,6 +572,16 @@ class Authority(ResourceBase):
         ("revision_history", "Revision History", "TODO: Help text"),
         ("sources", "Sources", "TODO: Help text"),
     )
+
+    @property
+    def collection_set(self):
+        qs = Collection.objects.all()
+        return qs.start_from("g.v(%d).inE('createdBy').outV" % self.eid)
+
+    @property
+    def mentioned_set(self):
+        qs = Collection.objects.all()
+        return qs.start_from("g.v(%d).inE('mentionedIn').outV" % self.eid)
 
     lod = nodeprop.Integer(name=_("Level of Description"))
     type_of_entity = nodeprop.Integer(name=_("Type of Entity"),
