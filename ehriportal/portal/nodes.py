@@ -11,8 +11,9 @@ import json
 from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext as _
+from django.utils.encoding import smart_str, force_unicode
 
-from portal import utils, terms
+from portal import utils, terms, models
 
 from bulbs import model, property as nodeprop
 from bulbs.utils import current_datetime, initialize_element, \
@@ -45,6 +46,7 @@ class GraphQuery(object):
         self.default_ordering = False
         self.extra_order_by = ()
         self.filters = {}
+        self.start = "g.V"
 
     def clone(self):
         obj = self.__class__(self.model)
@@ -53,6 +55,7 @@ class GraphQuery(object):
         obj.high_mark = self.high_mark
         obj.order_by = self.order_by[:]
         obj.default_ordering = self.default_ordering#
+        obj.start = self.start
         self.extra_order_by = ()
         return obj
 
@@ -70,11 +73,16 @@ class GraphQuery(object):
         obj.filters[key] = value
         return obj
 
+    def set_start(self, str):
+        obj = self.clone()
+        obj.start = str
+        return obj
+
     def get_count(self, using=None):
         # FIXME: This is all kinds of wrong
         # TODO: Find better way of doing this...
-        cmd = "g.V.filter{it.element_type=='%s'}.count()" % self.model.element_type
-        number = GRAPH.client.gremlin(cmd).content
+        script = self.get_compiler().get_gremlin_script()
+        number = GRAPH.client.gremlin("%s.count()" % script).content
 
         # Apply offset and limit constraints manually, since using LIMIT/OFFSET
         # in SQL (in variants that provide them) doesn't change the COUNT
@@ -155,6 +163,11 @@ class GraphQuery(object):
     def get_compiler(self, using=None):
         return GremlinCompiler(self)
 
+    def __iter__(self):
+        compiler = self.get_compiler()
+        for iter in compiler.results_iter():
+            yield iter
+
 
 class GremlinCompiler(object):
     """Class which compiles a GraphQuery into a gremlin query.
@@ -164,9 +177,19 @@ class GremlinCompiler(object):
 
     def get_gremlin_script(self):
         query = self.query
-        qstr = "g.V.filter{it.element_type=='%s'}" % query.model.element_type
+        # short cut for starting traversal from a particular
+        # point. Defaults to g.V (all verts)
+        start = self.query.start
+        qstr = "%s.filter{it.element_type=='%s'}" % (start, query.model.element_type)
         for key, value in query.filters.items():
             qstr += ".filter{it.%s==\"%s\"}" % (key, value)
+        
+        # TODO: Desc/Asc ordering
+        if self.query.order_by:
+            for item in self.query.order_by:
+                qstr += ".sort{it.%s}" % item
+        # TODO: Default ordering
+        
         if query.low_mark != 0 and query.high_mark is None:
             qstr += "._().range(%d, -1)" % query.low_mark
         elif query.low_mark == 0 and query.high_mark is not None:
@@ -174,7 +197,6 @@ class GremlinCompiler(object):
         elif query.low_mark > 0 and query.high_mark is not None:
             qstr += "._().range(%d, %d)" % (query.low_mark, query.high_mark)
 
-        # TODO: Ordering and stuff
         return qstr
 
     def results_iter(self):
@@ -190,6 +212,13 @@ class GraphQuerySet(DjangoQuerySet):
         super(GraphQuerySet, self).__init__(*args, **kwargs)
         self.query = kwargs.get("query", GraphQuery(self.model))
 
+    def start_from(self, gremlinstr):
+        """Hacky method to change the starting point of
+        a graph traversal queryset. By default it's
+        g.V (all vertices)."""
+        clone = self._clone()
+        clone.query = clone.query.set_start(gremlinstr)
+        return clone
 
     def iterator(self):
         compiler = self.query.get_compiler()
@@ -197,18 +226,56 @@ class GraphQuerySet(DjangoQuerySet):
             yield res
         
     def filter(self, **kwargs):
+        clone = self._clone()
         for key, value in kwargs.items():
-            self.query = self.query.add_filter(key, value)
-        return self.__class__(query=self.query.clone())
+            clone.query = clone.query.add_filter(key, value)
+        return clone
 
     def count(self):
-        # TODO: Find better way of doing this...
-        cmd = "g.V.filter{it.element_type=='%s'}.count()" % self.model.element_type
-        return GRAPH.client.gremlin(cmd).content
+        return self.query.get_count()
 
     def all(self):
         # TODO: Find a lazy way of doing this
-        return self.query
+        return self._clone()
+
+    def create(self, **kwargs):
+        """
+        Creates a new object with the given kwargs, saving it to the database
+        and returning the created object.
+        """
+        self._for_write = True
+        proxy = getattr(GRAPH, self.model.element_type)
+        return proxy.create(**kwargs)
+
+    def get(self, **kwargs):
+        clone = self.filter(**kwargs)
+        if self.query.can_filter():
+            clone = clone.order_by()
+        num = len(clone)
+        if num == 1:
+            return clone._result_cache[0]
+        if not num:
+            raise self.model.DoesNotExist(
+                "%s matching query does not exist. "
+                "Lookup parameters were %s" %
+                (self.model.__class__.__name__, kwargs))
+        raise self.model.MultipleObjectsReturned(
+            "get() returned more than one %s -- it returned %s! "
+            "Lookup parameters were %s" %
+            (self.model.__class__.__name__, num, kwargs))
+
+    def get_or_create(self, **kwargs):
+        assert kwargs, \
+                'get_or_create() must be passed at least one keyword argument'
+        defaults = kwargs.pop("defaults",{})
+        try:
+            return self.get(**kwargs), False
+        except self.model.DoesNotExist:
+            pass
+        data = defaults.copy()
+        data.update(**kwargs)
+        return self.create(**data), True
+
 
 
 from django.db.models.manager import Manager, ManagerDescriptor
@@ -220,10 +287,16 @@ class GraphManager(Manager):
 
     def contribute_to_class(self, model, name):
         self.model = model
-        setattr(model, name, ManagerDescriptor(self))
+        mandesc = ManagerDescriptor(self)
+        setattr(model, name, mandesc)
+        setattr(model, "_default_manager", mandesc)
+
+    def create(self, **kwargs):
+        qs = self.get_query_set()
+        return super(GraphManager, self).create(**kwargs)
 
 
-
+from django.db.models.options import Options
 
 
 class ResourceType(model.ModelMeta):
@@ -231,42 +304,86 @@ class ResourceType(model.ModelMeta):
     All this does is instantiate models.TextField attributes
     on subclasses based on their translatable_fields tuple."""
     def __new__(cls, name, bases, attrs):
-        new = super(ResourceType, cls).__new__
+
+        super_new = super(ResourceType, cls).__new__
+        parents = [b for b in bases if isinstance(b, ResourceType)]
+        if not parents:
+            # If this isn't a subclass of Model, don't do anything special.
+            return super_new(cls, name, bases, attrs)
+
+        # Create the class.
+        module = attrs.pop('__module__')
+        new_class = super_new(cls, name, bases, {'__module__': module})
+        attr_meta = attrs.pop('Meta', None)
+        abstract = getattr(attr_meta, 'abstract', False)
+        if not attr_meta:
+            meta = getattr(new_class, 'Meta', None)
+        else:
+            meta = attr_meta
+        base_meta = getattr(new_class, '_meta', None)
+
+        if getattr(meta, 'app_label', None) is None:
+            # Figure out the app_label by looking one level up.
+            # For 'django.contrib.sites.models', this would be 'sites'.
+            model_module = sys.modules[new_class.__module__]
+            kwargs = {"app_label": model_module.__name__.split('.')[-2]}
+        else:
+            kwargs = {}
+
+        new_class.add_to_class('_meta', Options(meta, **kwargs))
+
+
          # Abstract class: abstract attribute should not be inherited.
         if attrs.pop("abstract", None) or not attrs.get("autoregister", True):
-            return new(cls, name, bases, attrs)
+            return super_new(cls, name, bases, attrs)
+        
+        # Add translatable fields
         for fname, vname, help in attrs.get("translatable_fields", []):
-            attrs[fname] = nodeprop.String(name=vname, nullable=True)
+            new_class.add_to_class(fname, nodeprop.String(name=vname, nullable=True))
 
-        newtype = new(cls, name, bases, attrs)
-        # create a proxy in the graph for this type
-
+        # Add other attributes
         for name, obj in attrs.items():
-            newtype.add_to_class(name, obj)
+            new_class.add_to_class(name, obj)
 
-        if attrs.get("element_type"):
-            GRAPH.add_proxy(attrs.get("element_type"), newtype)
-        return newtype
+        return new_class
 
     # Try and make some Django magic happy
     def add_to_class(cls, name, value):
         if hasattr(value, 'contribute_to_class'):
             value.contribute_to_class(cls, name)
+        else:
+            setattr(cls, name, value)
 
     def __repr__(cls):
         return "<class %s>" % cls.__name__
 
 
-class ResourceBase(model.Node):
+from django.core.exceptions import (ObjectDoesNotExist, 
+            MultipleObjectsReturned)
+
+class ResourceBase(model.Node, models.EntityUrlMixin):
     """Mixin for resources holding common properties."""
+    # Publication status enum
+    DRAFT, PUBLISHED = range(2)
+    PUB_STATUS = (
+            (DRAFT, _("Draft")),
+            (PUBLISHED, _("Published")),
+    )
+
     __metaclass__ = ResourceType
     __mode__ = model.STRICT
-    name = nodeprop.String(name=_("Name"), indexed=True, nullable=False)
-    slug = nodeprop.String(name=_("Slug"), indexed=True, nullable=False)
+    name = nodeprop.String(name=_("Name"), unique=True, indexed=True, nullable=False)
+    slug = nodeprop.String(name=_("Slug"), unique=True, indexed=True, nullable=False)
     created_on = nodeprop.DateTime(name=_("Date Created"), nullable=False)
     updated_on = nodeprop.DateTime(name=_("Date Updated"), nullable=True)
     publication_status = nodeprop.Integer(name=_("Publication Status"),
-            default=terms.DRAFT, indexed=True, nullable=True)
+            default=DRAFT, indexed=True, nullable=True)
+
+    class DoesNotExist(ObjectDoesNotExist):
+        pass
+
+    class MultipleObjectsReturned(MultipleObjectsReturned):
+        pass
 
     def __init__(self, client, **kwargs):
         super(ResourceBase, self).__init__(client)
@@ -274,17 +391,36 @@ class ResourceBase(model.Node):
 
     def _get_slug(self, name):
         proxy = getattr(GRAPH, self.element_type)
-        initial = 1
+        initial = 2
         base = slugify(name)
         potential = base
         while True:
             ires = proxy.index.lookup(slug=potential)
             if len(list(ires)) == 0:
                 break
-            potential = "%s-%d" % (base, initial)
+            potential = u"%s-%d" % (base, initial)
             initial += 1
         return potential
 
+    def __unicode__(self):                                                 
+
+        return self.name
+
+    def __str__(self):
+        if hasattr(self, '__unicode__'):
+            return force_unicode(self).encode('utf-8')
+        return '%s object' % self.__class__.__name__
+
+    def __repr__(self):
+        return u"<%s: %s>" % (self.__class__.__name__, self.slug)
+
+    @property
+    def resource_type(self):
+        return self._meta.verbose_name
+
+    @property
+    def published(self):
+        return self.publication_status == self.PUBLISHED
 
     def _create(self, _data, kwds):
         kwds["created_on"] = kwds.get("created_on", current_datetime())
@@ -339,6 +475,11 @@ class Repository(ResourceBase):
     objects = GraphManager()
 
     @property
+    def collection_set(self):
+        qs = Collection.objects.all()
+        return qs.start_from("g.v(%d).inE('heldBy').outV" % self.eid)
+
+    @property
     def collections(self):
         """Get all collections related by the heldBy edge."""
         for edge in self.inE(HeldBy.label):
@@ -346,12 +487,7 @@ class Repository(ResourceBase):
 
     def natural_key(self):
         return (self.name,)
-
-    def __repr__(self):
-        return "<%s: %s>" % (self.__class__.__name__, self.name)
-
-    def __unicode__(self):
-        return self.name
+GRAPH.add_proxy(Repository.element_type, Repository)
 
 
 class Collection(ResourceBase):
@@ -410,6 +546,7 @@ class Collection(ResourceBase):
 
     def natural_key(self):
         return (self.name,)
+GRAPH.add_proxy(Collection.element_type, Collection)
 
 
 class Authority(ResourceBase):
@@ -439,11 +576,5 @@ class Authority(ResourceBase):
 
     def natural_key(self):
         return (self.name,)
-
-    def __repr__(self):
-        return "<%s: %s>" % (self.__class__.__name__, self.name)
-
-    def __unicode__(self):
-        return self.name
-
+GRAPH.add_proxy(Authority.element_type, Authority)
 
