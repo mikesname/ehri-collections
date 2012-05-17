@@ -110,7 +110,6 @@ MIDDLEWARE_CLASSES = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.middleware.transaction.TransactionMiddleware",
-    "reversion.middleware.RevisionMiddleware",
     "django_openid.consumer.SessionConsumer",
     "django.contrib.messages.middleware.MessageMiddleware",
     "pinax.apps.account.middleware.LocaleMiddleware",
@@ -197,9 +196,6 @@ INSTALLED_APPS = [
 
     # db migrations
     "south",
-
-    # history/audit log
-    "reversion",
 
     # api
     "tastypie",
