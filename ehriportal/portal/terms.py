@@ -3,13 +3,6 @@ Definitions for some taxonomy terms.
 """
 from django.utils.translation import ugettext as _
 
-# Publication status enum
-DRAFT, PUBLISHED = range(2)
-PUB_STATUS = (
-        (DRAFT, _("Draft")),
-        (PUBLISHED, _("Published")),
-)
-
 FULL, PARTIAL, MINIMAL = range(3)
 LEVELS_OF_DETAIL = (
     (FULL, _("Full")),
