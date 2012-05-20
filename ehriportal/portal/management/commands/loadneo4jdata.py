@@ -46,14 +46,18 @@ class Command(BaseCommand):
                 for object in objects:
                     if verbosity > 2:
                         sys.stderr.write("Loading %s\n" % object.get("name"))
+                    clsname = object["model"].split(".")[1]
                     data = object["fields"]
                     # temp hacks
-                    data["element_type"] = "repository"
+                    data["element_type"] = clsname
                     data["lod"] = None
                     data["type_of_entity"] = None
-                    data.pop("languages")
-                    data.pop("scripts")
+                    data.pop("languages_of_description", None)
+                    data.pop("languages", None)
+                    data.pop("scripts_of_description", None)
+                    data.pop("scripts", None)
+                    data.pop("repository", None)
                     objdata.append(data)
-            params = dict(dataitems=objdata,index_name="repository",keys=None)
+            params = dict(dataitems=objdata,index_name=clsname,keys=None)
             script = GRAPH.client.scripts.get("create_multiple_indexed_vertex")
             res = GRAPH.client.gremlin(script, params)        
