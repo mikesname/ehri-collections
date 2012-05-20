@@ -7,6 +7,10 @@ from django.db.models.query import QuerySet as DjangoQuerySet
 from django.db.models.sql import Query as DjangoQuery
 from django.db.models.sql.constants import ORDER_PATTERN
 
+from bulbs.utils import initialize_elements
+
+from . import graph as GRAPH
+
 class GraphQuery(object):
     def __init__(self, model, where=None):
         self.model = model

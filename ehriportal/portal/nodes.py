@@ -15,23 +15,25 @@ from django.utils.encoding import smart_str, force_unicode
 
 from portal import utils, terms, models
 
-# FIXME: Do away with this global somehow
-GRAPH = neo4jserver.Graph() # FIXME: Handle non-default config
+import djbulbs
+from djbulbs.models import nodeprop
+from djbulbs.manager import GraphManager
 
+current_datetime = datetime.datetime.now
 
-class HeldBy(model.Relationship):
+class HeldBy(djbulbs.models.Relationship):
     label = "heldBy"
-GRAPH.add_proxy(HeldBy.label, HeldBy)
+djbulbs.graph.add_proxy(HeldBy.label, HeldBy)
 
 
-class CreatedBy(model.Relationship):
+class CreatedBy(djbulbs.models.Relationship):
     label = "createdBy"
-GRAPH.add_proxy(CreatedBy.label, CreatedBy)
+djbulbs.graph.add_proxy(CreatedBy.label, CreatedBy)
 
 
-class MentionedIn(model.Relationship):
-    label - "mentionedIn"
-GRAPH.add_proxy(MentionedIn.label, MentionedIn)
+class MentionedIn(djbulbs.models.Relationship):
+    label = "mentionedIn"
+djbulbs.graph.add_proxy(MentionedIn.label, MentionedIn)
 
 
 class ResourceBaseType(djbulbs.models.ModelType):
@@ -49,7 +51,7 @@ class ResourceBaseType(djbulbs.models.ModelType):
 
 
 
-class ResourceBase(djbulbs.models.Model):
+class ResourceBase(djbulbs.models.Model, models.EntityUrlMixin):
     """Mixin for resources holding common properties."""
     # Publication status enum
     DRAFT, PUBLISHED = range(2)
@@ -66,7 +68,7 @@ class ResourceBase(djbulbs.models.Model):
             default=DRAFT, indexed=True, nullable=True)
 
     def _get_slug(self, name):
-        proxy = getattr(GRAPH, self.element_type)
+        proxy = getattr(djbulbs.graph, self.element_type)
         initial = 2
         base = slugify(name)
         potential = base
@@ -106,7 +108,11 @@ class ResourceBase(djbulbs.models.Model):
             self.updated_on = current_datetime()
         return super(ResourceBase, self).save(*args, **kwargs)
 
+    def __unicode__(self):
+        return self.name
 
+    def __repr__(self):
+        return "<%s: %s>" % (self.__class__.__name__, self.slug)
 
 
 
@@ -157,7 +163,7 @@ class Repository(ResourceBase):
 
     def natural_key(self):
         return (self.name,)
-GRAPH.add_proxy(Repository.element_type, Repository)
+djbulbs.graph.add_proxy(Repository.element_type, Repository)
 
 
 class Collection(ResourceBase):
@@ -205,18 +211,18 @@ class Collection(ResourceBase):
     def set_repository(self, repo):
         try:
             rel = self.outE(HeldBy.label).next().eid
-            GRAPH.heldBy.delete(rel)
+            djbulbs.graph.heldBy.delete(rel)
         except StopIteration:
             # this should mean there is no existing repository
             pass
         if repo is not None:
-            GRAPH.heldBy.create(self, repo)
+            djbulbs.graph.heldBy.create(self, repo)
 
     repository = property(get_repository, set_repository)
 
     def natural_key(self):
         return (self.name,)
-GRAPH.add_proxy(Collection.element_type, Collection)
+djbulbs.graph.add_proxy(Collection.element_type, Collection)
 
 
 class Authority(ResourceBase):
@@ -256,5 +262,5 @@ class Authority(ResourceBase):
 
     def natural_key(self):
         return (self.name,)
-GRAPH.add_proxy(Authority.element_type, Authority)
+djbulbs.graph.add_proxy(Authority.element_type, Authority)
 

@@ -5,6 +5,7 @@ Django shim for Bulbs models.
 
 from django.db.models.manager import Manager, ManagerDescriptor
 
+from .query import GraphQuerySet
 
 class GraphManager(Manager):
     """Mock manager for graph models."""

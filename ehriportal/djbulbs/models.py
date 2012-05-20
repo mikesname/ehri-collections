@@ -2,14 +2,20 @@
 Django shim for Bulbs models.
 """
 
+import sys
 
 from django.db.models.options import Options
 
 from bulbs import model, property as nodeprop
 from bulbs.utils import current_datetime, initialize_element, \
         initialize_elements
-from bulbs import neo4jserver
 
+from . import graph as GRAPH
+
+
+# just alias relationship for now
+class Relationship(model.Relationship):
+    """Alias for Bulbs relationship."""
 
 
 class ModelType(model.ModelMeta):
@@ -68,8 +74,8 @@ from django.core.exceptions import (ObjectDoesNotExist,
             MultipleObjectsReturned)
 
 
-class Model(model.Node, models.EntityUrlMixin):
-    __metaclass__ = ResourceType
+class Model(model.Node):
+    __metaclass__ = ModelType
     __mode__ = model.STRICT
 
     class DoesNotExist(ObjectDoesNotExist):
@@ -81,6 +87,9 @@ class Model(model.Node, models.EntityUrlMixin):
     def __init__(self, client, **kwargs):
         super(Model, self).__init__(client)
         self.__dict__.update(**kwargs)
+
+    def __unicode__(self):
+        return u"<%s: %d>" % (self.__class__, self.eid)
 
     def __str__(self):
         if hasattr(self, '__unicode__'):

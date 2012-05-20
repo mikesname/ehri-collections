@@ -16,11 +16,6 @@ from portal import models
 class EntityCrudTestMixin(object):
     """Mixin class which defines a lot of boilerplate
     CRUD-deleted tests."""
-    def create_initial_revisions(self, *appmodels):
-        """Create initial model revisions for entity data."""
-        if not appmodels:
-            appmodels = ["portal"]
-        management.call_command("createinitialrevisions", *appmodels)
 
     def create_user_and_login(self):
         """Create a staff user to perform admin actions."""
@@ -150,88 +145,6 @@ class EntityCrudTestMixin(object):
         ccount2 = self.model.objects.count()
         self.assertEqual(ccount, ccount2 + 1)
         
-    def test_revisions(self):
-        """Test viewing a revision of an object."""
-        import reversion
-        obj = self.model.objects.get(slug=self.slug)
-        history = reversion.get_for_object(obj)
-        self.assertTrue(len(history) > 0)
-
-        response = self.client.get(reverse(self.urlprefix + "_revision", kwargs={
-            "slug": self.slug,
-            "revision": history[0].id,
-        }))
-        self.assertEqual(response.status_code, 200)
-        
-    def test_confirm_restore(self):
-        """Test confirming restore of an object."""
-        import reversion
-        obj = self.model.objects.get(slug=self.slug)
-        history = reversion.get_for_object(obj)
-        self.assertTrue(len(history) > 0)
-        response = self.client.get(reverse(self.urlprefix + "_restore", kwargs={
-            "slug": self.slug,
-            "revision": history[0].id,
-        }))
-        self.assertEqual(response.status_code, 200)
-        
-    def test_restore(self):
-        """Test restoring of an object."""
-        import reversion
-        obj = self.model.objects.get(slug=self.slug)
-        history = reversion.get_for_object(obj)
-        self.assertTrue(len(history) > 0)
-        revcount = len(history)
-        response = self.client.post(reverse(self.urlprefix + "_restore", kwargs={
-            "slug": self.slug,
-            "revision": history[0].id,
-        }))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(len(reversion.get_for_object(obj)), revcount + 1)
-
-    def test_revision_update(self):
-        """Test comparing revisions."""
-        import reversion
-        obj = self.model.objects.get(slug=self.slug)
-        histcount = reversion.get_for_object(obj).count()
-        self.testdata.update(self.updatedata)
-        response = self.client.post(reverse(self.urlprefix + "_edit", kwargs={
-            "slug": self.slug,
-        }), self.testdata)
-        self.assertEqual(reversion.get_for_object(obj).count(), histcount + 1)
-        
-    def test_revision_comment(self):
-        """Test that a revision comment ends up in the history correctly."""
-        import reversion
-        obj = self.model.objects.get(slug=self.slug)
-        self.testdata.update(self.updatedata)
-        comment = "This is a test comment"
-        self.testdata.update(revision_comment=comment)
-        response = self.client.post(reverse(self.urlprefix + "_edit", kwargs={
-            "slug": self.slug,
-        }), self.testdata)
-        hist = reversion.get_for_object(obj)[0]
-        self.assertEqual(hist.revision.comment, comment)
-        
-    def test_diff_update(self):
-        """Test comparing revisions."""
-        import reversion
-        obj = self.model.objects.get(slug=self.slug)
-        # call the update test
-        self.test_revision_update()
-        history = reversion.get_for_object(obj)
-        response = self.client.get(reverse(self.urlprefix + "_diff", kwargs={
-            "slug": self.slug,
-        }), dict(r=[hist.id for hist in history[:2]]))
-        self.assertEqual(response.status_code, 200)
-
-    def test_history(self):
-        """Test viewing history."""
-        response = self.client.get(reverse(self.urlprefix + "_history", kwargs={
-            "slug": self.slug,
-        }))
-        self.assertEqual(response.status_code, 200)
-
     @override_settings(PORTAL_HIDE_DRAFTS=True)
     def test_publication_permissions_detail(self):
         """Test non-staff users can't view draft items."""
@@ -295,7 +208,6 @@ class EntityCrudTestMixin(object):
 class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "repository.json", "collection.json"]
     def setUp(self):
-        self.create_initial_revisions()
         self.create_user_and_login()
         self.model = models.Repository
         self.slug = "wiener-library"
@@ -348,7 +260,6 @@ class PortalRepositoryTest(TestCase, EntityCrudTestMixin):
 class PortalCollectionTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "repository.json", "collection.json"]
     def setUp(self):
-        self.create_initial_revisions()
         self.create_user_and_login()
         self.model = models.Collection
         self.urlprefix = "collection"
@@ -370,7 +281,6 @@ class PortalCollectionTest(TestCase, EntityCrudTestMixin):
 class PortalAuthorityTest(TestCase, EntityCrudTestMixin):
     fixtures = ["resource.json", "authority.json"]
     def setUp(self):
-        self.create_initial_revisions()
         self.create_user_and_login()
         self.model = models.Authority
         self.urlprefix = "authority"
