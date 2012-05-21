@@ -13,7 +13,6 @@ from bulbs.config import DEBUG
 
 # FIXME: Do away with this global somehow
 GRAPH = neo4jserver.Graph() # FIXME: Handle non-default config
-GRAPH.config.set_logger(DEBUG)
 
 class Command(BaseCommand):
 
