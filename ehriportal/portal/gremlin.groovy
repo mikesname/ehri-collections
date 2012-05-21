@@ -30,9 +30,8 @@ def ingest_portal_data(data, relations) {
       def rel = relations.get(index_name + "." + entry.key)
       if (rel != null) {
         def (relname, relclass) = rel
-        def (slug,) = entry.value
         def rel_index = manager.forNodes(relclass)
-        def inV = rel_index.get("slug", slug).getSingle()
+        def inV = rel_index.get("slug", "wiener-library").getSingle()
         create_relation(vertex, inV, relname)
       } else {
         vertex.setProperty(entry.key, entry.value)
