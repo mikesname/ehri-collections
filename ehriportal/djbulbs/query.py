@@ -11,6 +11,42 @@ from bulbs.utils import initialize_elements
 
 from . import graph as GRAPH
 
+class GremlinCompiler(object):
+    """Class which compiles a GraphQuery into a gremlin query.
+    This is a stopgap measure."""
+    def __init__(self, query):
+        self.query = query
+
+    def get_gremlin_script(self):
+        query = self.query
+        # short cut for starting traversal from a particular
+        # point. Defaults to g.V (all verts)
+        start = self.query.start
+        qstr = "%s.filter{it.element_type=='%s'}" % (start, query.model.element_type)
+        for key, value in query.filters.items():
+            qstr += ".filter{it.%s==\"%s\"}" % (key, value)
+        
+        # TODO: Desc/Asc ordering
+        if self.query.order_by:
+            for item in self.query.order_by:
+                qstr += ".sort{it.%s}" % item
+        # TODO: Default ordering
+        
+        if query.low_mark != 0 and query.high_mark is None:
+            qstr += "._().range(%d, -1)" % query.low_mark
+        elif query.low_mark == 0 and query.high_mark is not None:
+            qstr += "._().range(0, %d)" % query.high_mark
+        elif query.low_mark > 0 and query.high_mark is not None:
+            qstr += "._().range(%d, %d)" % (query.low_mark, query.high_mark)
+
+        return qstr
+
+    def results_iter(self):
+        script = self.get_gremlin_script()
+        for res in initialize_elements(GRAPH.client, GRAPH.client.gremlin(script)):
+            yield res
+
+
 class GraphQuery(object):
     def __init__(self, model, where=None):
         self.model = model
@@ -140,42 +176,6 @@ class GraphQuery(object):
         compiler = self.get_compiler()
         for iter in compiler.results_iter():
             yield iter
-
-
-class GremlinCompiler(object):
-    """Class which compiles a GraphQuery into a gremlin query.
-    This is a stopgap measure."""
-    def __init__(self, query):
-        self.query = query
-
-    def get_gremlin_script(self):
-        query = self.query
-        # short cut for starting traversal from a particular
-        # point. Defaults to g.V (all verts)
-        start = self.query.start
-        qstr = "%s.filter{it.element_type=='%s'}" % (start, query.model.element_type)
-        for key, value in query.filters.items():
-            qstr += ".filter{it.%s==\"%s\"}" % (key, value)
-        
-        # TODO: Desc/Asc ordering
-        if self.query.order_by:
-            for item in self.query.order_by:
-                qstr += ".sort{it.%s}" % item
-        # TODO: Default ordering
-        
-        if query.low_mark != 0 and query.high_mark is None:
-            qstr += "._().range(%d, -1)" % query.low_mark
-        elif query.low_mark == 0 and query.high_mark is not None:
-            qstr += "._().range(0, %d)" % query.high_mark
-        elif query.low_mark > 0 and query.high_mark is not None:
-            qstr += "._().range(%d, %d)" % (query.low_mark, query.high_mark)
-
-        return qstr
-
-    def results_iter(self):
-        script = self.get_gremlin_script()
-        for res in initialize_elements(GRAPH.client, GRAPH.client.gremlin(script)):
-            yield res
 
 
 class GraphQuerySet(DjangoQuerySet):
