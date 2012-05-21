@@ -21,8 +21,8 @@ def ingest_portal_data(data) {
   def create_relation(outV, inV, label) {
     def relationshipType = DynamicRelationshipType.withName(label)
     def index = manager.forRelationships(label)
-    def edge = outV.createRelationshipTo(inV,relationshipType)
-    index.add(edge,"label",String.valueOf(label))
+    def edge = outV.createRelationshipTo(inV, relationshipType)
+    index.add(edge, "label", String.valueOf(label))
   }
 
   def create_vertex(index_name, data, keys=null) {
@@ -36,15 +36,14 @@ def ingest_portal_data(data) {
       // the related entity and create it.
       def rel = relations.get(index_name + "." + entry.key)
       if (rel != null) {
-        def relname = rel.getAt(0)
-        def relclass = rel.getAt(1)
+        def (relname, relclass) = rel
         def rel_index = manager.forNodes(relclass)
         def inV = rel_index.get("slug", "wiener-library").getSingle()
         create_relation(vertex, inV, relname)
       } else {
-        vertex.setProperty(entry.key,entry.value)
+        vertex.setProperty(entry.key, entry.value)
         if (keys == null || keys.contains(entry.key)) {
-          index.add(vertex,entry.key,String.valueOf(entry.value))
+          index.add(vertex, entry.key, String.valueOf(entry.value))
         }
       }
     }
