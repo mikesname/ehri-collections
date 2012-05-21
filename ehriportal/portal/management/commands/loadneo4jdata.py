@@ -37,6 +37,13 @@ class Command(BaseCommand):
         scripts_file = os.path.join(settings.PROJECT_ROOT, "portal", "gremlin.groovy")
         GRAPH.client.scripts.update(scripts_file)
 
+          # define a lookup of Django model relationships
+          # to Bulbs relationships.
+        relations = {
+          "collection.repository": ("heldBy", "repository"),
+          "collection.creator": ("createdBy", "authority")
+        }
+
         for fixture in fixture_labels:
             sys.stderr.write("Loading fixture: %s\n" % fixture)
             with open(fixture, "r") as fh:
@@ -55,5 +62,6 @@ class Command(BaseCommand):
                     data.pop("scripts_of_description", None)
                     data.pop("scripts", None)
             script = GRAPH.client.scripts.get("ingest_portal_data")
-            res = GRAPH.client.gremlin(script, params=dict(data=objects))
+            params = dict(data=objects, relations=relations)
+            res = GRAPH.client.gremlin(script, params=params)
             print res.content

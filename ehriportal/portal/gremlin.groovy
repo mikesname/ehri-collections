@@ -4,19 +4,12 @@
 //
 
 
-def ingest_portal_data(data) {
+def ingest_portal_data(data, relations) {
   import org.neo4j.graphdb.DynamicRelationshipType;
   neo4j = g.getRawGraph()
   manager = neo4j.index()
   g.setMaxBufferSize(0)
   g.startTransaction()
-
-  // define a lookup of Django model relationships
-  // to Bulbs relationships.
-  relations = [
-    "collection.repository": ["heldBy", "repository"],
-    "collection.creator": ["createdBy", "authority"]
-  ]
 
   def create_relation(outV, inV, label) {
     def relationshipType = DynamicRelationshipType.withName(label)
