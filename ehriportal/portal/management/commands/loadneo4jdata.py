@@ -40,24 +40,21 @@ class Command(BaseCommand):
 
         for fixture in fixture_labels:
             sys.stderr.write("Loading fixture: %s\n" % fixture)
-            objdata = []
             with open(fixture, "r") as fh:
                 objects = json.load(fh, encoding="utf8")
-                for object in objects:
-                    if verbosity > 2:
-                        sys.stderr.write("Loading %s\n" % object.get("name"))
-                    clsname = object["model"].split(".")[1]
+                for i in range(len(objects)):
+                    object = objects[i]
                     data = object["fields"]
+                    if verbosity > 2:
+                        sys.stderr.write("Loading %04d %s\n" % (i, data.get("name")))
                     # temp hacks
-                    data["element_type"] = clsname
+                    data["element_type"] = object["model"].split(".")[1]
                     data["lod"] = None
                     data["type_of_entity"] = None
                     data.pop("languages_of_description", None)
                     data.pop("languages", None)
                     data.pop("scripts_of_description", None)
                     data.pop("scripts", None)
-                    data.pop("repository", None)
-                    objdata.append(data)
-            params = dict(dataitems=objdata,index_name=clsname,keys=None)
-            script = GRAPH.client.scripts.get("create_multiple_indexed_vertex")
-            res = GRAPH.client.gremlin(script, params)        
+            script = GRAPH.client.scripts.get("ingest_portal_data")
+            res = GRAPH.client.gremlin(script, params=dict(data=objects))
+            print res.content

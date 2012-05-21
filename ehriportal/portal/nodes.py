@@ -80,9 +80,6 @@ class ResourceBase(djbulbs.models.Model, models.EntityUrlMixin):
             initial += 1
         return potential
 
-    def __repr__(self):
-        return u"<%s: %s>" % (self.__class__.__name__, self.name)
-
     @property
     def resource_type(self):
         return self._meta.verbose_name

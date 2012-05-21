@@ -8,7 +8,7 @@ from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required, user_passes_test
 from haystack.query import SearchQuerySet
 
-from portal import views, utils, forms, models, permissions
+from portal import views, utils, forms, models, permissions, nodes
 from portal.haystack_util import QueryFacet, FacetClass, QueryFacetClass
 
 FACETS = [
@@ -68,7 +68,7 @@ urlpatterns = patterns('',
         facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', views.PortalListView.as_view(
-        model=models.Collection,
+        model=nodes.Collection,
         template_name="collection_list.html",
         ), name='collection_list'),
 
@@ -99,7 +99,7 @@ urlpatterns = patterns('',
 
     # This URL has to go last because it matches everything...
     url(r'^(?P<slug>[-\w]+)/?$', views.PortalDetailView.as_view(
-            model=models.Collection,
+            model=nodes.Collection,
             template_name="collection_detail.html"
         ), name='collection_detail'),
 )

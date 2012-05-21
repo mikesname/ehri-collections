@@ -5,7 +5,7 @@ from django.views.generic.list_detail import object_list
 from django.views.generic.create_update import update_object
 from django.contrib.auth.decorators import login_required, user_passes_test
 
-from portal import views, forms, models, permissions
+from portal import views, forms, models, permissions, nodes
 from portal.haystack_util import FacetClass
 
 from haystack.query import SearchQuerySet
@@ -30,7 +30,7 @@ urlpatterns = patterns('',
         facetclasses=FACETS),
             name='authority_facets'),
     url(r'^/?$', views.PortalListView.as_view(
-        model=models.Authority,
+        model=nodes.Authority,
         template_name="authority_list.html",
         ), name='authority_list'),
     # Crud Actions
@@ -60,7 +60,7 @@ urlpatterns = patterns('',
     
     # these catch-all item must be at the bottom
     url(r'^(?P<slug>[-\w]+)/?$', views.PortalCollectionHolderDetailView.as_view(
-            model=models.Authority,
+            model=nodes.Authority,
             template_name="authority_detail.html"
         ), name='authority_detail'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
