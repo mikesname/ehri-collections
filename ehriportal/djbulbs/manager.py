@@ -16,7 +16,8 @@ class GraphManager(Manager):
         self.model = model
         mandesc = ManagerDescriptor(self)
         setattr(model, name, mandesc)
-        setattr(model, "_default_manager", mandesc)
+        if not hasattr(model, "_default_manager"):
+            setattr(model, "_default_manager", mandesc)
 
     def create(self, **kwargs):
         qs = self.get_query_set()

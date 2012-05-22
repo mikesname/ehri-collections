@@ -2,48 +2,72 @@
 Django Shims for Bulbs models.
 """
 
+import os
+import copy
 
 from django.db.models.query import QuerySet as DjangoQuerySet
 from django.db.models.sql import Query as DjangoQuery
-from django.db.models.sql.constants import ORDER_PATTERN
+from django.db.models.sql.constants import ORDER_PATTERN, LOOKUP_SEP
 
 from bulbs.utils import initialize_elements
 
 from . import graph as GRAPH
 
+
+scripts_file = os.path.join(os.path.dirname(__file__), "gremlin.groovy")
+GRAPH.client.scripts.update(scripts_file)
+
+OPS = (
+    "exact",
+    "iexact",
+    "startswith",
+    "endswith",
+    "contains",
+    "gt",
+    "lt",
+    "gte",
+    "lte",
+)
+
 class GremlinCompiler(object):
     """Class which compiles a GraphQuery into a gremlin query.
     This is a stopgap measure."""
+
     def __init__(self, query):
         self.query = query
 
-    def get_gremlin_script(self):
+    def get_query_params(self, count=False):
         query = self.query
-        # short cut for starting traversal from a particular
-        # point. Defaults to g.V (all verts)
-        start = self.query.start
-        qstr = "%s.filter{it.element_type=='%s'}" % (start, query.model.element_type)
+        props = query.model._properties
+        filters = []
+        relations = copy.copy(query.relations)
+        low = high = None
+        order_by = []
+        index_name = query.model.element_type
+        
         for key, value in query.filters.items():
-            qstr += ".filter{it.%s==\"%s\"}" % (key, value)
-        
-        # TODO: Desc/Asc ordering
-        if self.query.order_by:
-            for item in self.query.order_by:
-                qstr += ".sort{it.%s}" % item
-        # TODO: Default ordering
-        
-        if query.low_mark != 0 and query.high_mark is None:
-            qstr += "._().range(%d, -1)" % query.low_mark
-        elif query.low_mark == 0 and query.high_mark is not None:
-            qstr += "._().range(0, %d)" % query.high_mark
-        elif query.low_mark > 0 and query.high_mark is not None:
-            qstr += "._().range(%d, %d)" % (query.low_mark, query.high_mark)
+            lookup_type = "exact"
+            parts = key.split(LOOKUP_SEP)
+            if len(parts) > 1 and parts[-1] in OPS:
+                lookup_type = parts[-1]
+            if parts[0] in props:
+                filters.append((parts[0], lookup_type, value))
+            elif parts[0] in query.model._relations:
+                rel = query.model._relations[parts[0]]
+                relations.append((rel.relation.label, value.eid))
+            else:
+                raise Exception("Invalid filter lookup %s=%s for model '%s'" % (
+                    key, value, query.model))
 
-        return qstr
+        return dict(docount=count, index_name=index_name, filters=filters, order_by=order_by,
+                low=low, high=high, relations=relations)
+
 
     def results_iter(self):
-        script = self.get_gremlin_script()
-        for res in initialize_elements(GRAPH.client, GRAPH.client.gremlin(script)):
+        script = GRAPH.client.scripts.get("query")
+        params = self.get_query_params()
+        results = GRAPH.client.gremlin(script, params=params)
+        for res in initialize_elements(GRAPH.client, results):
             yield res
 
 
@@ -55,11 +79,13 @@ class GraphQuery(object):
         self.default_ordering = False
         self.extra_order_by = ()
         self.filters = {}
+        self.relations = []
         self.start = "g.V"
 
     def clone(self):
         obj = self.__class__(self.model)
         obj.filters = self.filters.copy()
+        obj.relations = copy.copy(self.relations)
         obj.low_mark = self.low_mark
         obj.high_mark = self.high_mark
         obj.order_by = self.order_by[:]
@@ -90,9 +116,9 @@ class GraphQuery(object):
     def get_count(self, using=None):
         # FIXME: This is all kinds of wrong
         # TODO: Find better way of doing this...
-        script = self.get_compiler().get_gremlin_script()
-        number = GRAPH.client.gremlin("%s.count()" % script).content
-
+        script = GRAPH.client.scripts.get("query")
+        params = self.get_compiler().get_query_params(count=True)
+        number = GRAPH.client.gremlin(script, params).content
         # Apply offset and limit constraints manually, since using LIMIT/OFFSET
         # in SQL (in variants that provide them) doesn't change the COUNT
         # output.

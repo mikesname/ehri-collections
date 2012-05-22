@@ -11,7 +11,6 @@ import json
 from django.conf import settings
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext as _
-from django.utils.encoding import smart_str, force_unicode
 
 from portal import utils, terms, models
 
@@ -199,23 +198,9 @@ class Collection(ResourceBase):
     languages_of_description = nodeprop.List(name=_("Language(s) of Description"))
     scripts_of_description = nodeprop.List(name=_("Script(s) of Description"))
 
-    def get_repository(self):
-        try:
-            return self.outE(HeldBy.label).next().inV()
-        except StopIteration:
-            return
+    creator = djbulbs.models.SingleRelationField(CreatedBy)
+    repository = djbulbs.models.SingleRelationField(HeldBy)
 
-    def set_repository(self, repo):
-        try:
-            rel = self.outE(HeldBy.label).next().eid
-            djbulbs.graph.heldBy.delete(rel)
-        except StopIteration:
-            # this should mean there is no existing repository
-            pass
-        if repo is not None:
-            djbulbs.graph.heldBy.create(self, repo)
-
-    repository = property(get_repository, set_repository)
 
     def natural_key(self):
         return (self.name,)

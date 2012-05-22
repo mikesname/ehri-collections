@@ -4,6 +4,7 @@
 //
 
 
+
 def ingest_portal_data(data, relations) {
   import org.neo4j.graphdb.DynamicRelationshipType;
   neo4j = g.getRawGraph()

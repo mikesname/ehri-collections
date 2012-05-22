@@ -5,17 +5,37 @@ Django shim for Bulbs models.
 import sys
 
 from django.db.models.options import Options
+from django.utils.encoding import smart_str, force_unicode
 
 from bulbs import model, property as nodeprop
 from bulbs.utils import current_datetime, initialize_element, \
         initialize_elements
 
-from . import graph as GRAPH
+from . import graph as GRAPH, manager
 
 
 # just alias relationship for now
 class Relationship(model.Relationship):
     """Alias for Bulbs relationship."""
+
+
+class SingleRelationField(object):
+    def __init__(self, relation):
+        self.relation = relation
+
+    def contribute_to_class(self, model, name):
+        self.model = model
+        model._relations[name] = self
+        rel = self.relation
+        def lookup_func(self):
+            cached = model._relation_cache.get(name)
+            if cached is not None:
+                return cached
+            # we can do with with bulbs, saving some hassle
+            model._relation_cache[name] = self.outE(rel.label).next().inV()
+            return model._relation_cache[name]
+        setattr(model, name, property(lookup_func))
+        
 
 
 class ModelType(model.ModelMeta):
@@ -48,6 +68,9 @@ class ModelType(model.ModelMeta):
 
         new_class.add_to_class('_meta', Options(meta, **kwargs))
 
+        # add a lookup for relations
+        new_class.add_to_class('_relations', dict())
+        new_class.add_to_class('_relation_cache', dict())
 
          # Abstract class: abstract attribute should not be inherited.
         if attrs.pop("abstract", None) or not attrs.get("autoregister", True):
