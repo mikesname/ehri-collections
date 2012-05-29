@@ -73,36 +73,18 @@ urlpatterns = patterns('',
         ), name='collection_list'),
 
     # Crud Actions
-    url(r'^create_node/?$', 
-            user_passes_test(permissions.is_staff)(
-                views.CollectionCreateView.as_view()), name='collection_create_node'),
-    url(r'^edit_node/(?P<slug>[-\w]+)/?$',
-            user_passes_test(permissions.is_staff)(
-                views.CollectionCreateView.as_view()), name='collection_edit_node'),
     url(r'^create/?$', 
             user_passes_test(permissions.is_staff)(
-                views.CollectionEditView.as_view()), name='collection_create'),
+                views.CollectionEditView.as_view(model=nodes.Collection)),
+                    name='collection_create'),
     url(r'^edit/(?P<slug>[-\w]+)/?$',
             user_passes_test(permissions.is_staff)(
-                views.CollectionEditView.as_view()), name='collection_edit'),
+                views.CollectionEditView.as_view(model=nodes.Collection)), 
+                    name='collection_edit'),
     url(r'^delete/(?P<slug>[-\w]+)/?$', 
             user_passes_test(permissions.is_staff)(
-                views.CollectionDeleteView.as_view()), name='collection_delete'),
-    url(r'^history/(?P<slug>[-\w]+)/?$', views.PortalHistoryView.as_view(
-            model=models.Collection,
-        ), name='collection_history'),
-    url(r'^restore/(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRestoreView.as_view(
-            model=models.Collection,
-        ), name='collection_restore'),
-    url(r'^diff/(?P<slug>[-\w]+)/?$', views.PortalRevisionDiffView.as_view(
-                model=models.Collection,
-                template_name="collection_diff.html",
-            ), name='collection_diff'),
-    url(r'^(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRevisionView.as_view(
-            model=models.Collection,
-            template_name="collection_revision.html"
-        ), name='collection_revision'),
-
+                views.CollectionDeleteView.as_view(model=nodes.Collection)), 
+                    name='collection_delete'),
     # This URL has to go last because it matches everything...
     url(r'^(?P<slug>[-\w]+)/?$', views.PortalDetailView.as_view(
             model=nodes.Collection,

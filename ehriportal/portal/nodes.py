@@ -100,6 +100,10 @@ class ResourceBase(djbulbs.models.Model, models.EntityUrlMixin):
             self._data["updated_on"] = self.updated_on = current_datetime()
         return super(ResourceBase, self).save(*args, **kwargs)
 
+    def to_dict(self):
+        """Serialize to dictionary."""
+        return self.data()
+
     def __unicode__(self):
         return self.name
 
@@ -111,32 +115,31 @@ class ResourceBase(djbulbs.models.Model, models.EntityUrlMixin):
 class Repository(ResourceBase):
     """Repository."""
     element_type = "repository"
-    translatable_fields = (
-        ("access_conditions", "Access Conditions", "TODO: Help text"),
-        ("buildings", "Buildings", "TODO: Help text"),
-        ("collecting_policies", "Collecting Policies", "TODO: Help text"),
-        ("dates_of_existence", "Dates of Existence", "TODO: Help text"),
-        ("disabled_access", "Disabled Access", "TODO: Help text"),
-        ("finding_aids", "Finding Aids", "TODO: Help text"),
-        ("functions", "Functions", "TODO: Help text"),
-        ("general_context", "General Context", "TODO: Help text"),
-        ("geocultural_context", "Geocultural Context", "TODO: Help text"),
-        ("history", "History", "TODO: Help text"),
-        ("holdings", "Holdings", "TODO: Help text"),
-        ("internal_structures", "Internal Structures", "TODO: Help text"),
-        ("legal_status", "Legal Status", "TODO: Help text"),
-        ("maintenance_notes", "Maintenance Notes", "TODO: Help text"),
-        ("mandates", "Mandates", "TODO: Help text"),
-        ("opening_times", "Opening Times", "TODO: Help text"),
-        ("places", "Places", "TODO: Help text"),
-        ("reproduction_services", "Reproduction Services", "TODO: Help text"),
-        ("research_services", "Research Services", "TODO: Help text"),
-        ("rules", "Rules", "TODO: Help text"),
-        ("sources", "Sources", "TODO: Help text"),
-    )
-
-    lod = nodeprop.Integer(name=_("Level of Description"))
+    level_of_description = nodeprop.Integer(name=_("Level of Description"))
     type_of_entity = nodeprop.Integer(name=_("Type of Entity"))
+        
+    access_conditions = nodeprop.String(name=_("Access Conditions"), nullable=True)
+    buildings = nodeprop.String(name=_("Buildings"), nullable=True)
+    collecting_policies = nodeprop.String(name=_("Collecting Policies"), nullable=True)
+    dates_of_existence = nodeprop.String(name=_("Dates of Existence"), nullable=True)
+    disabled_access = nodeprop.String(name=_("Disabled Access"), nullable=True)
+    finding_aids = nodeprop.String(name=_("Finding Aids"), nullable=True)
+    functions = nodeprop.String(name=_("Functions"), nullable=True)
+    general_context = nodeprop.String(name=_("General Context"), nullable=True)
+    geocultural_context = nodeprop.String(name=_("Geocultural Context"), nullable=True)
+    history = nodeprop.String(name=_("History"), nullable=True)
+    holdings = nodeprop.String(name=_("Holdings"), nullable=True)
+    internal_structures = nodeprop.String(name=_("Internal Structures"), nullable=True)
+    legal_status = nodeprop.String(name=_("Legal Status"), nullable=True)
+    maintenance_notes = nodeprop.String(name=_("Maintenance Notes"), nullable=True)
+    mandates = nodeprop.String(name=_("Mandates"), nullable=True)
+    opening_times = nodeprop.String(name=_("Opening Times"), nullable=True)
+    places = nodeprop.String(name=_("Places"), nullable=True)
+    reproduction_services = nodeprop.String(name=_("Reproduction Services"), nullable=True)
+    research_services = nodeprop.String(name=_("Research Services"), nullable=True)
+    rules = nodeprop.String(name=_("Rules"), nullable=True)
+    sources = nodeprop.String(name=_("Sources"), nullable=True)
+
     languages = nodeprop.List(name=_("Language(s)"))
     scripts = nodeprop.List(name=_("Script(s)"))
 
@@ -161,34 +164,35 @@ djbulbs.graph.add_proxy(Repository.element_type, Repository)
 class Collection(ResourceBase):
     """Model representing an archival description."""
     element_type = "collection"
-    translatable_fields = (
-        ("access_conditions", "Access Conditions", "TODO: Help text"),
-        ("accruals", "Accruals", "TODO: Help text"),
-        ("acquisition", "Immediate source of acquisition or transfer", "TODO: Help text"),
-        ("alternate_title", "Alternate Title", "TODO: Help text"),
-        ("appraisal", "Appraisal", "TODO: Help text"),
-        ("archival_history", "Archival History", "TODO: Help text"),
-        ("arrangement", "Arrangement", "TODO: Help text"),
-        ("edition", "Edition", "TODO: Help text"),
-        ("extent_and_medium", "Extent and Medium", "TODO: Help text"),
-        ("finding_aids", "Finding Aids", "TODO: Help text"),
-        ("institution_responsible_identifier", "Institution Responsible Identifier", "TODO: Help text"),
-        ("location_of_copies", "Location of Copies", "TODO: Help text"),
-        ("location_of_originals", "Location of Originals", "TODO: Help text"),
-        ("notes", _("Notes"), "TODO: Help text"),
-        ("physical_characteristics", "Physical Characteristics", "TODO: Help text"),
-        ("related_units_of_description", "Related Units of Description", "TODO: Help text"),
-        ("reproduction_conditions", "Reproduction Conditions", "TODO: Help text"),
-        ("revision_history", "Revision History", "TODO: Help text"),
-        ("rules", "Rules", "TODO: Help text"),
-        ("scope_and_content", "Scope and Content", "TODO: Help text"),
-        ("sources", "Sources", "TODO: Help text"),
-    )
+    translatable_fields = ()
 
     objects = GraphManager()
 
     identifier = nodeprop.String(indexed=True, name=_("Local Identifier"), nullable=False)
-    lod = nodeprop.Integer(name=_("Level of Description"))
+    level_of_description = nodeprop.Integer(name=_("Level of Description"))
+
+    access_conditions = nodeprop.String(name=_("Access Conditions"), nullable=True)
+    accruals = nodeprop.String(name=_("Accruals"), nullable=True)
+    acquisition = nodeprop.String(name=_("Immediate source of acquisition or transfer"), nullable=True)
+    alternate_title = nodeprop.String(name=_("Alternate Title"), nullable=True)
+    appraisal = nodeprop.String(name=_("Appraisal"), nullable=True)
+    archival_history = nodeprop.String(name=_("Archival History"), nullable=True)
+    arrangement = nodeprop.String(name=_("Arrangement"), nullable=True)
+    edition = nodeprop.String(name=_("Edition"), nullable=True)
+    extent_and_medium = nodeprop.String(name=_("Extent and Medium"), nullable=True)
+    finding_aids = nodeprop.String(name=_("Finding Aids"), nullable=True)
+    institution_responsible_identifier = nodeprop.String(name=_("Institution Responsible Identifier"), nullable=True)
+    location_of_copies = nodeprop.String(name=_("Location of Copies"), nullable=True)
+    location_of_originals = nodeprop.String(name=_("Location of Originals"), nullable=True)
+    notes = nodeprop.String(name=_("Notes"), nullable=True)
+    physical_characteristics = nodeprop.String(name=_("Physical Characteristics"), nullable=True)
+    related_units_of_description = nodeprop.String(name=_("Related Units of Description"), nullable=True)
+    reproduction_conditions = nodeprop.String(name=_("Reproduction Conditions"), nullable=True)
+    revision_history = nodeprop.String(name=_("Revision History"), nullable=True)
+    rules = nodeprop.String(name=_("Rules"), nullable=True)
+    scope_and_content = nodeprop.String(name=_("Scope and Content"), nullable=True)
+    sources = nodeprop.String(name=_("Sources"), nullable=True)
+
     languages = nodeprop.List(name=_("Language(s)"))
     scripts = nodeprop.List(name=_("Script(s)"))
     languages_of_description = nodeprop.List(name=_("Language(s) of Description"))
@@ -206,20 +210,6 @@ djbulbs.graph.add_proxy(Collection.element_type, Collection)
 class Authority(ResourceBase):
     """Model representing an archival authority."""
     element_type = "authority"
-    translatable_fields = (
-        ("dates_of_existence", "Dates of Existence", "TODO: Help text"),
-        ("functions", "Functions", "TODO: Help text"),
-        ("general_context", "General Context", "TODO: Help text"),
-        ("history", "History", "TODO: Help text"),
-        ("institution_responsible_identifier", "Institution Responsible Identifier", "TODO: Help text"),
-        ("internal_structures", "Internal Structures", "TODO: Help text"),
-        ("legal_status", "Legal Status", "TODO: Help text"),
-        ("mandates", "Mandates", "TODO: Help text"),
-        ("places", "Places", "TODO: Help text"),
-        ("revision_history", "Revision History", "TODO: Help text"),
-        ("sources", "Sources", "TODO: Help text"),
-    )
-
     @property
     def collection_set(self):
         qs = Collection.objects.all()
@@ -230,9 +220,23 @@ class Authority(ResourceBase):
         qs = Collection.objects.all()
         return qs.start_from("g.v(%d).inE('mentionedIn').outV" % self.eid)
 
-    lod = nodeprop.Integer(name=_("Level of Description"))
+    identifier = nodeprop.String(indexed=True, name=_("Local Identifier"), nullable=False)
+    level_of_description = nodeprop.Integer(name=_("Level of Description"))
     type_of_entity = nodeprop.Integer(name=_("Type of Entity"),
             nullable=False)
+    
+    dates_of_existence = nodeprop.String(name=_("Dates of Existence"), nullable=True)
+    functions = nodeprop.String(name=_("Functions"), nullable=True)
+    general_context = nodeprop.String(name=_("General Context"), nullable=True)
+    history = nodeprop.String(name=_("History"), nullable=True)
+    institution_responsible_identifier = nodeprop.String(name=_("Institution Responsible Identifier"), nullable=True)
+    internal_structures = nodeprop.String(name=_("Internal Structures"), nullable=True)
+    legal_status = nodeprop.String(name=_("Legal Status"), nullable=True)
+    mandates = nodeprop.String(name=_("Mandates"), nullable=True)
+    places = nodeprop.String(name=_("Places"), nullable=True)
+    revision_history = nodeprop.String(name=_("Revision History"), nullable=True)
+    sources = nodeprop.String(name=_("Sources"), nullable=True)
+
     languages = nodeprop.List(name=_("Language(s)"))
     scripts = nodeprop.List(name=_("Script(s)"))
 

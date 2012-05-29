@@ -36,13 +36,13 @@ urlpatterns = patterns('',
     # Crud Actions
     url(r'^create/?$', 
             user_passes_test(permissions.is_staff)(
-                views.AuthorityEditView.as_view()), name='authority_create'),
+                views.AuthorityEditView.as_view(model=nodes.Authority)), name='authority_create'),
     url(r'^edit/(?P<slug>[-\w]+)/?$',
             user_passes_test(permissions.is_staff)(
-                views.AuthorityEditView.as_view()), name='authority_edit'),
+                views.AuthorityEditView.as_view(model=nodes.Authority)), name='authority_edit'),
     url(r'^delete/(?P<slug>[-\w]+)/?$', 
             user_passes_test(permissions.is_staff)(
-                views.AuthorityDeleteView.as_view()), name='authority_delete'),
+                views.AuthorityDeleteView.as_view(model=nodes.Authority)), name='authority_delete'),
     url(r'^history/(?P<slug>[-\w]+)/?$', views.PortalHistoryView.as_view(
             model=models.Authority,
         ), name='authority_history'),

@@ -134,6 +134,9 @@ class OtherNameForm(forms.ModelForm):
 
 class PortalEntityForm(forms.Form):
     # extra (non-model) field for revision comment
+    name = forms.CharField(label=_("Name"), help_text=_("TODO: Help text"))
+    level_of_detail = forms.ChoiceField(label=_("Level of Description"),
+                    required=False, choices=terms.LEVELS_OF_DETAIL)
     publication_status = forms.ChoiceField(label=_("Publication Status"), 
                 choices=terms.PUBLICATION_STATUS, help_text=_("Status of this item with regards to "
                                                             "public visibility."))
@@ -157,8 +160,6 @@ class CollectionEditForm(PortalEntityForm):
     to other entities such as the repository and creator.)"""
     identifier = forms.CharField(label=_("Identifier"), help_text=_(""))
     name = forms.CharField(label=_("Title"), help_text=_(""))
-    lod = forms.ChoiceField(label=_("Level of Description"),
-                    required=False, choices=terms.LEVELS_OF_DETAIL)
     access_conditions = FreeTextField(label=_("Access Conditions"), 
 					required=False, help_text=_("TODO: Help text"))
     accruals = FreeTextField(label=_("Accruals"), 
@@ -212,17 +213,92 @@ class CollectionEditForm(PortalEntityForm):
 
 
 class RepositoryEditForm(PortalEntityForm):
-    languages = LanguageSelectFormField()
-    scripts = ScriptSelectFormField()
-    class Meta:
-        model = models.Repository
+    """Form details for an ISDIAH repository."""
+    identifier = forms.CharField(label=_("Identifier"), help_text=_(""))
+    name = forms.CharField(label=_("Title"), help_text=_(""))
+    type_of_entity = forms.ChoiceField(label=_("Type of Entity"),
+                choices=terms.ENTITY_TYPES)
+    access_conditions = FreeTextField(label=_("Access Conditions"),
+					required=False, help_text=_("TODO: Help text"))
+    buildings = FreeTextField(label=_("Buildings"),
+					required=False, help_text=_("TODO: Help text"))
+    collecting_policies = FreeTextField(label=_("Collecting Policies"),
+					required=False, help_text=_("TODO: Help text"))
+    dates_of_existence = FreeTextField(label=_("Dates of Existence"),
+					required=False, help_text=_("TODO: Help text"))
+    disabled_access = FreeTextField(label=_("Disabled Access"),
+					required=False, help_text=_("TODO: Help text"))
+    finding_aids = FreeTextField(label=_("Finding Aids"),
+					required=False, help_text=_("TODO: Help text"))
+    functions = FreeTextField(label=_("Functions"),
+					required=False, help_text=_("TODO: Help text"))
+    general_context = FreeTextField(label=_("General Context"),
+					required=False, help_text=_("TODO: Help text"))
+    geocultural_context = FreeTextField(label=_("Geocultural Context"),
+					required=False, help_text=_("TODO: Help text"))
+    history = FreeTextField(label=_("History"),
+					required=False, help_text=_("TODO: Help text"))
+    holdings = FreeTextField(label=_("Holdings"),
+					required=False, help_text=_("TODO: Help text"))
+    internal_structures = FreeTextField(label=_("Internal Structures"),
+					required=False, help_text=_("TODO: Help text"))
+    legal_status = FreeTextField(label=_("Legal Status"),
+					required=False, help_text=_("TODO: Help text"))
+    maintenance_notes = FreeTextField(label=_("Maintenance Notes"),
+					required=False, help_text=_("TODO: Help text"))
+    mandates = FreeTextField(label=_("Mandates"),
+					required=False, help_text=_("TODO: Help text"))
+    opening_times = FreeTextField(label=_("Opening Times"),
+					required=False, help_text=_("TODO: Help text"))
+    places = FreeTextField(label=_("Places"),
+					required=False, help_text=_("TODO: Help text"))
+    reproduction_services = FreeTextField(label=_("Reproduction Services"),
+					required=False, help_text=_("TODO: Help text"))
+    research_services = FreeTextField(label=_("Research Services"),
+					required=False, help_text=_("TODO: Help text"))
+    rules = FreeTextField(label=_("Rules"),
+					required=False, help_text=_("TODO: Help text"))
+    sources = FreeTextField(label=_("Sources"),
+					required=False, help_text=_("TODO: Help text"))
+    #languages = forms.multiplechoicefield(label=_("language of materials"), 
+    #                choices=utils.language_choices(), required=false, help_text=_("todo: help text"))
+    #scripts = forms.multiplechoicefield(label=_("script of materials"),
+    #                choices=utils.script_choices(), required=false, help_text=_("todo: help text"))
 
 
 class AuthorityEditForm(PortalEntityForm):
-    languages = LanguageSelectFormField()
-    scripts = ScriptSelectFormField()
-    class Meta:
-        model = models.Authority
+    """Form detailing an ISAAR authority file."""
+    identifier = forms.CharField(label=_("Identifier"), help_text=_(""))
+    name = forms.CharField(label=_("Title"), help_text=_(""))
+    type_of_entity = forms.ChoiceField(label=_("Type of Entity"),
+                choices=terms.AUTHORITY_TYPES)
+    dates_of_existence = FreeTextField(label=_("Dates of Existence"),
+					required=False, help_text=_("TODO: Help text"))
+    functions = FreeTextField(label=_("Functions"),
+					required=False, help_text=_("TODO: Help text"))
+    general_context = FreeTextField(label=_("General Context"),
+					required=False, help_text=_("TODO: Help text"))
+    history = FreeTextField(label=_("History"),
+					required=False, help_text=_("TODO: Help text"))
+    institution_responsible_identifier = FreeTextField(label=_("Institution Responsible Identifier"),
+					required=False, help_text=_("TODO: Help text"))
+    internal_structures = FreeTextField(label=_("Internal Structures"),
+					required=False, help_text=_("TODO: Help text"))
+    legal_status = FreeTextField(label=_("Legal Status"),
+					required=False, help_text=_("TODO: Help text"))
+    mandates = FreeTextField(label=_("Mandates"),
+					required=False, help_text=_("TODO: Help text"))
+    places = FreeTextField(label=_("Places"),
+					required=False, help_text=_("TODO: Help text"))
+    revision_history = FreeTextField(label=_("Revision History"),
+					required=False, help_text=_("TODO: Help text"))
+    sources = FreeTextField(label=_("Sources"),
+					required=False, help_text=_("TODO: Help text"))
+    #languages = forms.multiplechoicefield(label=_("language of materials"), 
+    #                choices=utils.language_choices(), required=false, help_text=_("todo: help text"))
+    #scripts = forms.MultipleChoiceField(label=_("Script of Materials"),
+    #                choices=utils.script_choices(), required=False, help_text=_("TODO: Help text"))
+
 
 class RestoreRevisionForm(forms.Form):
     """Restore a revision of an object."""

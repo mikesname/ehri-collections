@@ -28,7 +28,7 @@ urlpatterns = patterns('',
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
         redirect='repository_search',
         form_class=forms.FacetListSearchForm,
-        model=models.Repository,
+        model=nodes.Repository,
         facetclasses=FACETS),
             name='collection_facets'),
     url(r'^/?$', views.PortalListView.as_view(
@@ -39,32 +39,18 @@ urlpatterns = patterns('',
     # Crud Actions
     url(r'^create/?$', 
             user_passes_test(permissions.is_staff)(
-                views.RepositoryEditView.as_view()), name='repository_create'),
+                views.RepositoryEditView.as_view(model=nodes.Repository)), name='repository_create'),
     url(r'^edit/(?P<slug>[-\w]+)/?$',
             user_passes_test(permissions.is_staff)(
-                views.RepositoryEditView.as_view()), name='repository_edit'),
+                views.RepositoryEditView.as_view(model=nodes.Repository)), name='repository_edit'),
     url(r'^delete/(?P<slug>[-\w]+)/?$', 
             user_passes_test(permissions.is_staff)(
-                views.RepositoryDeleteView.as_view()), name='repository_delete'),
-    url(r'^history/(?P<slug>[-\w]+)/?$', views.PortalHistoryView.as_view(
-            model=models.Repository,
-        ), name='repository_history'),
-    url(r'^restore/(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRestoreView.as_view(
-            model=models.Repository,
-        ), name='repository_restore'),
-    url(r'^diff/(?P<slug>[-\w]+)/?$', views.PortalRevisionDiffView.as_view(
-            model=models.Repository,
-            template_name="repository_diff.html",
-        ), name='repository_diff'),
+                views.RepositoryDeleteView.as_view(model=nodes.Repository)), name='repository_delete'),
     url(r'^(?P<slug>[-\w]+)/collections/create/?$', 
-            views.RepositoryCollectionCreateView.as_view(), 
+            views.RepositoryCollectionCreateView.as_view(model=nodes.Repository), 
                 name='repository_collection_create'),
     
     # these catch-all item must be at the bottom
-    url(r'^(?P<slug>[-\w]+)/v/(?P<revision>\d+)/?$', views.PortalRevisionView.as_view(
-            model=models.Repository,
-            template_name="repository_revision.html"
-        ), name='repository_revision'),
     url(r'^(?P<slug>[-\w]+)/?$', views.PortalCollectionHolderDetailView.as_view(
             model=nodes.Repository,
             template_name="repository_detail.html"
@@ -72,7 +58,7 @@ urlpatterns = patterns('',
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
             views.ListCollectionsView.as_view(
                 template_name="collection_list.html",
-                related_item_model=models.Repository,
+                related_item_model=nodes.Repository,
                 related_item_attr="repository",
             ), name='repository_collections'),
 )

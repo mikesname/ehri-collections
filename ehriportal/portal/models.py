@@ -9,7 +9,7 @@ from django.contrib.gis.db import models
 from django.db.models.base import ModelBase
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
-
+from django.forms.models import model_to_dict
 from taggit.managers import TaggableManager
 from autoslug import AutoSlugField
 import jsonfield
@@ -220,6 +220,10 @@ class Resource(models.Model):
         if withval is not None:
             qset = self.property_set.filter(value=value)
         qset.delete()
+
+    def to_dict(self):
+        """Serialize to a dictionary."""
+        return model_to_dict(self)
 
     def __repr__(self):
         return u"<%s: %d>" % (self.type, self.pk)

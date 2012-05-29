@@ -4,6 +4,7 @@ Override loaddata so it disconnects Haystack signals before running.
 import os
 import sys
 import json
+import datetime
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.management.commands.loaddata import Command as LoadDataCommand
@@ -56,6 +57,8 @@ class Command(BaseCommand):
                     # temp hacks
                     data["element_type"] = object["model"].split(".")[1]
                     data["lod"] = None
+                    if not data.get("created_on"):
+                        data["created_on"] = datetime.datetime.now()
                     data["type_of_entity"] = None
                     data.pop("languages_of_description", None)
                     data.pop("languages", None)

@@ -202,30 +202,25 @@ class ListCollectionsView(PortalListView):
 # specific subclass to return a dictionary of formsets specific to
 # each entity.
 
-class CollectionCreateView(FormView):
-    """Create collections."""
-    form_class = forms.CollectionEditForm
-    model = nodes.Collection
-    template_name = "collection_form.html"
 
+class PortalUpdateView(FormView):
+    """Base class for entity create/edit that require
+    formsets in addition to their main form."""
+    model = None
     def get_formsets(self):
-        return {}
+        raise NotImplementedError
 
     def get_initial(self):
         # if we have an object, populate the form
         # with its current values...
         obj = self.get_object()
         if obj is not None:
-            return obj.data()
-        return super(CollectionCreateView, self).get_initial()
-
+            return obj.to_dict()
+        return super(PortalUpdateView, self).get_initial()
 
     def get_object(self):
-        if hasattr(self, "object") and self.object is not None:
-            return self.object
         if self.kwargs.get("slug"):
-            self.object = get_object_or_404(self.model, slug=self.kwargs.get("slug"))
-            return self.object
+            return get_object_or_404(self.model, slug=self.kwargs.get("slug"))
 
     def form_valid(self, form):
         context = self.get_context_data()
@@ -237,38 +232,7 @@ class CollectionCreateView(FormView):
             else:
                 for key, value in form.cleaned_data.items():
                     setattr(self.object, key, value)
-            print "Saving new object with values: %s" % form.cleaned_data
             self.object.save()
-            for formset in formsets.values():
-                formset.instance = self.object
-                formset.save()
-            return HttpResponseRedirect(self.object.get_absolute_url())
-        return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        return self.render_to_response(self.get_context_data(form=form))
-
-    def get_context_data(self, **kwargs):
-        context = super(CollectionCreateView, self).get_context_data(**kwargs)
-        context["formsets"] = self.get_formsets()
-        return context
-
-
-class PortalUpdateView(UpdateView):
-    """Base class for entity create/edit that require
-    formsets in addition to their main form."""
-    def get_formsets(self):
-        raise NotImplementedError
-
-    def get_object(self):
-        if self.kwargs.get("slug"):
-            return get_object_or_404(self.model, slug=self.kwargs.get("slug"))
-
-    def form_valid(self, form):
-        context = self.get_context_data()
-        formsets = context["formsets"]
-        if False not in [pf.is_valid() for pf in formsets.values()]:
-            self.object = form.save()
             for formset in formsets.values():
                 formset.instance = self.object
                 formset.save()
@@ -288,19 +252,18 @@ class CollectionEditView(PortalUpdateView):
     """Generic form implementation for creating or updating a
     collection object."""
     form_class = forms.CollectionEditForm
-    model = models.Collection
     template_name = "collection_form.html"
 
     def get_formsets(self):
         formsets = {}
-        if self.request.method == "POST":
-            formsets["dates"] = forms.DateFormSet(
-                    self.request.POST, self.request.FILES, instance=self.object)
-            formsets["othernames"] = forms.OtherNameFormSet(
-                    self.request.POST, self.request.FILES, instance=self.object)
-        else:
-            formsets["dates"] = forms.DateFormSet(instance=self.object)
-            formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
+        #if self.request.method == "POST":
+        #    formsets["dates"] = forms.DateFormSet(
+        #            self.request.POST, self.request.FILES, instance=self.object)
+        #    formsets["othernames"] = forms.OtherNameFormSet(
+        #            self.request.POST, self.request.FILES, instance=self.object)
+        #else:
+        #    formsets["dates"] = forms.DateFormSet(instance=self.object)
+        #    formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
         return formsets
 
 class RepositoryCollectionCreateView(CollectionEditView):
@@ -328,36 +291,36 @@ class RepositoryCollectionCreateView(CollectionEditView):
 class CollectionDeleteView(DeleteView):
     template_name = "collection_confirm_delete.html"
     success_url = reverse_lazy("collection_search")
-    model = models.Collection
 
 
 class RepositoryEditView(PortalUpdateView):
     """Generic form implementation for creating or updating a
     repository object."""
     form_class = forms.RepositoryEditForm
-    model = models.Repository
     template_name = "repository_form.html"
 
     def get_formsets(self):
         formsets = {}
-        if self.request.method == "POST":
-            formsets["contacts"] = forms.ContactFormSet(
-                    self.request.POST, self.request.FILES, instance=self.object)
-            formsets["parallelnames"] = forms.ParallelNameFormSet(
-                    self.request.POST, self.request.FILES, instance=self.object)
-            formsets["othernames"] = forms.OtherNameFormSet(
-                    self.request.POST, self.request.FILES, instance=self.object)
-        else:
-            formsets["contacts"] = forms.ContactFormSet(instance=self.object)
-            formsets["parallelnames"] = forms.ParallelNameFormSet(instance=self.object)
-            formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
+        #if self.request.method == "POST":
+        #    formsets["contacts"] = forms.ContactFormSet(
+        #            self.request.POST, self.request.FILES, instance=self.object)
+        #    formsets["parallelnames"] = forms.ParallelNameFormSet(
+        #            self.request.POST, self.request.FILES, instance=self.object)
+        #    formsets["othernames"] = forms.OtherNameFormSet(
+        #            self.request.POST, self.request.FILES, instance=self.object)
+        #else:
+        #    formsets["contacts"] = forms.ContactFormSet(instance=self.object)
+        #    formsets["parallelnames"] = forms.ParallelNameFormSet(instance=self.object)
+        #    formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
         return formsets
+
+class PortalDeleteView(DeleteView):
+    model = None
 
 
 class RepositoryDeleteView(DeleteView):
     template_name = "repository_confirm_delete.html"
     success_url = reverse_lazy("repository_search")
-    model = models.Repository
 
 
 class PortalHistoryView(ListView):
@@ -378,23 +341,21 @@ class AuthorityEditView(PortalUpdateView):
     """Generic form implementation for creating or updating a
     authority object."""
     form_class = forms.AuthorityEditForm
-    model = models.Authority
     template_name = "authority_form.html"
 
     def get_formsets(self):
         formsets = {}
-        if self.request.method == "POST":
-            formsets["othernames"] = forms.OtherNameFormSet(
-                    self.request.POST, self.request.FILES, instance=self.object)
-        else:
-            formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
+        #if self.request.method == "POST":
+        #    formsets["othernames"] = forms.OtherNameFormSet(
+        #            self.request.POST, self.request.FILES, instance=self.object)
+        #else:
+        #    formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
         return formsets
 
 
 class AuthorityDeleteView(DeleteView):
     template_name = "authority_confirm_delete.html"
     success_url = reverse_lazy("authority_search")
-    model = models.Authority
 
 
 class PortalDetailView(DetailView):
