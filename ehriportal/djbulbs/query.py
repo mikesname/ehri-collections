@@ -243,8 +243,9 @@ class GraphQuerySet(DjangoQuerySet):
         and returning the created object.
         """
         self._for_write = True
-        proxy = getattr(GRAPH, self.model.element_type)
-        return proxy.create(**kwargs)
+        new_model = self.model(**kwargs)
+        new_model.save()
+        return new_model
 
     def get(self, **kwargs):
         clone = self.filter(**kwargs)

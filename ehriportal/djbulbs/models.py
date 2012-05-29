@@ -32,8 +32,11 @@ class SingleRelationField(object):
             if cached is not None:
                 return cached
             # we can do with with bulbs, saving some hassle
-            model._relation_cache[name] = self.outE(rel.label).next().inV()
-            return model._relation_cache[name]
+            try:
+                model._relation_cache[name] = self.outE(rel.label).next().inV()
+            except StopIteration:
+                pass
+            return model._relation_cache.get(name)
         setattr(model, name, property(lookup_func))
         
 
@@ -107,9 +110,17 @@ class Model(model.Node):
     class MultipleObjectsReturned(MultipleObjectsReturned):
         pass
 
-    def __init__(self, client, **kwargs):
+    def __init__(self, client=None, **kwargs):
+        if client is None:
+            client = GRAPH.client
         super(Model, self).__init__(client)
-        self.__dict__.update(**kwargs)
+        self._data.update(**kwargs)
+
+    def save(self, *args, **kwargs):
+        if not hasattr(self, "eid"):
+            self._create(self._data, {})
+        else:
+            super(Model, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return u"<%s: %d>" % (self.__class__, self.eid)
