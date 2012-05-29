@@ -9,15 +9,17 @@
 {% block body_class %}collections{% endblock %}
 
 {% block sidebar_details %}
-    <div class="repo-logo">
-        <a href="{%url repository_detail object.repository.slug %}">
-        {% if object.repository.logo %}
-            <img  src="{{object.repository.logo.url}}" />
-        {% else %}
-        <div class="logo-placeholder"><h3>{{object.repository.name}}</h3></div>
-        {% endif %}
-        </a>
-    </div>
+    {% if object.repository %}
+        <div class="repo-logo">
+            <a href="{%url repository_detail object.repository.slug %}">
+            {% if object.repository.logo %}
+                <img  src="{{object.repository.logo.url}}" />
+            {% else %}
+            <div class="logo-placeholder"><h3>{{object.repository.name}}</h3></div>
+            {% endif %}
+            </a>
+        </div>
+    {% endif %}
     {% include "_collection_info.html" %}
 {% endblock %}
 

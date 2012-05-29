@@ -40,18 +40,20 @@ class ResourceBaseType(djbulbs.models.ModelType):
     All this does is instantiate models.TextField attributes
     on subclasses based on their translatable_fields tuple."""
     def __new__(cls, name, bases, attrs):
-        super_new = super(ResourceType, cls).__new__
+        super_new = super(ResourceBaseType, cls).__new__
          # Abstract class: abstract attribute should not be inherited.
+        new_class = super_new(cls, name, bases, attrs)
         if attrs.pop("abstract", None) or not attrs.get("autoregister", True):
-            return super_new(cls, name, bases, attrs)
+            return new_class 
         for fname, vname, help in attrs.get("translatable_fields", []):
-            super_new.add_to_class(fname, nodeprop.String(name=vname, nullable=True))
-        return super_new(cls, name, bases, attrs)
+            new_class.add_to_class(fname, nodeprop.String(name=vname, nullable=True))
+        return new_class
 
 
 
 class ResourceBase(djbulbs.models.Model, models.EntityUrlMixin):
     """Mixin for resources holding common properties."""
+    __metaclass__ = ResourceBaseType
     # Publication status enum
     DRAFT, PUBLISHED = range(2)
     PUB_STATUS = (
@@ -87,21 +89,15 @@ class ResourceBase(djbulbs.models.Model, models.EntityUrlMixin):
     def published(self):
         return self.publication_status == self.PUBLISHED
 
-    def _create(self, _data, kwds):
-        kwds["created_on"] = kwds.get("created_on", current_datetime())
-        # get the slug from the name
-        kwds["slug"] = self._get_slug(kwds["name"])
-        return super(ResourceBase, self)._create(_data, kwds)
-
-    def _update(self, _id, _data, kwds):
-        kwds["updated_on"] = kwds.get("updated_on", current_datetime())
-        return super(ResourceBase, self)._update(_id, _data, kwds)
-
     def save(self, *args, **kwargs):
-        if not self.created_on:
-            raise Exception("Unable to save an object created with its own __init__()")
+        if not hasattr(self, "eid"):
+            # Grotesque hacks to get around Bulbs difficulties. Because
+            # of the convoluted way that item._data gets populated, and
+            # the distinction between stored and regular properties
+            self._data["slug"] = self.slug = self._get_slug(self._data["name"])
+            self._data["created_on"] = self.created_on = current_datetime()
         else:
-            self.updated_on = current_datetime()
+            self._data["updated_on"] = self.updated_on = current_datetime()
         return super(ResourceBase, self).save(*args, **kwargs)
 
     def __unicode__(self):

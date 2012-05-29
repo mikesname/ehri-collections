@@ -8,7 +8,7 @@ import socket
 from django.utils.translation import ugettext_lazy as _
 from django.contrib import messages
 from django.views.generic import ListView
-from django.views.generic.edit import FormMixin, DeleteView, UpdateView, ProcessFormView
+from django.views.generic.edit import FormMixin, DeleteView, FormView, UpdateView, ProcessFormView
 from django.views.generic.detail import DetailView
 from django import forms
 from django.conf import settings
@@ -19,7 +19,7 @@ from django.shortcuts import get_object_or_404, render
 
 from haystack.query import SearchQuerySet
 from haystack.forms import EmptySearchQuerySet
-from portal import models, forms, utils
+from portal import models, nodes, forms, utils
 import reversion
 
 
@@ -201,6 +201,58 @@ class ListCollectionsView(PortalListView):
 # We just need to override the `get_formsets` method in each model-
 # specific subclass to return a dictionary of formsets specific to
 # each entity.
+
+class CollectionCreateView(FormView):
+    """Create collections."""
+    form_class = forms.CollectionEditForm
+    model = nodes.Collection
+    template_name = "collection_form.html"
+
+    def get_formsets(self):
+        return {}
+
+    def get_initial(self):
+        # if we have an object, populate the form
+        # with its current values...
+        obj = self.get_object()
+        if obj is not None:
+            return obj.data()
+        return super(CollectionCreateView, self).get_initial()
+
+
+    def get_object(self):
+        if hasattr(self, "object") and self.object is not None:
+            return self.object
+        if self.kwargs.get("slug"):
+            self.object = get_object_or_404(self.model, slug=self.kwargs.get("slug"))
+            return self.object
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        formsets = context["formsets"]
+        if False not in [pf.is_valid() for pf in formsets.values()]:
+            self.object = self.get_object()
+            if self.object is None:
+                self.object = self.model(**form.cleaned_data)
+            else:
+                for key, value in form.cleaned_data.items():
+                    setattr(self.object, key, value)
+            print "Saving new object with values: %s" % form.cleaned_data
+            self.object.save()
+            for formset in formsets.values():
+                formset.instance = self.object
+                formset.save()
+            return HttpResponseRedirect(self.object.get_absolute_url())
+        return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_context_data(self, **kwargs):
+        context = super(CollectionCreateView, self).get_context_data(**kwargs)
+        context["formsets"] = self.get_formsets()
+        return context
+
 
 class PortalUpdateView(UpdateView):
     """Base class for entity create/edit that require

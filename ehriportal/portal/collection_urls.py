@@ -73,6 +73,12 @@ urlpatterns = patterns('',
         ), name='collection_list'),
 
     # Crud Actions
+    url(r'^create_node/?$', 
+            user_passes_test(permissions.is_staff)(
+                views.CollectionCreateView.as_view()), name='collection_create_node'),
+    url(r'^edit_node/(?P<slug>[-\w]+)/?$',
+            user_passes_test(permissions.is_staff)(
+                views.CollectionCreateView.as_view()), name='collection_edit_node'),
     url(r'^create/?$', 
             user_passes_test(permissions.is_staff)(
                 views.CollectionEditView.as_view()), name='collection_create'),
