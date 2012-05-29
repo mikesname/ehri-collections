@@ -4,14 +4,14 @@ import string
 from django import forms
 from django.contrib.admin import widgets
 from django.utils import translation
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext as _
 from django.contrib.gis import geos
 from django.forms.models import modelformset_factory, inlineformset_factory
 
 from jsonfield.forms import JSONFormField
 from haystack.forms import EmptySearchQuerySet
 
-from portal import models, data, utils
+from portal import models, terms, data, utils
 
 
 def parse_point(pointstr):
@@ -98,13 +98,13 @@ class FacetListSearchForm(PortalSearchForm):
             choices=(("count",_("Count")), ("name", _("Name"))))
 
 
-class LanguageSelectFormField(JSONFormField):
+class LanguageSelectFormField(forms.MultipleChoiceField):
     def __init__(self, *args, **kwargs):
         super(LanguageSelectFormField, self).__init__(*args, **kwargs)
         self.widget = forms.SelectMultiple(choices=utils.language_choices())
 
 
-class ScriptSelectFormField(JSONFormField):
+class ScriptSelectFormField(forms.MultipleChoiceField):
     def __init__(self, *args, **kwargs):
         super(ScriptSelectFormField, self).__init__(*args, **kwargs)
         self.widget = forms.SelectMultiple(choices=utils.script_choices())
@@ -132,8 +132,11 @@ class OtherNameForm(forms.ModelForm):
                 "name": forms.TextInput(attrs={'placeholder': _("Type another name here...")}),
         }
 
-class PortalEntityForm(forms.ModelForm):
+class PortalEntityForm(forms.Form):
     # extra (non-model) field for revision comment
+    publication_status = forms.ChoiceField(label=_("Publication Status"), 
+                choices=terms.PUBLICATION_STATUS, help_text=_("Status of this item with regards to "
+                                                            "public visibility."))
     revision_comment = forms.CharField(required=False, widget=forms.TextInput(attrs={
                 "placeholder": _("Summary of changes (optional)"),
             }))
@@ -143,14 +146,69 @@ class ContactForm(forms.ModelForm):
         model = models.Contact
 
 
+class FreeTextField(forms.CharField):
+    def __init__(self, *args, **kwargs):
+        super(FreeTextField, self).__init__(*args, **kwargs)
+        self.widget = forms.Textarea()
+
 
 class CollectionEditForm(PortalEntityForm):
-    languages = LanguageSelectFormField()
-    languages_of_description = LanguageSelectFormField()
-    scripts = ScriptSelectFormField()
-    scripts_of_description = ScriptSelectFormField()
-    class Meta:
-        model = models.Collection
+    """Form representing an ISAD(G) collection entry (minus its relations
+    to other entities such as the repository and creator.)"""
+    identifier = forms.CharField(label=_("Identifier"), help_text=_(""))
+    name = forms.CharField(label=_("Title"), help_text=_(""))
+    lod = forms.ChoiceField(label=_("Level of Description"),
+                    required=False, choices=terms.LEVELS_OF_DETAIL)
+    access_conditions = FreeTextField(label=_("Access Conditions"), 
+					required=False, help_text=_("TODO: Help text"))
+    accruals = FreeTextField(label=_("Accruals"), 
+					required=False, help_text=_("TODO: Help text"))
+    acquisition = FreeTextField(label=_("Immediate source of acquisition or transfer"), 
+					required=False, help_text=_("TODO: Help text"))
+    alternate_title = FreeTextField(label=_("Alternate Title"), 
+					required=False, help_text=_("TODO: Help text"))
+    appraisal = FreeTextField(label=_("Appraisal"), 
+					required=False, help_text=_("TODO: Help text"))
+    archival_history = FreeTextField(label=_("Archival History"), 
+					required=False, help_text=_("TODO: Help text"))
+    arrangement = FreeTextField(label=_("Arrangement"), 
+					required=False, help_text=_("TODO: Help text"))
+    edition = FreeTextField(label=_("Edition"), 
+					required=False, help_text=_("TODO: Help text"))
+    extent_and_medium = FreeTextField(label=_("Extent and Medium"), 
+					required=False, help_text=_("TODO: Help text"))
+    finding_aids = FreeTextField(label=_("Finding Aids"), 
+					required=False, help_text=_("TODO: Help text"))
+    institution_responsible_identifier = FreeTextField(label=_("Institution Responsible Identifier"), 
+					required=False, help_text=_("TODO: Help text"))
+    location_of_copies = FreeTextField(label=_("Location of Copies"), 
+					required=False, help_text=_("TODO: Help text"))
+    location_of_originals = FreeTextField(label=_("Location of Originals"), 
+					required=False, help_text=_("TODO: Help text"))
+    notes = FreeTextField(label=_("Notes"), 
+					required=False, help_text=_("TODO: Help text"))
+    physical_characteristics = FreeTextField(label=_("Physical Characteristics"), 
+					required=False, help_text=_("TODO: Help text"))
+    related_units_of_description = FreeTextField(label=_("Related Units of Description"), 
+					required=False, help_text=_("TODO: Help text"))
+    reproduction_conditions = FreeTextField(label=_("Reproduction Conditions"), 
+					required=False, help_text=_("TODO: Help text"))
+    revision_history = FreeTextField(label=_("Revision History"), 
+					required=False, help_text=_("TODO: Help text"))
+    rules = FreeTextField(label=_("Rules"), 
+					required=False, help_text=_("TODO: Help text"))
+    scope_and_content = FreeTextField(label=_("Scope and Content"), 
+					required=False, help_text=_("TODO: Help text"))
+    sources = FreeTextField(label=_("Sources"), 
+					required=False, help_text=_("TODO: Help text"))
+    #languages = forms.MultipleChoiceField(label=_("Language of Materials"), 
+    #                choices=utils.language_choices(), required=False, help_text=_("TODO: Help text"))
+    #languages_of_description = forms.MultipleChoiceField(label=_("Language of Description"),
+    #                choices=utils.language_choices(), required=False, help_text=_("TODO: Help text"))
+    #scripts = forms.MultipleChoiceField(label=_("Script of Materials"),
+    #                choices=utils.script_choices(), required=False, help_text=_("TODO: Help text"))
+    #scripts_of_description = forms.MultipleChoiceField(label=_("Script of Description"),
+    #                choices=utils.script_choices(), required=False, help_text=_("TODO: Help text"))
 
 
 class RepositoryEditForm(PortalEntityForm):
