@@ -27,6 +27,8 @@ ADMINS = [
 
 MANAGERS = ADMINS
 
+DATABASE_ROUTERS = ['neo4django.utils.Neo4djangoIntegrationRouter']
+
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
@@ -37,6 +39,7 @@ DATABASES = {
         "PORT": "",                             # Set to empty string for default. Not used with sqlite3.
     }
 }
+
 
 NEO4J_DATABASES = {
     'default' : {
