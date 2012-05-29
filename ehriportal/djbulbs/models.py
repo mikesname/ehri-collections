@@ -130,5 +130,9 @@ class Model(model.Node):
             return force_unicode(self).encode('utf-8')
         return '%s object' % self.__class__.__name__
 
+    def delete(self):
+        if hasattr(self, "eid"):
+            return GRAPH.vertices.delete(self.eid)
+
 
 

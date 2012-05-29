@@ -50,7 +50,7 @@ class GremlinCompiler(object):
             parts = key.split(LOOKUP_SEP)
             if len(parts) > 1 and parts[-1] in OPS:
                 lookup_type = parts[-1]
-            if parts[0] in props:
+            if parts[0] in props or parts[0] == "eid":
                 filters.append((parts[0], lookup_type, value))
             elif parts[0] in query.model._relations:
                 rel = query.model._relations[parts[0]]
