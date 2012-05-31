@@ -1,4 +1,37 @@
 
+// For a node that can only have a type of
+// relation pointing to one entity, set
+// the target node, removing any existing
+// relation if necessary
+def set_single_relation(outV, inV, label) {
+  import org.neo4j.graphdb.DynamicRelationshipType;
+  neo4j = g.getRawGraph()
+  manager = neo4j.index()
+  outvertex = neo4j.getNodeById(outV)
+  index = manager.forRelationships(label)
+  g.setMaxBufferSize(0)
+  g.startTransaction()
+
+  try {
+    try {
+      def existing = g.v(outV).outE(label).next()
+      index.remove(neo4j.getRelationshipById(existing.id))
+      g.removeEdge(existing)
+    } catch (NoSuchElementException e) {
+    }
+    if (inV != null) {
+      def relationshipType = DynamicRelationshipType.withName(label)
+      def edge = outvertex.createRelationshipTo(neo4j.getNodeById(inV), relationshipType)
+      index.add(edge, "label", String.valueOf(label))
+    }
+    g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
+    return true;
+  } catch (e) {
+    g.stopTransaction(TransactionalGraph.Conclusion.FAILURE)  
+    return e
+  }
+}
+
 
 // construct a query - several of these paths can probably
 // be optimised, and I'm not sure if the index is being
