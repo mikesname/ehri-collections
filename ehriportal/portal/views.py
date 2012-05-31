@@ -234,9 +234,9 @@ class PortalUpdateView(FormView):
                 for key, value in form.cleaned_data.items():
                     setattr(self.object, key, value)
             self.object.save()
-            for formset in formsets.values():
-                formset.instance = self.object
-                formset.save()
+            #for formset in formsets.values():
+            #    formset.instance = self.object
+            #    formset.save()
             return HttpResponseRedirect(self.object.get_absolute_url())
         return self.form_invalid(form)
 
@@ -302,15 +302,19 @@ class RepositoryEditView(PortalUpdateView):
 
     def get_formsets(self):
         formsets = {}
-        #if self.request.method == "POST":
-        #    formsets["contacts"] = forms.ContactFormSet(
-        #            self.request.POST, self.request.FILES, instance=self.object)
+        if self.request.method == "POST":
+            formsets["contacts"] = forms.ContactFormSet(
+                    self.request.POST, self.request.FILES)
         #    formsets["parallelnames"] = forms.ParallelNameFormSet(
         #            self.request.POST, self.request.FILES, instance=self.object)
         #    formsets["othernames"] = forms.OtherNameFormSet(
         #            self.request.POST, self.request.FILES, instance=self.object)
-        #else:
-        #    formsets["contacts"] = forms.ContactFormSet(instance=self.object)
+        else:
+            initial = []
+            object = self.get_object()
+            if object:
+                initial = [c.to_dict() for c in object.contact_set]
+            formsets["contacts"] = forms.ContactFormSet(initial=initial)
         #    formsets["parallelnames"] = forms.ParallelNameFormSet(instance=self.object)
         #    formsets["othernames"] = forms.OtherNameFormSet(instance=self.object)
         return formsets

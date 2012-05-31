@@ -144,15 +144,28 @@ class PortalEntityForm(forms.Form):
                 "placeholder": _("Summary of changes (optional)"),
             }))
 
-class ContactForm(forms.ModelForm):
-    class Meta:
-        model = models.Contact
-
-
 class FreeTextField(forms.CharField):
     def __init__(self, *args, **kwargs):
         super(FreeTextField, self).__init__(*args, **kwargs)
         self.widget = forms.Textarea()
+
+class ContactForm(forms.Form):
+    """Form representing a repository's contact information."""
+    primary = forms.BooleanField(_("Primary Contact"))
+    contact_person = forms.CharField(label=_("Contact Person"), max_length=255, required=False)
+    street_address = FreeTextField(label=_("Street Address"), required=False)
+    city = forms.CharField(label=_("City"), max_length=100, required=False)
+    region = forms.CharField(label=_("Region"), max_length=100, required=False)
+    postal_code = forms.CharField(label=_("Postal Code"), max_length=100, required=False)
+    country_code = forms.ChoiceField(label=_("Country"), required=False,
+            choices=[(None, "------")] + list(utils.country_choices()))
+    website = forms.URLField(label=_("Website"), required=False)
+    email = forms.EmailField(label=_("Email"), required=False)
+    telephone = forms.CharField(label=_("Telephone"), max_length=100, required=False)
+    fax = forms.CharField(label=_("Fax"), max_length=100, required=False)
+    contact_type = forms.CharField(label=_("Contact Type"),
+            max_length=100, required=False)
+    note = FreeTextField(label=_("Notes"), required=False)
 
 
 class CollectionEditForm(PortalEntityForm):
@@ -317,19 +330,17 @@ def propertyformset_factory(topclass, propname):
 # The alternative is lots of ugly duplication or another exceedingly
 # meta 'factory' function, neither of which are nice options.
 
-DateFormSet = inlineformset_factory(models.Collection, models.FuzzyDate,
-        form=FuzzyDateForm, extra=1)
-
-
-OtherNameFormSet = inlineformset_factory(models.Collection, models.OtherFormOfName,
-        form=OtherNameForm, extra=1)
-
-
-ParallelNameFormSet = inlineformset_factory(models.Collection, models.ParallelFormOfName,
-        form=OtherNameForm, extra=1)
-
-
-ContactFormSet = inlineformset_factory(models.Repository, models.Contact,
-        form=ContactForm, extra=1)
-
+#DateFormSet = inlineformset_factory(models.Collection, models.FuzzyDate,
+#        form=FuzzyDateForm, extra=1)
+#
+#
+#OtherNameFormSet = inlineformset_factory(models.Collection, models.OtherFormOfName,
+#        form=OtherNameForm, extra=1)
+#
+#
+#ParallelNameFormSet = inlineformset_factory(models.Collection, models.ParallelFormOfName,
+#        form=OtherNameForm, extra=1)
+#
+#
+ContactFormSet = forms.formsets.formset_factory(form=ContactForm, extra=1, can_delete=True)
 
