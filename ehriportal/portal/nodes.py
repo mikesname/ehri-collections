@@ -7,6 +7,7 @@ import sys
 import re
 import datetime
 import json
+import functools
 
 from django.conf import settings
 from django.template.defaultfilters import slugify
@@ -29,10 +30,27 @@ class CreatedBy(djbulbs.models.Relationship):
     label = "createdBy"
 djbulbs.graph.add_proxy(CreatedBy.label, CreatedBy)
 
+class AddressOf(djbulbs.models.Relationship):
+    label = "addressOf"
+djbulbs.graph.add_proxy(AddressOf.label, AddressOf)
+
 
 class MentionedIn(djbulbs.models.Relationship):
     label = "mentionedIn"
 djbulbs.graph.add_proxy(MentionedIn.label, MentionedIn)
+
+
+def cachedproperty(f):
+    """Property constructor that memoizes the result.
+    TODO: Make it possible to reset this easily..."""
+    name = f.__name__
+    def getter(self):
+        try:
+            return self.__dict__["_%s_cache" % name]
+        except KeyError:
+            res = self.__dict__["_%s_cache" % name] = f(self)
+            return res
+    return property(getter)
 
 
 class ResourceBaseType(djbulbs.models.ModelType):
@@ -145,16 +163,26 @@ class Repository(ResourceBase):
 
     objects = GraphManager()
 
-    @property
+    @cachedproperty
+    def primary_address(self):
+        try:
+            # TODO: Actually pick out the primary contact!
+            return Contact.objects.filter(repository=self)[0]
+        except IndexError:
+            pass
+
+    @cachedproperty
+    def contact_set(self):
+        return Contact.objects.filter(repository=self)
+
+    @cachedproperty
     def collection_set(self):
-        qs = Collection.objects.all()
-        return qs.start_from("g.v(%d).inE('heldBy').outV" % self.eid)
+        return Collection.objects.filter(repository=self)
 
     @property
     def collections(self):
         """Get all collections related by the heldBy edge."""
-        for edge in self.inE(HeldBy.label):
-            yield edge.outV()
+        return self.collection_set.all()
 
     def natural_key(self):
         return (self.name,)
@@ -207,18 +235,44 @@ class Collection(ResourceBase):
 djbulbs.graph.add_proxy(Collection.element_type, Collection)
 
 
+class Contact(ResourceBase):
+    """Model representing a repository's address."""
+    element_type = "contact"
+
+    primary = nodeprop.Integer(name=_("Primary Contact"))
+    contact_person = nodeprop.String(name=_("Contact Person"), nullable=True)
+    street_address = nodeprop.String(name=_("Street Address"), nullable=True)
+    city = nodeprop.String(name=_("City"), nullable=True)
+    region = nodeprop.String(name=_("Region"), nullable=True)
+    postal_code = nodeprop.String(name=_("Postal Code"), nullable=True)
+    country_code = nodeprop.String(name=_("Country"), nullable=True)
+    website = nodeprop.String(name=_("Website"), nullable=True)
+    email = nodeprop.String(name=_("Email"), nullable=True)
+    telephone = nodeprop.String(name=_("Telephone"), nullable=True)
+    fax = nodeprop.String(name=_("Fax"), nullable=True)
+    contact_type = nodeprop.String(name=_("Contact Type"), nullable=True)
+    note = nodeprop.String(name=_("Notes"), nullable=True)
+    
+    repository = djbulbs.models.SingleRelationField(AddressOf)
+    objects = GraphManager()
+
+    def format(self):
+        elems = [e.strip() for e in [
+            self.street_address,
+            self.postal_code,
+            self.city,
+            self.region,
+            utils.country_name_from_code(self.country_code) \
+                    if self.country_code else None
+        ] if e is not None]
+        return "\n".join(elems).replace(", ", "\n")
+
+djbulbs.graph.add_proxy(Contact.element_type, Contact)
+
+
 class Authority(ResourceBase):
     """Model representing an archival authority."""
     element_type = "authority"
-    @property
-    def collection_set(self):
-        qs = Collection.objects.all()
-        return qs.start_from("g.v(%d).inE('createdBy').outV" % self.eid)
-
-    @property
-    def mentioned_set(self):
-        qs = Collection.objects.all()
-        return qs.start_from("g.v(%d).inE('mentionedIn').outV" % self.eid)
 
     identifier = nodeprop.String(indexed=True, name=_("Local Identifier"), nullable=False)
     level_of_description = nodeprop.Integer(name=_("Level of Description"))
@@ -241,6 +295,10 @@ class Authority(ResourceBase):
     scripts = nodeprop.List(name=_("Script(s)"))
 
     objects = GraphManager()
+
+    @cachedproperty
+    def collection_set(self):
+        return Collection.objects.filter(creator=self)
 
     def natural_key(self):
         return (self.name,)

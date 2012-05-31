@@ -65,8 +65,9 @@ urlpatterns = patterns('',
         ), name='authority_detail'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
             views.ListCollectionsView.as_view(
+                model=nodes.Collection,
                 template_name="collection_list.html",
-                related_item_model=models.Authority,
+                related_item_model=nodes.Authority,
                 related_item_attr="creator",
             ), name='authority_collections'),
 )

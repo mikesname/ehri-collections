@@ -3,7 +3,7 @@
 {% if object.logo %}
 <div class="repo-logo">
     <a href="{{object.get_absolute_url}}">
-        {% if object.logo %}
+        {% if object.logo.url %}
         <img width="220px" src="{{object.logo.url }}" />
         {% else %}
         <img width="220px" height="220px" src="{% static "img/repository_placeholder.png" %}" />

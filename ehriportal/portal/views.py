@@ -174,7 +174,8 @@ class ListCollectionsView(PortalListView):
     """View which displays the collections for a particular 
     repository, and added that repository to the template
     context."""
-    model = models.Collection
+    model = None
+    paginate_by = 20
     related_item_attr = None
     related_item_model = None
     def get_queryset(self, *args, **kwargs):

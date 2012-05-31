@@ -57,6 +57,7 @@ urlpatterns = patterns('',
         ), name='repository_detail'),
     url(r'^(?P<slug>[-\w]+)/collections/?$', 
             views.ListCollectionsView.as_view(
+                model=nodes.Collection,
                 template_name="collection_list.html",
                 related_item_model=nodes.Repository,
                 related_item_attr="repository",

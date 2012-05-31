@@ -5,11 +5,13 @@ import os
 import sys
 import json
 import datetime
+import calendar
+import dateutil
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.management.commands.loaddata import Command as LoadDataCommand
 
-from bulbs import neo4jserver
+from bulbs import neo4jserver, utils
 from bulbs.config import DEBUG
 
 # FIXME: Do away with this global somehow
@@ -42,8 +44,17 @@ class Command(BaseCommand):
           # to Bulbs relationships.
         relations = {
           "collection.repository": ("heldBy", "repository"),
+          "contact.repository": ("addressOf", "repository"),
           "collection.creator": ("createdBy", "authority")
         }
+
+        def fix_date(current, default):
+            if current is None:
+                if default is not None:
+                    return utils.to_timestamp(default)
+            else:
+                dt = dateutil.parser.parse(current)
+                return utils.to_timestamp(dt)
 
         for fixture in fixture_labels:
             sys.stderr.write("Loading fixture: %s\n" % fixture)
@@ -57,8 +68,8 @@ class Command(BaseCommand):
                     # temp hacks
                     data["element_type"] = object["model"].split(".")[1]
                     data["lod"] = None
-                    if not data.get("created_on"):
-                        data["created_on"] = datetime.datetime.now()
+                    data["created_on"] = fix_date(data.get("created_on"), datetime.datetime.now())
+                    data["updated_on"] = fix_date(data.get("updated_on"), None)
                     data["type_of_entity"] = None
                     data.pop("languages_of_description", None)
                     data.pop("languages", None)
