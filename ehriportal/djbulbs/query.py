@@ -29,47 +29,6 @@ OPS = (
     "lte",
 )
 
-class GremlinCompiler(object):
-    """Class which compiles a GraphQuery into a gremlin query.
-    This is a stopgap measure."""
-
-    def __init__(self, query):
-        self.query = query
-
-    def get_query_params(self, count=False):
-        query = self.query
-        props = query.model._properties
-        filters = []
-        relations = copy.copy(query.relations)
-        low = high = None
-        order_by = []
-        index_name = query.model.element_type
-        
-        for key, value in query.filters.items():
-            lookup_type = "exact"
-            parts = key.split(LOOKUP_SEP)
-            if len(parts) > 1 and parts[-1] in OPS:
-                lookup_type = parts[-1]
-            if parts[0] in props or parts[0] == "eid":
-                filters.append((parts[0], lookup_type, value))
-            elif parts[0] in query.model._relations:
-                rel = query.model._relations[parts[0]]
-                relations.append((rel.relation.label, value.eid))
-            else:
-                raise Exception("Invalid filter lookup %s=%s for model '%s'" % (
-                    key, value, query.model))
-
-        return dict(docount=count, index_name=index_name, filters=filters, order_by=order_by,
-                low=low, high=high, relations=relations)
-
-
-    def results_iter(self):
-        script = GRAPH.client.scripts.get("query")
-        params = self.get_query_params()
-        results = GRAPH.client.gremlin(script, params=params)
-        for res in initialize_elements(GRAPH.client, results):
-            yield res
-
 
 class GraphQuery(object):
     def __init__(self, model, where=None):
@@ -117,7 +76,7 @@ class GraphQuery(object):
         # FIXME: This is all kinds of wrong
         # TODO: Find better way of doing this...
         script = GRAPH.client.scripts.get("query")
-        params = self.get_compiler().get_query_params(count=True)
+        params = self.get_query_params(count=True)
         number = GRAPH.client.gremlin(script, params).content
         # Apply offset and limit constraints manually, since using LIMIT/OFFSET
         # in SQL (in variants that provide them) doesn't change the COUNT
@@ -195,12 +154,42 @@ class GraphQuery(object):
         """
         return not self.low_mark and self.high_mark is None
 
-    def get_compiler(self, using=None):
-        return GremlinCompiler(self)
+    def get_query_params(self, count=False):
+        props = self.model._properties
+        filters = []
+        relations = copy.copy(self.relations)
+
+        # TODO: Order by params
+        order_by = []
+        
+        for key, value in self.filters.items():
+            lookup_type = "exact"
+            parts = key.split(LOOKUP_SEP)
+            if len(parts) > 1 and parts[-1] in OPS:
+                lookup_type = parts[-1]
+            if parts[0] in props or parts[0] == "eid":
+                filters.append((parts[0], lookup_type, value))
+            elif parts[0] in self.model._relations:
+                rel = self.model._relations[parts[0]]
+                relations.append((rel.relation.label, value.eid))
+            else:
+                raise Exception("Invalid filter lookup %s=%s for model '%s'" % (
+                    key, value, self.model))
+
+        return dict(docount=count, index_name=self.model.element_type,
+                filters=filters, order_by=order_by,
+                low=self.low_mark, high=self.high_mark,
+                relations=relations)
+
+    def results_iter(self):
+        params = self.get_query_params()
+        script = GRAPH.client.scripts.get("query")
+        results = GRAPH.client.gremlin(script, params=params)
+        for res in initialize_elements(GRAPH.client, results):
+            yield res
 
     def __iter__(self):
-        compiler = self.get_compiler()
-        for iter in compiler.results_iter():
+        for iter in self.results_iter():
             yield iter
 
 
@@ -220,8 +209,7 @@ class GraphQuerySet(DjangoQuerySet):
         return clone
 
     def iterator(self):
-        compiler = self.query.get_compiler()
-        for res in compiler.results_iter():
+        for res in self.query.results_iter():
             yield res
         
     def filter(self, **kwargs):
