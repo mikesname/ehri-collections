@@ -23,21 +23,31 @@ class SingleRelationField(object):
     def __init__(self, relation):
         self.relation = relation
 
-    def contribute_to_class(self, model, name):
-        self.model = model
-        model._relations[name] = self
-        rel = self.relation
+    def contribute_to_class(cls, model, name):
+        cls.model = model
+        model._relations[name] = cls
+        rel = cls.relation
         def lookup_func(self):
-            cached = model._relation_cache.get(name)
+            cached = self._relation_cache.get(name)
             if cached is not None:
                 return cached
-            # we can do with with bulbs, saving some hassle
+            # we can do this with bulbs directly, saving some hassle
             try:
-                model._relation_cache[name] = self.outE(rel.label).next().inV()
+                self._relation_cache[name] = self.outE(rel.label).next().inV()
             except StopIteration:
                 pass
-            return model._relation_cache.get(name)
-        setattr(model, name, property(lookup_func))
+            return self._relation_cache.get(name)
+
+        def setter_func(self, other):
+            script = GRAPH.client.scripts.get("set_single_relation")
+            params = dict(outV=self.eid, inV=other.eid if other else None, label=rel.label)
+            try:
+                res = GRAPH.client.gremlin(script, params=params)
+                self._relation_cache[name] = other
+            except Exception, e:
+                # FIXME: Handle this error
+                pass
+        setattr(model, name, property(lookup_func, setter_func))
         
 
 
@@ -115,6 +125,7 @@ class Model(model.Node):
             client = GRAPH.client
         super(Model, self).__init__(client)
         self._data.update(**kwargs)
+        self._relation_cache = {}
 
     def save(self, *args, **kwargs):
         if not hasattr(self, "eid"):
