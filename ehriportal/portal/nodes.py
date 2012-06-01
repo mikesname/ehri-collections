@@ -79,6 +79,13 @@ class ResourceBase(djbulbs.models.Model, models.EntityUrlMixin):
             (PUBLISHED, _("Published")),
     )
 
+    # FIXME: Mock attrs for testing
+    other_names = []
+    languages = []
+    languages_of_description = []
+    scripts = []
+    scripts_of_description = []
+
     name = nodeprop.String(name=_("Name"), unique=True, indexed=True, nullable=False)
     slug = nodeprop.String(name=_("Slug"), unique=True, indexed=True, nullable=False)
     created_on = nodeprop.DateTime(name=_("Date Created"), nullable=False)
@@ -164,7 +171,7 @@ class Repository(ResourceBase):
     objects = GraphManager()
 
     @cachedproperty
-    def primary_address(self):
+    def primary_contact(self):
         try:
             # TODO: Actually pick out the primary contact!
             return Contact.objects.filter(repository=self)[0]

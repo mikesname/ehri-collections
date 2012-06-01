@@ -2,7 +2,7 @@
 
 import datetime
 from haystack import indexes
-from portal import models, utils
+from portal import nodes, utils
 
 
 class MultiValueIntegerField(indexes.MultiValueField):
@@ -29,7 +29,7 @@ class RepositoryIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     description = indexes.CharField(model_attr='general_context', null=True)
     other_names = indexes.MultiValueField(model_attr='other_names', stored=True, indexed=True)
     address = indexes.CharField(model_attr='primary_contact', null=True, stored=True, indexed=False)
-    country = indexes.CharField(model_attr='country_code', faceted=True, null=True, stored=True)
+    #country = indexes.CharField(model_attr='country_code', faceted=True, null=True, stored=True)
     location = indexes.LocationField(null=True, faceted=True, stored=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
     publication_date = indexes.DateTimeField(model_attr='created_on')
@@ -38,7 +38,7 @@ class RepositoryIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     suggestions = indexes.CharField()
 
     def get_model(self):
-        return models.Repository
+        return nodes.Repository
 
     def prepare(self, obj):
         prepared_data = super(RepositoryIndex, self).prepare(obj)
@@ -81,7 +81,7 @@ class AuthorityIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     suggestions = indexes.CharField()
 
     def get_model(self):
-        return models.Authority
+        return nodes.Authority
 
     def prepare(self, obj):
         prepared_data = super(AuthorityIndex, self).prepare(obj)
@@ -104,15 +104,15 @@ class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     repository = indexes.CharField(model_attr='repository__name')
     repository_slug = indexes.CharField(model_attr='repository__slug', stored=True, indexed=False)
     repository_other_names = indexes.MultiValueField(model_attr='repository__other_names')
-    location_of_materials = indexes.CharField(model_attr='repository__country_code', faceted=True, null=True)
+    #location_of_materials = indexes.CharField(model_attr='repository__country_code', faceted=True, null=True)
     languages = indexes.MultiValueField(model_attr='languages', faceted=True)
-    tags = indexes.MultiValueField(model_attr='tag_list', faceted=True)
-    start_date = indexes.DateField(model_attr='start_date', faceted=True, null=True)
-    years = MultiValueIntegerField(model_attr='date_range', faceted=True, null=True)
-    dates = MultiValueDateField(model_attr='date_range', null=True)
-    dates_exact = FacetMultiValueDateField(facet_for="dates", model_attr='date_range', null=True)
-    date_range = indexes.CharField(model_attr='date_range_string', stored=True, null=True)
-    end_date = indexes.DateField(model_attr='end_date', faceted=True, null=True)
+    #tags = indexes.MultiValueField(model_attr='tag_list', faceted=True)
+    #start_date = indexes.DateField(model_attr='start_date', faceted=True, null=True)
+    #years = MultiValueIntegerField(model_attr='date_range', faceted=True, null=True)
+    #dates = MultiValueDateField(model_attr='date_range', null=True)
+    #dates_exact = FacetMultiValueDateField(facet_for="dates", model_attr='date_range', null=True)
+    #date_range = indexes.CharField(model_attr='date_range_string', stored=True, null=True)
+    #end_date = indexes.DateField(model_attr='end_date', faceted=True, null=True)
     publication_status = indexes.IntegerField(model_attr='publication_status', 
                 faceted=True, stored=True)
     languages_of_description = indexes.MultiValueField(model_attr='languages_of_description', 
@@ -124,7 +124,7 @@ class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     suggestions = indexes.CharField()
 
     def get_model(self):
-        return models.Collection
+        return nodes.Collection
 
     def prepare(self, obj):
         prepared_data = super(CollectionIndex, self).prepare(obj)
