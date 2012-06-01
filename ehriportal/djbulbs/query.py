@@ -4,12 +4,13 @@ Django Shims for Bulbs models.
 
 import os
 import copy
+import datetime
 
 from django.db.models.query import QuerySet as DjangoQuerySet
 from django.db.models.sql import Query as DjangoQuery
 from django.db.models.sql.constants import ORDER_PATTERN, LOOKUP_SEP
 
-from bulbs.utils import initialize_elements
+from bulbs.utils import initialize_elements, to_timestamp
 
 from . import graph as GRAPH
 
@@ -163,6 +164,13 @@ class GraphQuery(object):
         order_by = []
         
         for key, value in self.filters.items():
+
+            # turn datetime instances into bulbs-acceptable timestamps
+            if isinstance(value, datetime.datetime):
+                value = to_timestamp(value)
+            elif isinstance(value, datetime.date):
+                value = to_timestamp(datetime.datetime.combine(value, datetime.time()))
+
             lookup_type = "exact"
             parts = key.split(LOOKUP_SEP)
             if len(parts) > 1 and parts[-1] in OPS:
