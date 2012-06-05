@@ -22,7 +22,7 @@ FACETS = [
 
 urlpatterns = patterns('',
     url(r'^search/?$', views.PortalSearchListView.as_view(
-        model=models.Repository,
+        model=nodes.Repository,
         facetclasses=FACETS,
         template_name="repository_search.html"), name='repository_search'),
     url(r'^search/(?P<facet>[^\/]+)/?$', views.PaginatedFacetView.as_view(
