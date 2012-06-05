@@ -78,20 +78,21 @@ class ResourceBase(djbulbs.models.Model, models.EntityUrlMixin):
             (DRAFT, _("Draft")),
             (PUBLISHED, _("Published")),
     )
-
     # FIXME: Mock attrs for testing
     other_names = []
-    languages = []
-    languages_of_description = []
-    scripts = []
-    scripts_of_description = []
+    from django.db.models.query import EmptyQuerySet
+    place_set = EmptyQuerySet()
+    #languages = []
+    #languages_of_description = []
+    #scripts = []
+    #scripts_of_description = []
 
     name = nodeprop.String(name=_("Name"), unique=True, indexed=True, nullable=False)
     slug = nodeprop.String(name=_("Slug"), unique=True, indexed=True, nullable=False)
     created_on = nodeprop.DateTime(name=_("Date Created"), nullable=False)
     updated_on = nodeprop.DateTime(name=_("Date Updated"), nullable=True)
     publication_status = nodeprop.Integer(name=_("Publication Status"),
-            default=DRAFT, indexed=True, nullable=True)
+            default=DRAFT, indexed=True)
 
     def _get_slug(self, name):
         proxy = getattr(djbulbs.graph, self.element_type)
@@ -141,7 +142,7 @@ class Repository(ResourceBase):
     """Repository."""
     element_type = "repository"
     level_of_description = nodeprop.Integer(name=_("Level of Description"))
-    type_of_entity = nodeprop.Integer(name=_("Type of Entity"))
+    type_of_entity = nodeprop.Integer(name=_("Type of Entity"), nullable=True)
         
     access_conditions = nodeprop.String(name=_("Access Conditions"), nullable=True)
     buildings = nodeprop.String(name=_("Buildings"), nullable=True)
@@ -302,6 +303,10 @@ class Authority(ResourceBase):
     scripts = nodeprop.List(name=_("Script(s)"))
 
     objects = GraphManager()
+
+    @property
+    def type_name(self):
+        return terms.AUTHORITY_TYPES[self.type_of_entity][1]
 
     @cachedproperty
     def collection_set(self):

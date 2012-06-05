@@ -17,6 +17,8 @@ from bulbs.config import DEBUG
 # FIXME: Do away with this global somehow
 GRAPH = neo4jserver.Graph() # FIXME: Handle non-default config
 
+from portal import nodes
+
 class Command(BaseCommand):
 
     args = "fixture [fixture ...]"
@@ -67,10 +69,10 @@ class Command(BaseCommand):
                         sys.stderr.write("Loading %04d %s\n" % (i, data.get("name")))
                     # temp hacks
                     data["element_type"] = object["model"].split(".")[1]
+                    data["publication_status"] = nodes.ResourceBase.DRAFT
                     data["lod"] = None
                     data["created_on"] = fix_date(data.get("created_on"), datetime.datetime.now())
                     data["updated_on"] = fix_date(data.get("updated_on"), None)
-                    data["type_of_entity"] = None
                     data.pop("languages_of_description", None)
                     data.pop("languages", None)
                     data.pop("scripts_of_description", None)

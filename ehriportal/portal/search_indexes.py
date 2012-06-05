@@ -28,7 +28,7 @@ class RepositoryIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     slug = indexes.CharField(model_attr='slug', indexed=False, stored=True)
     description = indexes.CharField(model_attr='general_context', null=True)
     other_names = indexes.MultiValueField(model_attr='other_names', stored=True, indexed=True)
-    address = indexes.CharField(model_attr='primary_contact', null=True, stored=True, indexed=False)
+    #address = indexes.CharField(model_attr='primary_contact', null=True, stored=True, indexed=False)
     #country = indexes.CharField(model_attr='country_code', faceted=True, null=True, stored=True)
     location = indexes.LocationField(null=True, faceted=True, stored=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
@@ -47,7 +47,7 @@ class RepositoryIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
 
     def prepare_address(self, desc):
         contact = desc.primary_contact
-        if contact:
+        if contact is not None:
             return contact.format()
 
     def prepare_location(self, desc):
@@ -105,7 +105,7 @@ class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     repository_slug = indexes.CharField(model_attr='repository__slug', stored=True, indexed=False)
     repository_other_names = indexes.MultiValueField(model_attr='repository__other_names')
     #location_of_materials = indexes.CharField(model_attr='repository__country_code', faceted=True, null=True)
-    languages = indexes.MultiValueField(model_attr='languages', faceted=True)
+    #languages = indexes.MultiValueField(model_attr='languages', faceted=True)
     #tags = indexes.MultiValueField(model_attr='tag_list', faceted=True)
     #start_date = indexes.DateField(model_attr='start_date', faceted=True, null=True)
     #years = MultiValueIntegerField(model_attr='date_range', faceted=True, null=True)
@@ -115,8 +115,8 @@ class CollectionIndex(indexes.RealTimeSearchIndex, indexes.Indexable):
     #end_date = indexes.DateField(model_attr='end_date', faceted=True, null=True)
     publication_status = indexes.IntegerField(model_attr='publication_status', 
                 faceted=True, stored=True)
-    languages_of_description = indexes.MultiValueField(model_attr='languages_of_description', 
-            faceted=True)
+    #languages_of_description = indexes.MultiValueField(model_attr='languages_of_description', 
+    #        faceted=True)
     text = indexes.CharField(document=True, use_template=True, stored=False)
     #ngram = indexes.EdgeNgramField(use_template=True, template_name="search/indexes/portal/collection_text.txt",
     #        stored=False)
