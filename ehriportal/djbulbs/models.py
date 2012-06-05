@@ -80,6 +80,11 @@ class ModelType(model.ModelMeta):
             kwargs = {}
 
         new_class.add_to_class('_meta', Options(meta, **kwargs))
+        
+        # HACK! Simulate making a pk field in Options called eid
+        class PkField:
+            name = "eid"
+        new_class._meta.pk = PkField()
 
         # add a lookup for relations
         new_class.add_to_class('_relations', dict())
@@ -119,6 +124,13 @@ class Model(model.Node):
 
     class MultipleObjectsReturned(MultipleObjectsReturned):
         pass
+
+    @property
+    def pk(self):
+        return self.eid
+
+    def _get_pk_val(self):
+        return self.eid
 
     def __init__(self, client=None, **kwargs):
         if client is None:

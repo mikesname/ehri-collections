@@ -6,7 +6,7 @@ import os
 import copy
 import datetime
 
-from django.db.models.query import QuerySet as DjangoQuerySet
+from django.db.models.query import QuerySet, ValuesQuerySet, ValuesListQuerySet
 from django.db.models.sql import Query as DjangoQuery
 from django.db.models.sql.constants import ORDER_PATTERN, LOOKUP_SEP
 
@@ -31,16 +31,41 @@ OPS = (
 )
 
 
+class GraphCompiler(object):
+    def __init__(self, query, db):
+        self.query = query
+        self.db = db
+
+    def results_iter(self):
+        params = self.query.get_query_params()
+        script = GRAPH.client.scripts.get("query")
+        results = GRAPH.client.gremlin(script, params=params)
+        for res in initialize_elements(GRAPH.client, results):
+            yield res
+
+
 class GraphQuery(object):
     def __init__(self, model, where=None):
         self.model = model
+        self.db = GRAPH
         self.low_mark, self.high_mark = 0, None
         self.order_by = []
         self.default_ordering = False
         self.extra_order_by = ()
         self.filters = {}
         self.relations = []
-        self.start = "g.V"
+
+    def clear_deferred_loading(self):
+        pass
+
+    def clear_select_fields(self):
+        pass
+
+    def add_fields(self, *args, **kwargs):
+        pass
+
+    def get_compiler(self, db=None):
+        return GraphCompiler(self, db)
 
     def clone(self):
         obj = self.__class__(self.model)
@@ -50,7 +75,6 @@ class GraphQuery(object):
         obj.high_mark = self.high_mark
         obj.order_by = self.order_by[:]
         obj.default_ordering = self.default_ordering#
-        obj.start = self.start
         self.extra_order_by = ()
         return obj
 
@@ -66,11 +90,6 @@ class GraphQuery(object):
         # comparison
         obj = self.clone()
         obj.filters[key] = value
-        return obj
-
-    def set_start(self, str):
-        obj = self.clone()
-        obj.start = str
         return obj
 
     def get_count(self, using=None):
@@ -189,36 +208,34 @@ class GraphQuery(object):
                 low=self.low_mark, high=self.high_mark,
                 relations=relations)
 
-    def results_iter(self):
-        params = self.get_query_params()
-        script = GRAPH.client.scripts.get("query")
-        results = GRAPH.client.gremlin(script, params=params)
-        for res in initialize_elements(GRAPH.client, results):
-            yield res
-
     def __iter__(self):
-        for iter in self.results_iter():
+        for iter in self.get_compiler(self.db).results_iter():
             yield iter
 
 
-class GraphQuerySet(DjangoQuerySet):
+class GraphQuerySet(QuerySet):
     """Fake QuerySet-like class that mimics (very badly
     at the moment) the Django one."""
     def __init__(self, *args, **kwargs):
         super(GraphQuerySet, self).__init__(*args, **kwargs)
         self.query = kwargs.get("query", GraphQuery(self.model))
 
-    def start_from(self, gremlinstr):
-        """Hacky method to change the starting point of
-        a graph traversal queryset. By default it's
-        g.V (all vertices)."""
-        clone = self._clone()
-        clone.query = clone.query.set_start(gremlinstr)
-        return clone
-
     def iterator(self):
-        for res in self.query.results_iter():
+        for res in self.query:
             yield res
+
+    def values(self, *fields):
+        return self._clone(klass=ValuesGraphQuerySet, setup=True, _fields=fields)
+
+    def values_list(self, *fields, **kwargs):
+        flat = kwargs.pop('flat', False)
+        if kwargs:
+            raise TypeError('Unexpected keyword arguments to values_list: %s'
+                    % (kwargs.keys(),))
+        if flat and len(fields) > 1:
+            raise TypeError("'flat' is not valid when values_list is called with more than one field.")
+        return self._clone(klass=ValuesListGraphQuerySet, setup=True, flat=flat,
+                _fields=fields)
         
     def filter(self, **kwargs):
         clone = self._clone()
@@ -228,10 +245,6 @@ class GraphQuerySet(DjangoQuerySet):
 
     def count(self):
         return self.query.get_count()
-
-    def all(self):
-        # TODO: Find a lazy way of doing this
-        return self._clone()
 
     def create(self, **kwargs):
         """
@@ -272,4 +285,83 @@ class GraphQuerySet(DjangoQuerySet):
         data.update(**kwargs)
         return self.create(**data), True
 
+
+class ValuesGraphQuerySet(GraphQuerySet):
+    """Return an iterable list of value dictionaries instead of objects."""
+    def iterator(self):
+        for res in self.query.get_compiler(self.db).results_iter():
+            yield res.to_dict()
+
+    def _clone(self, klass=None, setup=False, **kwargs):
+        """
+        Cloning a ValuesQuerySet preserves the current fields.
+        """
+        c = super(ValuesGraphQuerySet, self)._clone(klass, **kwargs)
+        if not hasattr(c, '_fields'):
+            # Only clone self._fields if _fields wasn't passed into the cloning
+            # call directly.
+            c._fields = self._fields[:]
+        c.field_names = self.field_names
+        c.extra_names = self.extra_names
+        c.aggregate_names = self.aggregate_names
+        if setup and hasattr(c, '_setup_query'):
+            c._setup_query()
+        return c
+
+
+    def _setup_query(self):
+        """
+        Constructs the field_names list that the values query will be
+        retrieving.
+
+        Called by the _clone() method after initializing the rest of the
+        instance.
+        """
+        self.query.clear_deferred_loading()
+        self.query.clear_select_fields()
+
+        if self._fields:
+            self.extra_names = []
+            self.aggregate_names = []
+            if not self.query.extra and not self.query.aggregates:
+                # Short cut - if there are no extra or aggregates, then
+                # the values() clause must be just field names.
+                self.field_names = list(self._fields)
+            else:
+                self.query.default_cols = False
+                self.field_names = []
+                for f in self._fields:
+                    # we inspect the full extra_select list since we might
+                    # be adding back an extra select item that we hadn't
+                    # had selected previously.
+                    if f in self.query.extra:
+                        self.extra_names.append(f)
+                    elif f in self.query.aggregate_select:
+                        self.aggregate_names.append(f)
+                    else:
+                        self.field_names.append(f)
+        else:
+            # Default to all fields.
+            self.extra_names = None
+            self.field_names = [f.attname for f in self.model._meta.fields]
+            self.aggregate_names = None
+
+        self.query.select = []
+        if self.extra_names is not None:
+            self.query.set_extra_mask(self.extra_names)
+        self.query.add_fields(self.field_names, True)
+        if self.aggregate_names is not None:
+            self.query.set_aggregate_mask(self.aggregate_names)
+
+
+class ValuesListGraphQuerySet(GraphQuerySet):
+    """Return an iterable list of values instead of objects."""
+    def iterator(self):
+        for res in self.query.get_compiler(self.db).results_iter():
+            # FIXME: Yield dynamic values doesn't seem to work
+            yield res.eid
+            #if self.flat and len(self._fields) == 1:
+            #    yield getattr(res, self._fields[0], None)
+            #else:
+            #    yield tuple(getattr(res, f, None) for f in self._fields)
 
