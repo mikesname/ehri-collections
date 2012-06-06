@@ -18,7 +18,7 @@ django-taggit
 django-autoslug
 django-jsonfield
 django-modeltranslation
- -e git+https://github.com/toastdriven/django-haystack.git#egg=django-haystack
+ -e git+https://github.com/mikesname/django-haystack.git#egg=django-haystack
  -e git+https://github.com/geopy/geopy.git#egg=geopy
  -e git+https://github.com/toastdriven/django-tastypie.git#egg=django-tastypie
  -e git+https://github.com/mikesname/bulbs.git#egg=bulbs
