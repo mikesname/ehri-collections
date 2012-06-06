@@ -7,11 +7,13 @@
     <a class="search-item-title" title="{{result.name}}" href="{% url repository_detail slug=result.slug %}">
         {{ result.name|truncatewords:10 }}
     </a>
-    <span class="repository-country">
-        <a href="{% url repository_search %}?country={{result.country}}">
-            {{ result.country|countrycode2name|truncatewords:2 }}
-        </a>
-    </span>
+    {% if result.country %}
+        <span class="repository-country">
+            <a href="{% url repository_search %}?country={{result.country}}">
+                {{ result.country|countrycode2name|truncatewords:2 }}
+            </a>
+        </span>
+    {% endif %}
 {% endblock %}
 
 {% block resultbody %}

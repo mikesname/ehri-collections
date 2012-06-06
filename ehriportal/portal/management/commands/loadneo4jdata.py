@@ -47,7 +47,8 @@ class Command(BaseCommand):
         relations = {
           "collection.repository": ("heldBy", "repository"),
           "contact.repository": ("addressOf", "repository"),
-          "collection.creator": ("createdBy", "authority")
+          "collection.creator": ("createdBy", "authority"),
+          "fuzzydate.collection": ("locatesInTime", "collection"),
         }
 
         def fix_date(current, default):
@@ -68,15 +69,24 @@ class Command(BaseCommand):
                     if verbosity > 2:
                         sys.stderr.write("Loading %04d %s\n" % (i, data.get("name")))
                     # temp hacks
+                    
+                    # correct instances where type_of_entity is an empty string
+                    if data.get("type_of_entity") == "":
+                        data["type_of_entity"] = None
+
                     data["element_type"] = object["model"].split(".")[1]
                     data["publication_status"] = nodes.ResourceBase.DRAFT
                     data["lod"] = None
                     data["created_on"] = fix_date(data.get("created_on"), datetime.datetime.now())
                     data["updated_on"] = fix_date(data.get("updated_on"), None)
+                    data["start_date"] = fix_date(data.get("start_date"), None)
+                    data["end_date"] = fix_date(data.get("end_date"), None)
                     data.pop("languages_of_description", None)
                     data.pop("languages", None)
                     data.pop("scripts_of_description", None)
                     data.pop("scripts", None)
+                    data.pop("start_time", None)
+                    data.pop("end_time", None)
             script = GRAPH.client.scripts.get("ingest_portal_data")
             params = dict(data=objects, relations=relations)
             res = GRAPH.client.gremlin(script, params=params)

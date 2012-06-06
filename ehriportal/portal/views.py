@@ -85,7 +85,7 @@ class PortalSearchListView(ListView, FormMixin):
         extra = super(PortalSearchListView, self).get_context_data(*args, **kwargs)
         extra["facet_classes"] = self.facetclasses
         extra["form"] = self.form
-
+        print "FACET CLASSES", self.facetclasses
         # FIXME: This spelling suggestion stuff could be improved:
         # 1. it relies on the instance searchqueryset (which may not
         #    be re-entrant.)

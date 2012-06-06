@@ -8,8 +8,6 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from portal import views, forms, utils, models, nodes, permissions
 from portal.haystack_util import FacetClass
 
-from haystack.query import SearchQuerySet
-
 FACETS = [
     FacetClass(
         "country",

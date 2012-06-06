@@ -254,6 +254,8 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
+HAYSTACK_LIMIT_TO_REGISTERED_MODELS = False
+
 if TESTING:
     HAYSTACK_CONNECTIONS["default"] = {
         "ENGINE": "haystack.backends.whoosh_backend.WhooshEngine",

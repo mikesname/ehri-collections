@@ -30,6 +30,7 @@ class CreatedBy(djbulbs.models.Relationship):
     label = "createdBy"
 djbulbs.graph.add_proxy(CreatedBy.label, CreatedBy)
 
+
 class AddressOf(djbulbs.models.Relationship):
     label = "addressOf"
 djbulbs.graph.add_proxy(AddressOf.label, AddressOf)
@@ -38,6 +39,12 @@ djbulbs.graph.add_proxy(AddressOf.label, AddressOf)
 class MentionedIn(djbulbs.models.Relationship):
     label = "mentionedIn"
 djbulbs.graph.add_proxy(MentionedIn.label, MentionedIn)
+
+
+# FIXME: Think up a proper name for this relationship
+class LocatesInTime(djbulbs.models.Relationship):
+    label = "locatesInTime"
+djbulbs.graph.add_proxy(LocatesInTime.label, LocatesInTime)
 
 
 def cachedproperty(f):
@@ -179,6 +186,12 @@ class Repository(ResourceBase):
         except IndexError:
             pass
 
+    @property
+    def country_code(self):
+        contact = self.primary_contact
+        if contact:
+            return contact.country_code
+
     @cachedproperty
     def contact_set(self):
         return Contact.objects.filter(repository=self)
@@ -237,6 +250,60 @@ class Collection(ResourceBase):
     creator = djbulbs.models.SingleRelationField(CreatedBy)
     repository = djbulbs.models.SingleRelationField(HeldBy)
 
+    @cachedproperty
+    def date_set(self):
+        return FuzzyDate.objects.filter(collection=self)
+
+    @cachedproperty
+    def start_date(self):
+        """Shortcut for getting the earliest date to which
+        this collection relates."""
+        try:
+            fdate = self.date_set.all().order_by("start_date")[0]
+        except IndexError:
+            return
+        return fdate.start_date
+
+    @cachedproperty
+    def end_date(self):
+        """Shortcut for getting the lastest date to which
+        this collection relates."""
+        try:
+            edate = self.date_set.all().order_by("-end_date", "-start_date")[0]
+        except IndexError:
+            return
+        if edate.end_date:
+            return edate.end_date
+        return edate.start_date
+
+    @cachedproperty
+    def date(self):
+        """Average of start/end dates. Not exact."""
+        if not self.end_date and not self.start_date:
+            return
+        if not self.end_date:
+            return self.start_date
+        return self.start_date + ((self.end_date - self.start_date) / 2)
+
+    @cachedproperty
+    def date_range(self):
+        """List of years this collection covers."""
+        if not self.end_date and not self.start_date:
+            return []
+        if not self.end_date:
+            return [self.start_date]
+        return [datetime.date(y,1,1) for y in \
+                range(self.start_date.year, self.end_date.year + 1)]
+
+    @property
+    def date_range_string(self):
+        """List of years this collection covers."""
+        dates = self.date_range
+        if not dates:
+            return None
+        if len(dates) == 1:
+            return str(self.start_date.year)
+        return "%s-%s" % (dates[0].year, dates[-1].year)
 
     def natural_key(self):
         return (self.name,)
@@ -264,6 +331,10 @@ class Contact(ResourceBase):
     repository = djbulbs.models.SingleRelationField(AddressOf)
     objects = GraphManager()
 
+    def __unicode__(self):
+        return u"<%s: %s>" % (self.__class__.__name__, self.contact_person)
+
+
     def format(self):
         elems = [e.strip() for e in [
             self.street_address,
@@ -273,8 +344,7 @@ class Contact(ResourceBase):
             utils.country_name_from_code(self.country_code) \
                     if self.country_code else None
         ] if e is not None]
-        return "\n".join(elems).replace(", ", "\n")
-
+        return u"\n".join(elems).replace(", ", "\n")
 djbulbs.graph.add_proxy(Contact.element_type, Contact)
 
 
@@ -315,4 +385,63 @@ class Authority(ResourceBase):
     def natural_key(self):
         return (self.name,)
 djbulbs.graph.add_proxy(Authority.element_type, Authority)
+
+
+class FuzzyDate(djbulbs.models.Model):
+    """Model representing an approximate historical
+    date or a date range."""
+    element_type = "fuzzydate"
+    CHOICES = (
+            ("year", "Year"),
+            ("month", "Month"),
+            ("day", "Day"),
+    )
+    objects = GraphManager()
+    collection = djbulbs.models.SingleRelationField(LocatesInTime)
+    start_date = nodeprop.DateTime(name=_("Start Date"), indexed=True, nullable=False)
+    end_date = nodeprop.DateTime(name=_("End Date"), indexed=True, nullable=True)
+    precision = nodeprop.String(name=_("Precision"), nullable=True)
+    circa = nodeprop.Integer(name=_("Circa"), nullable=True, default=0)
+
+    @classmethod
+    def from_fuzzy_date(cls, datestr):
+        """Parse dates like "1939-1946", "c 1945" etc. This exists solely
+        for importing dates from Aim25 web scrapes, and will go away some
+        point in the future."""
+        m1 = re.search("^(?P<start>\d{4})\s*-\s*(?P<end>\d{4})(?P<ish>s)?$", datestr.strip())
+        fdate = FuzzyDate()
+        if m1:
+            d1 = datetime.datetime(int(m1.group("start")), 1, 1)
+            d2 = datetime.datetime(int(m1.group("end")), 12, 31)
+            fdate.start_date = d1
+            fdate.end_date = d2
+            fdate.circa = m1.group("ish") is not None
+            fdate.precision = "year"
+            return fdate
+        m2 = re.search("^(?P<circa>c)?\s?(?P<year>\d{4})$", datestr.strip())
+        if m2:
+            d1 = datetime.datetime(int(m2.group("year")), 1, 1)
+            fdate.start_date = d1
+            fdate.circa = m2.group("circa") is not None
+            fdate.precision = "year"
+            return fdate
+        # fallback - try and parse with dateutil...
+        try:
+            from dateutil import parser
+            fdate.start_date = parser.parse(datestr, default=datetime.date(2012, 1, 1))
+            return fdate
+        except (ValueError, TypeError):
+            return None
+
+    def __unicode__(self):
+        """Print a sensible representation."""
+        out = ""
+        if self.circa:
+            out += "c"
+        # TODO: Make this format properly
+        out += str(self.start_date.year)
+        if self.end_date:
+            out += "-%d" % self.end_date.year
+        return out
+djbulbs.graph.add_proxy(FuzzyDate.element_type, FuzzyDate)
 
