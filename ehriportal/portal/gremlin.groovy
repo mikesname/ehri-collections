@@ -3,7 +3,31 @@
 // into Neo4j
 //
 
+def set_bulk_relations(label, idpairs) {
+  import org.neo4j.graphdb.DynamicRelationshipType;
+  neo4j = g.getRawGraph()
+  manager = neo4j.index()
+  g.setMaxBufferSize(0)
+  g.startTransaction()
 
+  try {
+    def i = 0
+    for (idpair in idpairs) {
+      def (outV, inV) = idpair;
+      def outvertex = neo4j.getNodeById(outV)
+      def relationshipType = DynamicRelationshipType.withName(label)
+      def index = manager.forRelationships(label)
+      def edge = outvertex.createRelationshipTo(neo4j.getNodeById(inV), relationshipType)
+      index.add(edge, "label", String.valueOf(label))
+      i++
+    }
+    g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
+    return i;
+  } catch (e) {
+    g.stopTransaction(TransactionalGraph.Conclusion.FAILURE)  
+    return e
+  }
+}
 
 def ingest_portal_data(data, relations) {
   import org.neo4j.graphdb.DynamicRelationshipType;
