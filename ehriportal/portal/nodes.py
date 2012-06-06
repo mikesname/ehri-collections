@@ -397,9 +397,11 @@ class Keyword(djbulbs.models.Model):
     element_type = "keyword"
     name = nodeprop.String(name=_("Name"), nullable=False)
 
+    objects = GraphManager()
     @property
     def items(self):
         return self.outE(Describes.label).inV()
+djbulbs.graph.add_proxy(Keyword.element_type, Keyword)
 
 
 class FuzzyDate(djbulbs.models.Model):
