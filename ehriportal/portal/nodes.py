@@ -41,6 +41,11 @@ class MentionedIn(djbulbs.models.Relationship):
 djbulbs.graph.add_proxy(MentionedIn.label, MentionedIn)
 
 
+class Describes(djbulbs.models.Relationship):
+    label = "describes"
+djbulbs.graph.add_proxy(Describes.label, Describes)
+
+
 # FIXME: Think up a proper name for this relationship
 class LocatesInTime(djbulbs.models.Relationship):
     label = "locatesInTime"
@@ -385,6 +390,16 @@ class Authority(ResourceBase):
     def natural_key(self):
         return (self.name,)
 djbulbs.graph.add_proxy(Authority.element_type, Authority)
+
+
+class Keyword(djbulbs.models.Model):
+    """Model representing a keyword."""
+    element_type = "keyword"
+    name = nodeprop.String(name=_("Name"), nullable=False)
+
+    @property
+    def items(self):
+        return self.outE(Describes.label).inV()
 
 
 class FuzzyDate(djbulbs.models.Model):
