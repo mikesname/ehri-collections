@@ -127,6 +127,10 @@ class ResourceBase(djbulbs.models.Model, models.EntityUrlMixin):
     def published(self):
         return self.publication_status == self.PUBLISHED
 
+    @cachedproperty
+    def tag_list(self):
+        return Keyword.objects.incoming(Describes, self)
+
     def save(self, *args, **kwargs):
         if not hasattr(self, "eid"):
             # Grotesque hacks to get around Bulbs difficulties. Because
@@ -398,9 +402,24 @@ class Keyword(djbulbs.models.Model):
     name = nodeprop.String(name=_("Name"), nullable=False)
 
     objects = GraphManager()
-    @property
-    def items(self):
-        return self.outE(Describes.label).inV()
+
+    def _describes(self, model):
+        return model.objects.outgoing(Describes, self)
+
+    @cachedproperty
+    def collection_set(self):
+        return self._describes(Collection)
+
+    @cachedproperty
+    def repository_set(self):
+        return self._describes(Repository)
+
+    @cachedproperty
+    def authority_set(self):
+        return self._describes(Authority)
+
+    def __unicode__(self):
+        return self.name
 djbulbs.graph.add_proxy(Keyword.element_type, Keyword)
 
 
