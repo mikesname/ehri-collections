@@ -106,6 +106,11 @@ class GraphQuery(object):
             number = min(number, self.high_mark - self.low_mark)
         return number
 
+    def delete(self, using=None):
+        script = GRAPH.client.scripts.get("query")
+        params = self.get_query_params(delete=True)
+        return GRAPH.client.gremlin(script, params).content
+
     # Methods copied from Django
     # TODO: Inherit these if possible
 
@@ -174,7 +179,7 @@ class GraphQuery(object):
         """
         return not self.low_mark and self.high_mark is None
 
-    def get_query_params(self, count=False):
+    def get_query_params(self, count=False, delete=False):
         props = self.model._properties
         filters = []
         relations = copy.copy(self.relations)
@@ -192,9 +197,14 @@ class GraphQuery(object):
 
             lookup_type = "exact"
             parts = key.split(LOOKUP_SEP)
+            
+            # exchange the pk for eid
+            if parts[0] in ("pk", "eid"):
+                parts[0] = "id"
+
             if len(parts) > 1 and parts[-1] in OPS:
                 lookup_type = parts[-1]
-            if parts[0] in props or parts[0] == "eid":
+            if parts[0] in props or parts[0] == "id":
                 filters.append((parts[0], lookup_type, value))
             elif parts[0] in self.model._relations:
                 rel = self.model._relations[parts[0]]
@@ -203,7 +213,7 @@ class GraphQuery(object):
                 raise Exception("Invalid filter lookup %s=%s for model '%s'" % (
                     key, value, self.model))
 
-        return dict(docount=count, index_name=self.model.element_type,
+        return dict(docount=count, dodelete=delete, index_name=self.model.element_type,
                 filters=filters, order_by=order_by,
                 low=self.low_mark, high=self.high_mark,
                 relations=relations)
@@ -245,6 +255,9 @@ class GraphQuerySet(QuerySet):
 
     def count(self):
         return self.query.get_count()
+
+    def delete(self):
+        return self.query.delete()
 
     def create(self, **kwargs):
         """
@@ -364,4 +377,6 @@ class ValuesListGraphQuerySet(GraphQuerySet):
             #    yield getattr(res, self._fields[0], None)
             #else:
             #    yield tuple(getattr(res, f, None) for f in self._fields)
+
+
 

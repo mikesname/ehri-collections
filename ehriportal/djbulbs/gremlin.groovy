@@ -36,7 +36,7 @@ def set_single_relation(outV, inV, label) {
 // construct a query - several of these paths can probably
 // be optimised, and I'm not sure if the index is being
 // used as much as it could be.
-def query(index_name, relations, filters, high, low, order_by, docount) {
+def query(index_name, relations, filters, high, low, order_by, docount, dodelete) {
   try {
     def opblocks = [
       "exact":   {it, a, v -> it."$a" == v},
@@ -90,6 +90,11 @@ def query(index_name, relations, filters, high, low, order_by, docount) {
 
     if (docount)
       return pipe.count()
+
+    if (dodelete) {
+      pipe.collect{g.removeVertex(it)}
+      return true;
+    } 
     return pipe
   } catch (e) {
     return e
