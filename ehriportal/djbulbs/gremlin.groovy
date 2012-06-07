@@ -36,7 +36,7 @@ def set_single_relation(outV, inV, label) {
 // construct a query - several of these paths can probably
 // be optimised, and I'm not sure if the index is being
 // used as much as it could be.
-def query(index_name, relations, filters, high, low, order_by, docount, dodelete) {
+def query(index_name, inrels, outrels, filters, high, low, order_by, docount, dodelete) {
   try {
     def opblocks = [
       "exact":   {it, a, v -> it."$a" == v},
@@ -51,11 +51,16 @@ def query(index_name, relations, filters, high, low, order_by, docount, dodelete
       "lte":     {it, a, v -> it."$a" <= v},
     ]
 
-    def pipe = g.V
+    def pipe = g.V._()
 
-    for (relation in relations) {
+    for (relation in inrels) {
       def (relname, outV) = relation
-      pipe = g.v(outV).inE(relname).outV
+      pipe = pipe.retain(g.v(outV).inE(relname).outV.toList())
+    }
+
+    for (relation in outrels) {
+      def (relname, outV) = relation
+      pipe = pipe.retain(g.v(outV).outE(relname).inV.toList())
     }
 
     if (index_name != null)

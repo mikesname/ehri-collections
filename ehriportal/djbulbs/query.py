@@ -53,7 +53,8 @@ class GraphQuery(object):
         self.default_ordering = False
         self.extra_order_by = ()
         self.filters = {}
-        self.relations = []
+        self.inrels = []
+        self.outrels = []
 
     def clear_deferred_loading(self):
         pass
@@ -70,7 +71,8 @@ class GraphQuery(object):
     def clone(self):
         obj = self.__class__(self.model)
         obj.filters = self.filters.copy()
-        obj.relations = copy.copy(self.relations)
+        obj.inrels = copy.copy(self.inrels)
+        obj.outrels = copy.copy(self.outrels)
         obj.low_mark = self.low_mark
         obj.high_mark = self.high_mark
         obj.order_by = self.order_by[:]
@@ -182,7 +184,8 @@ class GraphQuery(object):
     def get_query_params(self, count=False, delete=False):
         props = self.model._properties
         filters = []
-        relations = copy.copy(self.relations)
+        inrels = copy.copy(self.inrels)
+        outrels = copy.copy(self.outrels)
 
         # TODO: Order by params
         order_by = []
@@ -208,7 +211,7 @@ class GraphQuery(object):
                 filters.append((parts[0], lookup_type, value))
             elif parts[0] in self.model._relations:
                 rel = self.model._relations[parts[0]]
-                relations.append((rel.relation.label, value.eid))
+                inrels.append((rel.relation.label, value.eid))
             else:
                 raise Exception("Invalid filter lookup %s=%s for model '%s'" % (
                     key, value, self.model))
@@ -216,11 +219,22 @@ class GraphQuery(object):
         return dict(docount=count, dodelete=delete, index_name=self.model.element_type,
                 filters=filters, order_by=order_by,
                 low=self.low_mark, high=self.high_mark,
-                relations=relations)
+                inrels=inrels, outrels=outrels)
 
     def __iter__(self):
         for iter in self.get_compiler(self.db).results_iter():
             yield iter
+
+    ########################
+    # Graph methods
+    ########################
+    def add_outgoing_relation(self, relation, instance):
+        """Add an outgoing relationship constraint."""
+        self.outrels.append((relation.label, instance.pk))
+
+    def add_incoming_relation(self, relation, instance):
+        """Add an incoming relationship constraint."""
+        self.inrels.append((relation.label, instance.pk))
 
 
 class GraphQuerySet(QuerySet):
@@ -297,6 +311,20 @@ class GraphQuerySet(QuerySet):
         data = defaults.copy()
         data.update(**kwargs)
         return self.create(**data), True
+
+    ########################
+    # Special graph methods
+    ########################
+
+    def outgoing(self, relation, instance):
+        clone = self._clone()
+        clone.query.add_outgoing_relation(relation, instance)
+        return clone
+
+    def incoming(self, relation, instance):
+        clone = self._clone()
+        clone.query.add_incoming_relation(relation, instance)
+        return clone
 
 
 class ValuesGraphQuerySet(GraphQuerySet):
@@ -377,6 +405,5 @@ class ValuesListGraphQuerySet(GraphQuerySet):
             #    yield getattr(res, self._fields[0], None)
             #else:
             #    yield tuple(getattr(res, f, None) for f in self._fields)
-
 
 

@@ -23,5 +23,10 @@ class GraphManager(Manager):
         qs = self.get_query_set()
         return super(GraphManager, self).create(**kwargs)
 
+    def outgoing(self, *args, **kwargs):
+        return self.get_query_set().outgoing(*args, **kwargs)
+    
+    def incoming(self, *args, **kwargs):
+        return self.get_query_set().incoming(*args, **kwargs)
 
 
