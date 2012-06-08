@@ -7,10 +7,14 @@ import sys
 from django.db.models.options import Options
 from django.db.models import signals
 from django.utils.encoding import smart_str, force_unicode
+from django.core.exceptions import (ObjectDoesNotExist, 
+            MultipleObjectsReturned)
 
 from bulbs import model, property as nodeprop
 from bulbs.utils import current_datetime, initialize_element, \
         initialize_elements
+from bulbs.neo4jserver import batch
+from bulbs.neo4jserver.client import gremlin_path
 
 from . import graph as GRAPH, manager
 
@@ -105,10 +109,6 @@ class ModelType(model.ModelMeta):
         return "<class %s>" % cls.__name__
 
 
-from django.core.exceptions import (ObjectDoesNotExist, 
-            MultipleObjectsReturned)
-
-
 class Model(model.Node):
     __metaclass__ = ModelType
     __mode__ = model.STRICT
@@ -143,28 +143,44 @@ class Model(model.Node):
             meta = self._meta
         return getattr(self, meta.pk.attname, None)
 
-    def _set_relation(self, relname, instance):
-        script = GRAPH.client.scripts.get("set_single_relation")
-        params = dict(outV=self.pk, inV=instance.pk if instance else None, label=relname)
-        GRAPH.client.gremlin(script, params=params)
-
     def save(self, *args, **kwargs):
         signals.pre_save.send(sender=self.__class__, instance=self, raw=False, using=None,
                                   update_fields=None)
-        created = False
-        if self._get_pk_val() is None:
+        creating = self._get_pk_val() is None
+
+        # This is how we would do it if it were currently possible
+        # create and set relationships in a batch, but it isn't
+        # because we need the pk to set relationships
+        #index_name = self.get_index_name(self._client.config)
+        #keys = self.get_index_keys()
+        #data = self._get_property_data()
+        #params = dict(data=data,index_name=index_name,keys=keys)
+        #script = self._client.scripts.get("create_indexed_vertex")
+        #if updating:
+        #    script = self._client.scripts.get("update_indexed_vertex")
+        #    params["_id"] = self.pk
+        #neobatch.add_message("POST", gremlin_path, dict(script=script, params=params))
+
+        if creating:
             self._create(self._data, {})
-            created = True
-            # FIXME: This should really go in a transaction with the
-            # creation/updating code, but that entails a large and
-            # complex Gremlin script
         else:
-            super(Model, self).save(*args, **kwargs)
+            super(Model, self).save()
+
+        # start of batch request...
+        neobatch = batch.Neo4jBatchRequest(self._client.request.config, 
+                    self._client.request.content_type)
+        # set relationships...
         for relname, instance in self._pending_relations.items():
-            self._set_relation(relname, instance)
+            script = self._client.scripts.get("set_single_relation")
+            params = dict(outV=self.pk, inV=instance.pk if instance else None, label=relname)
+            args = ["POST", gremlin_path, dict(script=script, params=params)]
+            neobatch.add_message(*args)
+        neobatch.send()
+
+        # reset pending relations so they're not set again on save...
         self._pending_relations = {}
 
-        signals.post_save.send(sender=self.__class__, instance=self, created=created,
+        signals.post_save.send(sender=self.__class__, instance=self, created=creating,
                                    update_fields=None, raw=False, using=None)
 
     def __unicode__(self):
@@ -184,7 +200,7 @@ class Model(model.Node):
         signals.pre_delete.send(sender=self.__class__, instance=self, using=None)
         # TODO: Add more error checking here...
         # Bulbs should throw an exception if anything goes badly wrong
-        GRAPH.vertices.delete(self._get_pk_val())
+        self._client.vertices.delete(self._get_pk_val())
         signals.post_delete.send(sender=self.__class__, instance=self, using=None)
 
 
