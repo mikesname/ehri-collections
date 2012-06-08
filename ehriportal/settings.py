@@ -139,7 +139,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     "pinax.apps.account.context_processors.account",
     
     #"notification.context_processors.notification",
-    "announcements.context_processors.site_wide_announcements",
+    #"announcements.context_processors.site_wide_announcements",
     "suggestions.context_processors.suggestions_form",
 ]
 
@@ -169,7 +169,7 @@ INSTALLED_APPS = [
     "django_openid",
     "timezones",
     "emailconfirmation",
-    "announcements",
+    #"announcements",
     "pagination",
     "idios",
     "metron",
