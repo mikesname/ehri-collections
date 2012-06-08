@@ -202,7 +202,7 @@ class GraphQuery(object):
             parts = key.split(LOOKUP_SEP)
             
             # exchange the pk for eid
-            if parts[0] in ("pk", "eid"):
+            if parts[0] in ("pk", GRAPH.config.id_var):
                 parts[0] = "id"
 
             if len(parts) > 1 and parts[-1] in OPS:
@@ -211,7 +211,7 @@ class GraphQuery(object):
                 filters.append((parts[0], lookup_type, value))
             elif parts[0] in self.model._relations:
                 rel = self.model._relations[parts[0]]
-                inrels.append((rel.relation.label, value.eid))
+                inrels.append((rel.relation.label, value.pk))
             else:
                 raise Exception("Invalid filter lookup %s=%s for model '%s'" % (
                     key, value, self.model))
@@ -400,7 +400,7 @@ class ValuesListGraphQuerySet(GraphQuerySet):
     def iterator(self):
         for res in self.query.get_compiler(self.db).results_iter():
             # FIXME: Yield dynamic values doesn't seem to work
-            yield res.eid
+            yield res.pk
             #if self.flat and len(self._fields) == 1:
             #    yield getattr(res, self._fields[0], None)
             #else:

@@ -5,6 +5,7 @@ Django shim for Bulbs models.
 import sys
 
 from django.db.models.options import Options
+from django.db.models import signals
 from django.utils.encoding import smart_str, force_unicode
 
 from bulbs import model, property as nodeprop
@@ -39,14 +40,8 @@ class SingleRelationField(object):
             return self._relation_cache.get(name)
 
         def setter_func(self, other):
-            script = GRAPH.client.scripts.get("set_single_relation")
-            params = dict(outV=self.eid, inV=other.eid if other else None, label=rel.label)
-            try:
-                res = GRAPH.client.gremlin(script, params=params)
-                self._relation_cache[name] = other
-            except Exception, e:
-                # FIXME: Handle this error
-                pass
+            self._pending_relations[rel.label] = other
+            self._relation_cache[name] = other
         setattr(model, name, property(lookup_func, setter_func))
         
 
@@ -83,12 +78,11 @@ class ModelType(model.ModelMeta):
         
         # HACK! Simulate making a pk field in Options called eid
         class PkField:
-            name = "eid"
+            attname = name = GRAPH.config.id_var
         new_class._meta.pk = PkField()
 
         # add a lookup for relations
         new_class.add_to_class('_relations', dict())
-        new_class.add_to_class('_relation_cache', dict())
 
          # Abstract class: abstract attribute should not be inherited.
         if attrs.pop("abstract", None) or not attrs.get("autoregister", True):
@@ -125,37 +119,73 @@ class Model(model.Node):
     class MultipleObjectsReturned(MultipleObjectsReturned):
         pass
 
-    @property
-    def pk(self):
-        return self.eid
-
-    def _get_pk_val(self):
-        return self.eid
-
     def __init__(self, client=None, **kwargs):
+        signals.pre_init.send(sender=self.__class__, args=[], kwargs=kwargs)
         if client is None:
             client = GRAPH.client
         super(Model, self).__init__(client)
-        self._data.update(**kwargs)
+
         self._relation_cache = {}
+        self._pending_relations = {}
+        for key, cls in self._relations.items():
+            relinst = kwargs.pop(key, None)
+            if relinst is not None:
+                self._pending_relations[cls.relation.label] = relinst
+                self._relation_cache[key] = relinst
+        self._data.update(**kwargs)
+
+    @property
+    def pk(self):
+        return self._get_pk_val()
+
+    def _get_pk_val(self, meta=None):
+        if meta is None:
+            meta = self._meta
+        return getattr(self, meta.pk.attname, None)
+
+    def _set_relation(self, relname, instance):
+        script = GRAPH.client.scripts.get("set_single_relation")
+        params = dict(outV=self.pk, inV=instance.pk if instance else None, label=relname)
+        GRAPH.client.gremlin(script, params=params)
 
     def save(self, *args, **kwargs):
-        if not hasattr(self, "eid"):
+        signals.pre_save.send(sender=self.__class__, instance=self, raw=False, using=None,
+                                  update_fields=None)
+        created = False
+        if self._get_pk_val() is None:
             self._create(self._data, {})
+            created = True
+            # FIXME: This should really go in a transaction with the
+            # creation/updating code, but that entails a large and
+            # complex Gremlin script
         else:
             super(Model, self).save(*args, **kwargs)
+        for relname, instance in self._pending_relations.items():
+            self._set_relation(relname, instance)
+        self._pending_relations = {}
+
+        signals.post_save.send(sender=self.__class__, instance=self, created=created,
+                                   update_fields=None, raw=False, using=None)
 
     def __unicode__(self):
-        return u"<%s: %d>" % (self.__class__, self.eid)
+        return u"<%s: %d>" % (self.__class__, self._get_pk_val())
 
     def __str__(self):
         if hasattr(self, '__unicode__'):
             return force_unicode(self).encode('utf-8')
         return '%s object' % self.__class__.__name__
 
+    def _get_pk_val(self):
+        if hasattr(self, self._meta.pk.attname):
+            return getattr(self, self._meta.pk.attname)
+
     def delete(self):
-        if hasattr(self, "eid"):
-            return GRAPH.vertices.delete(self.eid)
+        assert self._get_pk_val() is not None, "%s object can't be deleted because its %s attribute is set to None." % (self._meta.object_name, self._meta.pk.attname)
+        signals.pre_delete.send(sender=self.__class__, instance=self, using=None)
+        # TODO: Add more error checking here...
+        # Bulbs should throw an exception if anything goes badly wrong
+        GRAPH.vertices.delete(self._get_pk_val())
+        signals.post_delete.send(sender=self.__class__, instance=self, using=None)
 
 
 
