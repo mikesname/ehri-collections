@@ -200,7 +200,7 @@ class Model(model.Node):
         signals.pre_delete.send(sender=self.__class__, instance=self, using=None)
         # TODO: Add more error checking here...
         # Bulbs should throw an exception if anything goes badly wrong
-        self._client.vertices.delete(self._get_pk_val())
+        GRAPH.vertices.delete(self._get_pk_val())
         signals.post_delete.send(sender=self.__class__, instance=self, using=None)
 
 
