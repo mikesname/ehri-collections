@@ -54,10 +54,10 @@ class Command(BaseCommand):
         def fix_date(current, default):
             if current is None:
                 if default is not None:
-                    return utils.to_timestamp(default)
+                    return default.isoformat()
             else:
                 dt = dateutil.parser.parse(current)
-                return utils.to_timestamp(dt)
+                return dt.isoformat()
 
         for fixture in fixture_labels:
             sys.stderr.write("Loading fixture: %s\n" % fixture)
