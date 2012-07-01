@@ -12,8 +12,7 @@ YAHOO_APP_ID = "33_udMTV34GnWuHaUYyuZXH.wkBvwNDroY74jndgzW0lNtePUNMb7GBk91hYdxAc
 if "test" in sys.argv:
     DATABASES = {
         "default": {
-            "ENGINE": "django.contrib.gis.db.backends.spatialite",
+            "ENGINE": "django.db.backends.sqlite3",
             "NAME": "test.sqlite",                       # Or path to database file if using sqlite3.
         }
     }
-    SPATIALITE_SQL = "conf/init_spatialite-2.3.sql"

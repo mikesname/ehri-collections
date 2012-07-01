@@ -47,7 +47,6 @@ class Migration(SchemaMigration):
         db.create_table('portal_place', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('resource', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['portal.Resource'])),
-            ('point', self.gf('django.contrib.gis.db.models.fields.PointField')()),
         ))
         db.send_create_signal('portal', ['Place'])
 
@@ -260,7 +259,6 @@ class Migration(SchemaMigration):
         'portal.place': {
             'Meta': {'object_name': 'Place'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'point': ('django.contrib.gis.db.models.fields.PointField', [], {}),
             'resource': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['portal.Resource']"})
         },
         'portal.property': {

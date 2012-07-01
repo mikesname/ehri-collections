@@ -134,7 +134,6 @@ class Migration(DataMigration):
         'portal.place': {
             'Meta': {'object_name': 'Place'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'point': ('django.contrib.gis.db.models.fields.PointField', [], {}),
             'resource': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['portal.Resource']"})
         },
         'portal.property': {

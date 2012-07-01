@@ -5,7 +5,7 @@ import re
 import datetime
 import json
 
-from django.contrib.gis.db import models
+from django.db import models
 from django.db.models.base import ModelBase
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
@@ -307,8 +307,6 @@ def propertyproxy_factory(propname):
 class Place(models.Model):
     """A point on the earth associated with a resource."""
     resource = models.ForeignKey(Resource)
-    point = models.PointField()
-    objects = models.GeoManager()
 reversion.register(Place)
 
 
