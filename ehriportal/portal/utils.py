@@ -7,7 +7,6 @@ import babel
 
 from haystack.query import SearchQuerySet
 from django.core.paginator import Paginator, Page, InvalidPage, EmptyPage
-from django.contrib.gis import geos
 from django.utils import translation
 from haystack.models import SearchResult
 from haystack.query import SearchQuerySet
@@ -69,9 +68,7 @@ class HaystackPaginationEncoder(json.JSONEncoder):
     """JSON Encoder a Django pagination object."""
     def default(self, obj):
         # handle dates
-        if isinstance(obj, geos.Point):
-            return (obj.x, obj.y)
-        elif isinstance(obj, datetime.date):
+        if isinstance(obj, datetime.date):
             return obj.strftime('%Y-%m-%d')
         elif isinstance(obj, datetime.datetime):
             return obj.strftime('%Y-%m-%dT%H:%M:%S')

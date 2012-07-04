@@ -5,25 +5,12 @@ from django import forms
 from django.contrib.admin import widgets
 from django.utils import translation
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.gis import geos
 from django.forms.models import modelformset_factory, inlineformset_factory
 
 from jsonfield.forms import JSONFormField
 from haystack.forms import EmptySearchQuerySet
 
 from portal import models, data, utils
-
-
-def parse_point(pointstr):
-    """Parse a GEOS point from a two-float string."""
-    try:
-        y, x = string.split(pointstr, ",")
-    except IndexError:
-        return None
-    try:
-        return geos.Point(float(x), float(y))
-    except ValueError:
-        return None
 
 
 class PortalSearchForm(forms.Form):
@@ -81,11 +68,6 @@ class MapSearchForm(PortalSearchForm):
         """Filter a search set with geo-bounds."""
         model = getattr(models, self.cleaned_data["type"])
         sqs = sqs.models(model)
-        if self.cleaned_data["ne"] and self.cleaned_data["sw"]:
-            botlft = parse_point(self.cleaned_data["sw"])
-            toprgt = parse_point(self.cleaned_data["ne"])
-            if botlft and toprgt:
-                sqs = sqs.within("location", botlft, toprgt)
         return super(MapSearchForm, self).filter(sqs)
 
 
