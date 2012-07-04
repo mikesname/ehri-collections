@@ -29,7 +29,7 @@ MANAGERS = ADMINS
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
         "NAME": "portaltest",                       # Or path to database file if using sqlite3.
         "USER": "portaltest",                             # Not used with sqlite3.
         "PASSWORD": "changeme",                         # Not used with sqlite3.
@@ -153,7 +153,6 @@ INSTALLED_APPS = [
     "django.contrib.markup",
     "django.contrib.messages",
     "django.contrib.humanize",
-    "django.contrib.gis",
     
     "pinax.templatetags",
     
@@ -201,8 +200,8 @@ INSTALLED_APPS = [
     "tastypie",
 
     # our apps
-    "portal",
     "suggestions",
+    "portal",
 ]
 
 FIXTURE_DIRS = [
